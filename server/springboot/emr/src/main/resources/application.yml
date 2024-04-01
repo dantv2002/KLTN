@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: emr
+  output:
+    ansi:
+      enabled: DETECT
+  profiles:
+    active: prod
