@@ -5,4 +5,4 @@ spring:
     ansi:
       enabled: DETECT
   profiles:
-    active: prod
+    active: dev

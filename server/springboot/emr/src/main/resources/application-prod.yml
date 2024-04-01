@@ -8,3 +8,8 @@ logging:
     name: .logs/emr.log
   pattern:
     file: "%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M : %msg%n"
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://emr:uhGmyUpbUt5abDdm@cluster-emr.8yjyrlf.mongodb.net/?retryWrites=true&w=majority&appName=cluster-emr
+      database: emrprod

@@ -3,5 +3,9 @@ server:
 logging:
   level:
     root: DEBUG
-
-
+    org.mongodb.driver.cluster: OFF
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://emr:uhGmyUpbUt5abDdm@cluster-emr.8yjyrlf.mongodb.net/?retryWrites=true&w=majority&appName=cluster-emr
+      database: emrdev
