@@ -1,5 +1,7 @@
 package com.hospitalx.emr.models.dtos;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hospitalx.emr.common.AuthProvider;
@@ -13,6 +15,7 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccountDto {
+    @JsonProperty("Id")
     private String id;
 
     @JsonProperty("FullName")
@@ -36,4 +39,5 @@ public class AccountDto {
     private AuthProvider authProvider;
     private Boolean deleted;
     private Verify verify;
+    private List<String> records;
 }

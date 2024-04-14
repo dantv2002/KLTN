@@ -169,11 +169,10 @@ public class AccountService implements IDAO<AccountDto> {
         }
     }
 
-    // Override
-
+    // Override methods
     @Override
     public AccountDto save(AccountDto t) {
-        log.info("Save account: " + t);
+        log.info("Save account: " + t.toString());
         Account account = modelMapper.map(t, Account.class);
         return modelMapper.map(accountRepository.save(account), AccountDto.class);
     }
@@ -186,8 +185,9 @@ public class AccountService implements IDAO<AccountDto> {
 
     @Override
     public AccountDto get(String id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'get'");
+        log.info("Get account: " + id);
+        return accountRepository.findById(id).map(account -> modelMapper.map(account, AccountDto.class))
+                .orElseThrow(() -> new CustomException("Account not exists", HttpStatus.NOT_FOUND.value()));
     }
 
     @Override
@@ -210,7 +210,8 @@ public class AccountService implements IDAO<AccountDto> {
         }
     }
 
-    // Override
+    //
+    //
     private Account createAccountAndSendVerification(String id, String email, String fullName, String password,
             String confirmPassword) {
 

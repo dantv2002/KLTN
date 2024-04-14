@@ -1,5 +1,7 @@
 package com.hospitalx.emr.models.entitys;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -28,6 +30,8 @@ public class Account {
     private Boolean deleted = false;
 
     private Verify verify;
+
+    private List<String> records;
 
     public void setFullName(String fullName) {
         this.fullName = fullName.replace(" ", "_");

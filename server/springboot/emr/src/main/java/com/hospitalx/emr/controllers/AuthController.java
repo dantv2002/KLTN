@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +29,7 @@ import com.hospitalx.emr.configs.AppConfig;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api")
 @Slf4j
 public class AuthController {
     @Autowired
@@ -41,7 +42,7 @@ public class AuthController {
     private TokenService tokenService;
 
     // API register account local
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity<BaseResponse> registerAccount(@RequestBody @Valid AccountDto accountDto) {
         BaseResponse response = new BaseResponse();
         log.debug("message", accountDto);
@@ -57,7 +58,7 @@ public class AuthController {
     }
 
     // API verify account register local
-    @PostMapping("register/{id}")
+    @PostMapping("/auth/register/{id}")
     public ResponseEntity<BaseResponse> verifyAccount(@RequestBody @Valid VerificationCodeDto verificationCodeDto,
             @PathVariable("id") String id) {
         BaseResponse response = new BaseResponse();
@@ -69,7 +70,7 @@ public class AuthController {
     }
 
     // API reset password account local
-    @PostMapping("/reset-password")
+    @PutMapping("/auth/reset-password")
     public ResponseEntity<BaseResponse> resetPassword(@RequestBody @Valid AccountDto accountDto) {
         AccountDto account = accountService.resetPassword(accountDto);
 
@@ -85,7 +86,7 @@ public class AuthController {
     }
 
     // API verify reset password account local
-    @PostMapping("/reset-password/{id}")
+    @PostMapping("/auth/reset-password/{id}")
     public ResponseEntity<BaseResponse> verifyResetPassword(@RequestBody @Valid VerificationCodeDto verificationCodeDto,
             @PathVariable("id") String id) {
         BaseResponse response = new BaseResponse();
@@ -97,7 +98,7 @@ public class AuthController {
     }
 
     // API login with account local
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<BaseResponse> login(@RequestBody Map<String, String> login,
             HttpServletResponse response) {
 
