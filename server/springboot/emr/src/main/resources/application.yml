@@ -1,8 +1,47 @@
+client:
+  url: "http://localhost:5173"
+
+server:
+  servlet:
+    context-path: /emr
+
+app:
+  jwt:
+    rsa:
+      private-key: classpath:certs/private.pem
+      public-key: classpath:certs/public.pem
+    expiresTime: 7
+  cookie:
+    expiresTime: 7
+  imageDefault: "https://res.cloudinary.com/daj4c7vpe/image/upload/v1712716406/avatars/qcowoo7pqqqmaoqeozne.png"
+
 spring:
   application:
     name: emr
   output:
     ansi:
       enabled: DETECT
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: ${GOOGLE_CLIENT_ID}
+            clientSecret: ${GOOGLE_CLIENT_SECRET}
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
+            scope:
+              - email
+              - profile
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: laptrinhwinform2@gmail.com
+    password: tgjixkqeibkdunhx
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   profiles:
     active: dev

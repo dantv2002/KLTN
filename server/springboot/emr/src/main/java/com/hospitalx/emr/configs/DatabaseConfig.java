@@ -3,8 +3,6 @@ package com.hospitalx.emr.configs;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
@@ -13,10 +11,13 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoIterable;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * DatabaseConfig
  */
 @Configuration
+@Slf4j
 public class DatabaseConfig extends AbstractMongoClientConfiguration {
 
     @Value("${spring.data.mongodb.uri}")
@@ -24,8 +25,6 @@ public class DatabaseConfig extends AbstractMongoClientConfiguration {
 
     @Value("${spring.data.mongodb.database}")
     private String database;
-
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseConfig.class);
 
     @Override
     protected String getDatabaseName() {
@@ -41,9 +40,9 @@ public class DatabaseConfig extends AbstractMongoClientConfiguration {
             for (String dbname : databases) {
                 resultdb.add(dbname);
             }
-            logger.info("MongoDB database connected. List databases name: " + resultdb);
+            log.info("MongoDB database connected. List databases name: " + resultdb);
         } catch (Exception e) {
-            logger.error("Failed to connect mongoDB database: " + e);
+            log.error("Failed to connect mongoDB database: " + e);
         }
         return client;
     }

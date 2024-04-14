@@ -2,8 +2,7 @@ server:
   port: 8080
 logging:
   level:
-    root: OFF
-    com.hospitalx.emr: INFO
+    root: INFO
   file:
     name: .logs/emr.log
   pattern:
