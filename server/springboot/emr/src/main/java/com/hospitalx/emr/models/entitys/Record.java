@@ -16,9 +16,10 @@ public class Record {
     private String email;
     private String fullName;
     private Date dateOfBirth;
-    private Boolean gender;
+    private String gender;
     private String numberPhone;
     private String identityCard = null;
     private String address;
     private String healthInsurance = null;
+    private Boolean locked = false;
 }

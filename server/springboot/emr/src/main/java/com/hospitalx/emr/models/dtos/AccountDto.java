@@ -22,13 +22,13 @@ public class AccountDto {
     private String fullName;
     private String imageUrl;
 
-    @NotEmpty(message = "Please enter your email")
-    @Email(message = "Please enter valid email address")
+    @NotEmpty(message = "Vui lòng nhập email")
+    @Email(message = "Vui lòng nhập đúng định dạng email")
     @JsonProperty("Email")
     private String email;
     private Boolean emailVerified;
 
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\\-+]).{8,20}$", message = "Password must contain at least one digit, one lower case, one upper case, one special character and must be between 8 and 20 characters long")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\\-+]).{8,20}$", message = "Mật khẩu phải chứa ít nhất 1 chữ số, 1 chữ thường, 1 chữ hoa, 1 ký tự đặc biệt và có độ dài từ 8-20 ký tự")
     @JsonProperty("Password")
     private String password;
     @JsonProperty("ConfirmPassword")

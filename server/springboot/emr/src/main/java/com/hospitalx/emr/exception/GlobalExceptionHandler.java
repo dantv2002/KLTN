@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse> handleException(Exception exception) {
         BaseResponse baseResponse = new BaseResponse();
-        String message = "Internal Server Error";
+        String message = "Lỗi hệ thống";
         baseResponse.setMessage(message);
         baseResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         baseResponse.setData(null);
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ NoHandlerFoundException.class, NoResourceFoundException.class })
     public ResponseEntity<BaseResponse> handleNoHandlerFoundException(Exception exception) {
         BaseResponse baseResponse = new BaseResponse();
-        String message = "Page not found";
+        String message = "Không tìm thấy trang";
         baseResponse.setMessage(message);
         baseResponse.setStatus(HttpStatus.NOT_FOUND.value());
         baseResponse.setData(null);
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InsufficientAuthenticationException.class)
     public ResponseEntity<BaseResponse> handleInsufficientAuthenticationException(Exception exception) {
         BaseResponse baseResponse = new BaseResponse();
-        String message = "Full authentication is required to access this resource";
+        String message = "Không có quyền truy cập";
         baseResponse.setMessage(message);
         baseResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
         baseResponse.setData(null);

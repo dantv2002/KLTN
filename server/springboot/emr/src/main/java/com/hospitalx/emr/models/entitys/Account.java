@@ -32,8 +32,4 @@ public class Account {
     private Verify verify;
 
     private List<String> records;
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName.replace(" ", "_");
-    }
 }

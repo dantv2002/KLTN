@@ -2,6 +2,7 @@
 package com.hospitalx.emr.component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
     @Autowired
     private AppConfig appConfig;
+    @Autowired
+    private Encoder encoder;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
@@ -32,7 +35,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("status", HttpStatus.UNAUTHORIZED.value())
-                .queryParam("message", "Authentication failed! Please try again!")
+                .queryParam("message", encoder.encode("Quá trình xác thực đã thất bại! Vui lòng thử lại!"))
                 .build().toUriString();
         response.sendRedirect(targetUrl);
     }

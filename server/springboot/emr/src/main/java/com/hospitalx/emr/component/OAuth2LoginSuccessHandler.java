@@ -1,6 +1,7 @@
 package com.hospitalx.emr.component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private TokenService tokenService;
     @Autowired
     private AppConfig appConfig;
+    @Autowired
+    private Encoder encoder;
 
     private AccountDto accountdDto = null;
-    private String message = "Success";
+    private String message = "Thành công";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -53,10 +56,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             if (accDto.getDeleted() || !accDto.getActived()) {
                 if (accDto.getDeleted()) {
                     accountService.delete(accDto.getId());
-                    message = "Data of the account has been deleted";
+                    message = "Dữ liệu của tài khoản đã bị xóa";
                     this.createAccount(name, imageUrl, email);
                 } else {
-                    message = "Account has been locked";
+                    message = "Tài khoản đã bị khóa";
                 }
             } else {
                 this.accountdDto = accDto;
@@ -64,9 +67,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         }, () -> {
             this.createAccount(name, imageUrl, email);
         });
+        message = encoder.encode(message);
         if (accountdDto != null) {
             this.setCookie(response, "Token", tokenService.createToken(accountdDto), appConfig.getExpiresTime(), true);
-            this.setCookie(response, "FullName", accountdDto.getFullName(), appConfig.getExpiresTime(), false);
+            this.setCookie(response, "FullName", encoder.encode(accountdDto.getFullName()), appConfig.getExpiresTime(),
+                    false);
             this.setCookie(response, "Email", accountdDto.getEmail(), appConfig.getExpiresTime(), false);
             this.setCookie(response, "Role", accountdDto.getRole(), appConfig.getExpiresTime(), false);
             targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
@@ -100,5 +105,4 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         cookie.setMaxAge(maxAge * 24 * 60 * 60);
         response.addCookie(cookie);
     }
-
 }

@@ -5,9 +5,11 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mongodb.lang.NonNull;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
@@ -17,38 +19,39 @@ public class RecordDto {
     @JsonProperty("Id")
     private String id;
 
-    @NotEmpty(message = "Please enter your email")
-    @Email(message = "Please enter valid email address")
+    @NotEmpty(message = "Vui lòng nhập email")
+    @Email(message = "Vui lòng nhập đúng định dạng email")
     @JsonProperty("Email")
     private String email;
 
-    @NotEmpty(message = "Please enter your full name")
+    @NotEmpty(message = "Vui lòng nhập họ và tên")
     @JsonProperty("FullName")
     private String fullName;
 
-    @NotEmpty(message = "Please enter your date of birth")
+    @NotNull(message = "Vui lòng chọn ngày sinh")
     @JsonProperty("DateOfBirth")
-    @JsonFormat(pattern = "MM/dd/yyyy")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private Date dateOfBirth;
 
-    @NotEmpty(message = "Please select your gender")
+    @NotEmpty(message = "Vui lòng chọn giới tính")
     @JsonProperty("Gender")
-    private Boolean gender;
+    @Pattern(regexp = "Nam|Nữ|Khác", message = "Giới tính phải là Nam, Nữ hoặc Khác")
+    private String gender;
 
-    @NotEmpty(message = "Please enter your phone number")
+    @NotEmpty(message = "Vui lòng nhập số điện thoại")
     @JsonProperty("NumberPhone")
-    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Số điện thoại phải có 10 chữ số")
     private String numberPhone;
 
     @JsonProperty("IdentityCard")
-    @Pattern(regexp = "(^[0-9]{12}$)|(^[a-zA-Z][0-9]{7}$)", message = "Identity Card must be 12 digits or start with a letter followed by 7 digits")
+    @Pattern(regexp = "(^[0-9]{12}$)", message = "Vui lòng nhập đúng định dạng số căn cước công dân (12 chữ số)")
     private String identityCard;
 
-    @NotEmpty(message = "Please enter your address")
+    @NotEmpty(message = "Vui lòng nhập địa chỉ sinh sống")
     @JsonProperty("Address")
     private String address;
 
     @JsonProperty("HealthInsurance")
-    @Pattern(regexp = "^[a-zA-Z]{2}[0-9]{13}$", message = "Health Card must start with 2 letters followed by 13 digits")
+    @Pattern(regexp = "^[a-zA-Z]{2}[0-9]{13}$", message = "Vui lòng nhập đúng định dạng mã thẻ bảo hiểm y tế")
     private String healthInsurance;
 }

@@ -1,5 +1,8 @@
 package com.hospitalx.emr.controllers;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import com.hospitalx.emr.common.BaseResponse;
+import com.hospitalx.emr.component.Encoder;
 import com.hospitalx.emr.configs.AppConfig;
 
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
     @Autowired
     private AppConfig appConfig;
+    @Autowired
+    private Encoder encoder;
 
     @Autowired
     private AccountService accountService;
@@ -45,9 +51,9 @@ public class AuthController {
     @PostMapping("/auth/register")
     public ResponseEntity<BaseResponse> registerAccount(@RequestBody @Valid AccountDto accountDto) {
         BaseResponse response = new BaseResponse();
-        log.debug("message", accountDto);
+        log.debug("message", accountDto.toString());
         AccountDto account = accountService.registerAccount(accountDto);
-        response.setMessage("Verify code has been sent to email: " + accountDto.getEmail());
+        response.setMessage("Mã xác minh đã được gửi tới email: " + accountDto.getEmail());
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<>() {
             {
@@ -63,7 +69,7 @@ public class AuthController {
             @PathVariable("id") String id) {
         BaseResponse response = new BaseResponse();
         accountService.verifyAccount(id, verificationCodeDto.getCode());
-        response.setMessage("Account has been verified");
+        response.setMessage("Tài khoản đã được xác minh");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -75,7 +81,7 @@ public class AuthController {
         AccountDto account = accountService.resetPassword(accountDto);
 
         BaseResponse response = new BaseResponse();
-        response.setMessage("Verify code has been sent to email: " + accountDto.getEmail());
+        response.setMessage("Mã xác minh đã được gửi tới email: " + accountDto.getEmail());
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<>() {
             {
@@ -91,7 +97,7 @@ public class AuthController {
             @PathVariable("id") String id) {
         BaseResponse response = new BaseResponse();
         accountService.verifyResetPassword(id, verificationCodeDto.getCode());
-        response.setMessage("Reset password success");
+        response.setMessage("Đặt lại mật khẩu thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -100,17 +106,17 @@ public class AuthController {
     // API login with account local
     @PostMapping("/auth/login")
     public ResponseEntity<BaseResponse> login(@RequestBody Map<String, String> login,
-            HttpServletResponse response) {
+            HttpServletResponse response) throws UnsupportedEncodingException {
 
         AccountDto account = accountService.loginAccount(login.get("Email"), login.get("Password"));
 
         this.setCookie(response, "Token", tokenService.createToken(account), appConfig.getExpiresTime(), true);
-        this.setCookie(response, "FullName", account.getFullName(), appConfig.getExpiresTime(), false);
+        this.setCookie(response, "FullName", encoder.encode(account.getFullName()), appConfig.getExpiresTime(), false);
         this.setCookie(response, "Email", account.getEmail(), appConfig.getExpiresTime(), false);
         this.setCookie(response, "Role", account.getRole(), appConfig.getExpiresTime(), false);
 
         BaseResponse baseResponse = new BaseResponse();
-        baseResponse.setMessage("Login success");
+        baseResponse.setMessage("Đăng nhập thành công");
         baseResponse.setStatus(HttpStatus.OK.value());
         baseResponse.setData(null);
 
@@ -127,7 +133,7 @@ public class AuthController {
         this.setCookie(response, "Role", null, 0, false);
 
         BaseResponse baseResponse = new BaseResponse();
-        baseResponse.setMessage("Logout success");
+        baseResponse.setMessage("Đăng xuất thành công");
         baseResponse.setStatus(HttpStatus.OK.value());
         baseResponse.setData(null);
 

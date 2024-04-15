@@ -18,19 +18,19 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public void sendEmail(String ToEmail, String UserName, String VerifyCode) {
+    public void sendEmailVerify(String ToEmail, String UserName, String VerifyCode) {
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
                 messageHelper.setTo(ToEmail);
-                messageHelper.setSubject("EMR - Verification Code");
+                messageHelper.setSubject("EMR - Mã xác minh");
                 //
                 Context context = new Context();
                 context.setVariable("UserName", UserName);
                 context.setVariable("ToEmail", ToEmail);
                 context.setVariable("VerifyCode", VerifyCode);
 
-                String content = templateEngine.process("EmailTemplate", context);
+                String content = templateEngine.process("VerifyTemplate", context);
                 //
                 messageHelper.setText(content, true);
             }

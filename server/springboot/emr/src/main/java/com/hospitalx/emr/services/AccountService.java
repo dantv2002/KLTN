@@ -39,7 +39,8 @@ public class AccountService implements IDAO<AccountDto> {
 
     public AccountDto resetPassword(AccountDto accountDto) {
         if (!accountDto.getPassword().equals(accountDto.getConfirmPassword())) {
-            throw new CustomException("Password and Confirm Password are not the same", HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("Mật khẩu và xác nhận lại mật khẩu không giống nhau",
+                    HttpStatus.BAD_REQUEST.value());
         }
         log.info("Reset password: " + accountDto.getEmail());
         this.accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
@@ -50,11 +51,11 @@ public class AccountService implements IDAO<AccountDto> {
                                     Instant.now().plusSeconds(5 * 60))); // 5 minutes
                     acc.setPasswordUpdate(BCrypt.hashpw(accountDto.getPassword(), BCrypt.gensalt(10)));
                     this.account = accountRepository.save(acc);
-                    emailService.sendEmail(acc.getEmail(), acc.getFullName(), code);
+                    emailService.sendEmailVerify(acc.getEmail(), acc.getFullName(), code);
                     log.info("Send verification code success: " + acc.getEmail());
                 }, () -> {
                     log.error("Reset password failed because email not exists");
-                    throw new CustomException("Account not exists", HttpStatus.NOT_FOUND.value());
+                    throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
                 });
         // hide information
         this.account.setImageUrl(null);
@@ -83,10 +84,11 @@ public class AccountService implements IDAO<AccountDto> {
                         log.info("Verify reset password success: " + acc.getEmail());
                     } else {
                         log.error("Verify reset password failed: " + acc.getEmail());
-                        throw new CustomException("Verify code is invalid or expired", HttpStatus.BAD_REQUEST.value());
+                        throw new CustomException("Mã xác minh không hợp lệ hoặc đã hết hạn",
+                                HttpStatus.BAD_REQUEST.value());
                     }
                 }, () -> {
-                    throw new CustomException("Account not exists", HttpStatus.NOT_FOUND.value());
+                    throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
                 });
     }
 
@@ -97,9 +99,9 @@ public class AccountService implements IDAO<AccountDto> {
                     if (acc.getDeleted() | !acc.getEmailVerified() || !acc.getActived()) {
                         log.error("Login account failed: " + email);
                         if (acc.getDeleted() || !acc.getEmailVerified()) {
-                            throw new CustomException("Account not exists", HttpStatus.UNAUTHORIZED.value());
+                            throw new CustomException("Tài khoản không tồn tại", HttpStatus.UNAUTHORIZED.value());
                         } else {
-                            throw new CustomException("Account has been locked", HttpStatus.UNAUTHORIZED.value());
+                            throw new CustomException("Tài khoản đã bị khóa", HttpStatus.UNAUTHORIZED.value());
                         }
                     }
                     if (BCrypt.checkpw(password, acc.getPassword())) {
@@ -107,25 +109,26 @@ public class AccountService implements IDAO<AccountDto> {
                         return modelMapper.map(acc, AccountDto.class);
                     } else {
                         log.error("Login account failed: " + email);
-                        throw new CustomException("The Username or Password is Incorrect",
+                        throw new CustomException("Tài khoản hoặc mật khẩu không chính xác",
                                 HttpStatus.BAD_REQUEST.value());
                     }
                 }).orElseThrow(() -> {
                     log.error("Login account failed: " + email);
-                    throw new CustomException("The Username or Password is Incorrect", HttpStatus.BAD_REQUEST.value());
+                    throw new CustomException("Tài khoản hoặc mật khẩu không chính xác",
+                            HttpStatus.BAD_REQUEST.value());
                 });
     }
 
     public AccountDto registerAccount(AccountDto accountDto) {
         if (accountDto.getFullName() == null || accountDto.getFullName().isEmpty()) {
-            throw new CustomException("Please enter your full name", HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("Vui lòng nhập họ và tên", HttpStatus.BAD_REQUEST.value());
         }
         log.info("Register account not verified: " + accountDto.getEmail() + " - Auth provider: " + AuthProvider.LOCAL);
         this.accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
                 .ifPresentOrElse(account -> {
                     if (account.getEmailVerified()) { // account already exists
                         log.error("Email already exists");
-                        throw new CustomException("Email already exists", HttpStatus.CONFLICT.value());
+                        throw new CustomException("Tài khoản đã tồn tại", HttpStatus.CONFLICT.value());
                     } else { // account exists but not verified
                         this.account = createAccountAndSendVerification(account.getId(), accountDto.getEmail(),
                                 accountDto.getFullName(),
@@ -152,10 +155,11 @@ public class AccountService implements IDAO<AccountDto> {
                         log.info("Verify account success: " + acc.getEmail());
                     } else {
                         log.error("Verify account failed: " + acc.getEmail());
-                        throw new CustomException("Verify code is invalid or expired", HttpStatus.BAD_REQUEST.value());
+                        throw new CustomException("Mã xác minh không hợp lệ hoặc đã hết hạn",
+                                HttpStatus.BAD_REQUEST.value());
                     }
                 }, () -> {
-                    throw new CustomException("Account not exists", HttpStatus.NOT_FOUND.value());
+                    throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
                 });
     }
 
@@ -187,7 +191,7 @@ public class AccountService implements IDAO<AccountDto> {
     public AccountDto get(String id) {
         log.info("Get account: " + id);
         return accountRepository.findById(id).map(account -> modelMapper.map(account, AccountDto.class))
-                .orElseThrow(() -> new CustomException("Account not exists", HttpStatus.NOT_FOUND.value()));
+                .orElseThrow(() -> new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value()));
     }
 
     @Override
@@ -216,7 +220,7 @@ public class AccountService implements IDAO<AccountDto> {
             String confirmPassword) {
 
         if (!password.equals(confirmPassword)) {
-            throw new CustomException("Password and Confirm Password are not the same",
+            throw new CustomException("Mật khẩu và xác nhận lại mật khẩu không giống nhau",
                     HttpStatus.BAD_REQUEST.value());
         }
         String code = getVerifyCode();
@@ -232,7 +236,7 @@ public class AccountService implements IDAO<AccountDto> {
                 new Verify(BCrypt.hashpw(code, BCrypt.gensalt(10)),
                         Instant.now().plusSeconds(5 * 60))); // 5 minutes
         account = accountRepository.save(account);
-        emailService.sendEmail(account.getEmail(), account.getFullName(), code);
+        emailService.sendEmailVerify(account.getEmail(), account.getFullName(), code);
         log.info("Create account and send verification: " + account.getEmail());
         // hide information
         account.setImageUrl(null);

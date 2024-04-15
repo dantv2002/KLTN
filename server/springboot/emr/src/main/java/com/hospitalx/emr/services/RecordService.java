@@ -40,7 +40,7 @@ public class RecordService implements IDAO<RecordDto> {
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto account = accountService.get(id);
         if (account.getRecords() != null && account.getRecords().size() == 10) {
-            throw new CustomException("The number of record has reached the maximum of 10",
+            throw new CustomException("Số lượng hồ sơ đã đạt giới hạn tối đa!",
                     HttpStatus.BAD_REQUEST.value());
         }
         Record record = recordRepository.save(modelMapper.map(t, Record.class));
@@ -48,13 +48,21 @@ public class RecordService implements IDAO<RecordDto> {
             account.setRecords(new ArrayList<String>());
         }
         account.getRecords().add(record.getId());
+        accountService.update(account);
         return modelMapper.map(record, RecordDto.class);
     }
 
     @Override
     public Page<RecordDto> getAll(String keyword, Pageable pageable) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+        log.info("Get all records");
+        String id = authenticationFacade.getAuthentication().getName();
+        AccountDto accountDto = accountService.get(id);
+        log.info("ID account: " + accountDto.getId());
+        if (accountDto.getRecords() == null || accountDto.getRecords().isEmpty()) {
+            return Page.empty();
+        }
+        return recordRepository.findAllById(accountDto.getRecords(), pageable)
+                .map(record -> modelMapper.map(record, RecordDto.class));
     }
 
     @Override

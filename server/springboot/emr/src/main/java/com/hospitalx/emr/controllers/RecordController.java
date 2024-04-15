@@ -1,13 +1,22 @@
 package com.hospitalx.emr.controllers;
 
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.common.BaseResponse;
@@ -31,21 +40,68 @@ public class RecordController {
         log.info("Create record: " + recordDto.toString());
         recordService.save(recordDto);
         BaseResponse response = new BaseResponse();
-        response.setMessage("Create record success");
+        response.setMessage("Tạo hồ sơ thành công");
         response.setStatus(HttpStatus.OK.value());
+        response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PreAuthorize("hasRole('ROLE_PATIENT')")
     @GetMapping("/patient/records")
-    public ResponseEntity<BaseResponse> getAll() {
-        log.info("Get all records");
+    public ResponseEntity<BaseResponse> getAll(
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            @RequestParam(name = "sortBy", defaultValue = "id", required = false) String sortBy,
+            @RequestParam(name = "sortDir", defaultValue = "asc", required = false) String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<RecordDto> records = recordService.getAll(null, pageable);
         BaseResponse response = new BaseResponse();
-        response.setData(recordService.getAll(null, null));
-        response.setMessage("Get all records success");
+        response.setData(new HashMap<String, Object>() {
+            {
+                put("Records", records.getContent());
+                put("CurrentPage", records.getNumber());
+                put("TotalItems", records.getTotalElements());
+                put("TotalPages", records.getTotalPages());
+            }
+        });
+        response.setMessage("Tải tất cả hồ sơ thành công");
         response.setStatus(HttpStatus.OK.value());
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
+    @GetMapping("/patient/record/{id}")
+    public ResponseEntity<BaseResponse> get(@RequestBody @Valid RecordDto recordDto) {
+        log.info("Get record: " + recordDto.toString());
+        BaseResponse response = new BaseResponse();
+        response.setData(recordService.get(recordDto.getId()));
+        response.setMessage("Tải hồ sơ thành công");
+        response.setStatus(HttpStatus.OK.value());
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
+    @PutMapping("/patient/record/{id}")
+    public ResponseEntity<BaseResponse> update(@RequestBody @Valid RecordDto recordDto) {
+        log.info("Update record: " + recordDto.toString());
+        recordService.save(recordDto);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Cập nhật hồ sơ thành công");
+        response.setStatus(HttpStatus.OK.value());
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
+    @DeleteMapping("/patient/record/{id}")
+    public ResponseEntity<BaseResponse> delete(@RequestBody @Valid RecordDto recordDto) {
+        log.info("Delete record: " + recordDto.toString());
+        recordService.delete(recordDto.getId());
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Xóa hồ sơ thành công");
+        response.setStatus(HttpStatus.OK.value());
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }
