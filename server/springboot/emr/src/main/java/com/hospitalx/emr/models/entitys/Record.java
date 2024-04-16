@@ -22,4 +22,5 @@ public class Record {
     private String address;
     private String healthInsurance = null;
     private Boolean locked = false;
+    private Boolean deleted = false;
 }

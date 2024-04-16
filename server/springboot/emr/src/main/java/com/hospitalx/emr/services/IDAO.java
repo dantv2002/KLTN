@@ -10,7 +10,7 @@ public interface IDAO<T> {
 
     public T get(String id);
 
-    public T update(T t);
+    public void update(T t);
 
-    public Boolean delete(String id);
+    public void delete(String id);
 }

@@ -5,7 +5,6 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mongodb.lang.NonNull;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -43,6 +42,7 @@ public class RecordDto {
     @Pattern(regexp = "^[0-9]{10}$", message = "Số điện thoại phải có 10 chữ số")
     private String numberPhone;
 
+    @NotEmpty(message = "Vui lòng nhập số căn cước công dân")
     @JsonProperty("IdentityCard")
     @Pattern(regexp = "(^[0-9]{12}$)", message = "Vui lòng nhập đúng định dạng số căn cước công dân (12 chữ số)")
     private String identityCard;
@@ -51,6 +51,7 @@ public class RecordDto {
     @JsonProperty("Address")
     private String address;
 
+    @NotEmpty(message = "Vui lòng nhập mã số thẻ bảo hiểm y tế")
     @JsonProperty("HealthInsurance")
     @Pattern(regexp = "^[a-zA-Z]{2}[0-9]{13}$", message = "Vui lòng nhập đúng định dạng mã thẻ bảo hiểm y tế")
     private String healthInsurance;

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.models.dtos.AccountDto;
+import com.hospitalx.emr.models.dtos.UpdatePasswordDto;
 import com.hospitalx.emr.models.dtos.VerificationCodeDto;
 import com.hospitalx.emr.services.AccountService;
 import com.hospitalx.emr.services.TokenService;
@@ -30,11 +32,8 @@ import com.hospitalx.emr.common.BaseResponse;
 import com.hospitalx.emr.component.Encoder;
 import com.hospitalx.emr.configs.AppConfig;
 
-import lombok.extern.slf4j.Slf4j;
-
 @RestController
 @RequestMapping("/api")
-@Slf4j
 public class AuthController {
     @Autowired
     private AppConfig appConfig;
@@ -51,7 +50,6 @@ public class AuthController {
     @PostMapping("/auth/register")
     public ResponseEntity<BaseResponse> registerAccount(@RequestBody @Valid AccountDto accountDto) {
         BaseResponse response = new BaseResponse();
-        log.debug("message", accountDto.toString());
         AccountDto account = accountService.registerAccount(accountDto);
         response.setMessage("Mã xác minh đã được gửi tới email: " + accountDto.getEmail());
         response.setStatus(HttpStatus.OK.value());
@@ -123,6 +121,15 @@ public class AuthController {
         return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
     }
 
+    @PutMapping("/update-password")
+    public ResponseEntity<BaseResponse> updatePassword(@RequestBody @Valid UpdatePasswordDto updatePasswordDto) {
+        accountService.updatePassword(updatePasswordDto);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Đổi mật khẩu thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(null);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
     // API logout
     @GetMapping("/logout")
     public ResponseEntity<BaseResponse> logout(HttpServletResponse response) {
@@ -140,6 +147,9 @@ public class AuthController {
         return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
     }
 
+
+
+    // Set cookie
     private void setCookie(HttpServletResponse response, String name, String value, int maxAge, boolean httpOnly) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");

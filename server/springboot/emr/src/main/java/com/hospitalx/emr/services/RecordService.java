@@ -36,10 +36,12 @@ public class RecordService implements IDAO<RecordDto> {
     // Override methods
     @Override
     public RecordDto save(RecordDto t) {
+        checkExistRecord(t.getIdentityCard(), null);
         log.info("Save record: " + t.toString());
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto account = accountService.get(id);
         if (account.getRecords() != null && account.getRecords().size() == 10) {
+            log.error("Record limit exceeded!");
             throw new CustomException("Số lượng hồ sơ đã đạt giới hạn tối đa!",
                     HttpStatus.BAD_REQUEST.value());
         }
@@ -49,39 +51,100 @@ public class RecordService implements IDAO<RecordDto> {
         }
         account.getRecords().add(record.getId());
         accountService.update(account);
+        log.info("Save record success with ID: " + record.getId() + " for account: " + account.getId());
         return modelMapper.map(record, RecordDto.class);
     }
 
     @Override
     public Page<RecordDto> getAll(String keyword, Pageable pageable) {
-        log.info("Get all records");
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto accountDto = accountService.get(id);
-        log.info("ID account: " + accountDto.getId());
+        log.info("Get all records for account: " + accountDto.getId());
         if (accountDto.getRecords() == null || accountDto.getRecords().isEmpty()) {
+            log.info("No records found for account: " + accountDto.getId());
             return Page.empty();
         }
+        log.info("Get all records success for account: " + accountDto.getId() + " with total records: "
+                + accountDto.getRecords().size() + " records");
         return recordRepository.findAllById(accountDto.getRecords(), pageable)
                 .map(record -> modelMapper.map(record, RecordDto.class));
     }
 
     @Override
     public RecordDto get(String id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'get'");
+        log.info("Get record with ID: " + id);
+        String accountId = authenticationFacade.getAuthentication().getName();
+        AccountDto account = accountService.get(accountId);
+        if (account.getRecords() == null || account.getRecords().isEmpty() || !account.getRecords().contains(id)) {
+            log.error("Record not found for account: " + account.getId());
+            throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());
+        }
+        Record record = recordRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value()));
+        log.info("Get record success with ID: " + id);
+        return modelMapper.map(record, RecordDto.class);
     }
 
     @Override
-    public RecordDto update(RecordDto t) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    public void update(RecordDto t) {
+        log.info("Update record: " + t.toString());
+        String id = authenticationFacade.getAuthentication().getName();
+        AccountDto account = accountService.get(id);
+        if (account.getRecords() == null || account.getRecords().isEmpty()
+                || !account.getRecords().contains(t.getId())) {
+            log.error("Record not found for account: " + account.getId());
+            throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());
+        }
+        checkExistRecord(t.getIdentityCard(), t.getId());
+        Record record = recordRepository.findById(t.getId())
+                .orElseThrow(() -> new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value()));
+        if (record.getLocked()) {
+            log.info("Record is locked!");
+            t.setId(null);
+            record = recordRepository.save(modelMapper.map(t, Record.class));
+            account.getRecords().remove(t.getId());
+            account.getRecords().add(record.getId());
+            accountService.update(account);
+            log.info("Update record success with ID: " + record.getId());
+        } else {
+            recordRepository.save(modelMapper.map(t, Record.class));
+            log.info("Update record success with ID: " + t.getId());
+        }
     }
 
     @Override
-    public Boolean delete(String id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+    public void delete(String id) {
+        log.info("Delete record with ID: " + id);
+        String accountId = authenticationFacade.getAuthentication().getName();
+        AccountDto account = accountService.get(accountId);
+        if (account.getRecords() == null || account.getRecords().isEmpty() || !account.getRecords().contains(id)) {
+            log.error("Record not found for account: " + account.getId());
+            throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());
+        }
+        Record record = recordRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value()));
+        if (record.getLocked()) {
+            log.info("Record is locked!");
+            record.setDeleted(true);
+            recordRepository.save(record);
+        } else {
+            recordRepository.delete(record);
+        }
+        account.getRecords().remove(id);
+        accountService.update(account);
+        log.info("Delete record success with ID: " + id);
     }
+
     //
     //
+    private void checkExistRecord(String identityCard, String id) {
+        Page<RecordDto> records = this.getAll("", Pageable.unpaged());
+        records.stream().forEach(record -> {
+            if (record.getIdentityCard().equals(identityCard) && (id == null || !record.getId().equals(id))) {
+                log.error("Record already exists with identity card: " + identityCard);
+                throw new CustomException("Hồ sơ của người này đã tồn tại!", HttpStatus.CONFLICT.value());
+            }
+        });
+
+    }
 }

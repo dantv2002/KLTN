@@ -13,9 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.hospitalx.emr.common.AuthProvider;
+import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.configs.AppConfig;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
+import com.hospitalx.emr.models.dtos.UpdatePasswordDto;
 import com.hospitalx.emr.models.entitys.Account;
 import com.hospitalx.emr.models.entitys.Verify;
 import com.hospitalx.emr.repositories.AccountRepository;
@@ -34,15 +36,35 @@ public class AccountService implements IDAO<AccountDto> {
     private EmailService emailService;
     @Autowired
     private AppConfig appConfig;
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
 
     private Account account = null;
 
+    public void updatePassword(UpdatePasswordDto updatePasswordDto) {
+        if (!updatePasswordDto.getNewPassword().equals(updatePasswordDto.getConfirmNewPassword())) {
+            throw new CustomException("Mật khẩu và xác nhận lại mật khẩu không giống nhau",
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        String id = authenticationFacade.getAuthentication().getName();
+        AccountDto account = this.get(id);
+        log.info("Update password: " + account.getEmail());
+        if (BCrypt.checkpw(updatePasswordDto.getOldPassword(), account.getPassword())) {
+            account.setPassword(BCrypt.hashpw(updatePasswordDto.getNewPassword(), BCrypt.gensalt(10)));
+            accountRepository.save(modelMapper.map(account, Account.class));
+            log.info("Update password success: " + account.getEmail());
+        } else {
+            log.error("Update password failed: " + account.getEmail());
+            throw new CustomException("Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST.value());
+        }
+    }
+
     public AccountDto resetPassword(AccountDto accountDto) {
+        log.info("Reset password: " + accountDto.getEmail());
         if (!accountDto.getPassword().equals(accountDto.getConfirmPassword())) {
             throw new CustomException("Mật khẩu và xác nhận lại mật khẩu không giống nhau",
                     HttpStatus.BAD_REQUEST.value());
         }
-        log.info("Reset password: " + accountDto.getEmail());
         this.accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
                 .ifPresentOrElse(acc -> {
                     String code = getVerifyCode();
@@ -54,7 +76,7 @@ public class AccountService implements IDAO<AccountDto> {
                     emailService.sendEmailVerify(acc.getEmail(), acc.getFullName(), code);
                     log.info("Send verification code success: " + acc.getEmail());
                 }, () -> {
-                    log.error("Reset password failed because email not exists");
+                    log.error("Reset password failed because email {} not exists", accountDto.getEmail());
                     throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
                 });
         // hide information
@@ -88,6 +110,7 @@ public class AccountService implements IDAO<AccountDto> {
                                 HttpStatus.BAD_REQUEST.value());
                     }
                 }, () -> {
+                    log.error(("Account not exists: " + id));
                     throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
                 });
     }
@@ -120,14 +143,15 @@ public class AccountService implements IDAO<AccountDto> {
     }
 
     public AccountDto registerAccount(AccountDto accountDto) {
+        log.info("Register account not verified: " + accountDto.getEmail() + " - Auth provider: " + AuthProvider.LOCAL);
         if (accountDto.getFullName() == null || accountDto.getFullName().isEmpty()) {
+            log.error("Full name is empty");
             throw new CustomException("Vui lòng nhập họ và tên", HttpStatus.BAD_REQUEST.value());
         }
-        log.info("Register account not verified: " + accountDto.getEmail() + " - Auth provider: " + AuthProvider.LOCAL);
         this.accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
                 .ifPresentOrElse(account -> {
                     if (account.getEmailVerified()) { // account already exists
-                        log.error("Email already exists");
+                        log.error("Email already exists: " + account.getEmail());
                         throw new CustomException("Tài khoản đã tồn tại", HttpStatus.CONFLICT.value());
                     } else { // account exists but not verified
                         this.account = createAccountAndSendVerification(account.getId(), accountDto.getEmail(),
@@ -159,6 +183,7 @@ public class AccountService implements IDAO<AccountDto> {
                                 HttpStatus.BAD_REQUEST.value());
                     }
                 }, () -> {
+                    log.error(("Account not exists: " + id));
                     throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
                 });
     }
@@ -167,8 +192,10 @@ public class AccountService implements IDAO<AccountDto> {
         log.info("Get account: " + email + " " + authProvider);
         Optional<Account> account = accountRepository.findByEmailAndAuthProvider(email, authProvider);
         if (account.isPresent()) {
+            log.info("Get account success: " + email);
             return Optional.of(modelMapper.map(account.get(), AccountDto.class));
         } else {
+            log.error("Get account failed: " + email);
             return Optional.empty();
         }
     }
@@ -178,6 +205,7 @@ public class AccountService implements IDAO<AccountDto> {
     public AccountDto save(AccountDto t) {
         log.info("Save account: " + t.toString());
         Account account = modelMapper.map(t, Account.class);
+        log.info("Save account success: " + account.getEmail());
         return modelMapper.map(accountRepository.save(account), AccountDto.class);
     }
 
@@ -190,28 +218,28 @@ public class AccountService implements IDAO<AccountDto> {
     @Override
     public AccountDto get(String id) {
         log.info("Get account: " + id);
-        return accountRepository.findById(id).map(account -> modelMapper.map(account, AccountDto.class))
-                .orElseThrow(() -> new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value()));
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Không tìm thấy tài khoản", HttpStatus.NOT_FOUND.value()));
+        log.info("Get account success: " + id);
+        return modelMapper.map(account, AccountDto.class);
     }
 
     @Override
-    public AccountDto update(AccountDto t) {
-        log.info("Update account: " + t);
-        Account account = modelMapper.map(t, Account.class);
-        return modelMapper.map(accountRepository.save(account), AccountDto.class);
+    public void update(AccountDto t) {
+        log.info("Update account: " + t.toString());
+        accountRepository.findById(t.getId())
+                .orElseThrow(() -> new CustomException("Không tìm thấy tài khoản", HttpStatus.NOT_FOUND.value()));
+        accountRepository.save(modelMapper.map(t, Account.class));
+        log.info("Update account success: " + t.getEmail());
     }
 
     @Override
-    public Boolean delete(String id) {
-        try {
-            accountRepository.deleteById(id);
-            log.info("Delete account: " + id);
-            return true;
-        } catch (Exception e) {
-            log.error("Delete account: " + id + " failed");
-            log.error(e.getMessage());
-            return false;
-        }
+    public void delete(String id) {
+        log.info("Delete account: " + id);
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Không tìm thấy tài khoản", HttpStatus.NOT_FOUND.value()));
+        accountRepository.delete(account);
+        log.info("Delete account success: " + id);
     }
 
     //
@@ -237,7 +265,7 @@ public class AccountService implements IDAO<AccountDto> {
                         Instant.now().plusSeconds(5 * 60))); // 5 minutes
         account = accountRepository.save(account);
         emailService.sendEmailVerify(account.getEmail(), account.getFullName(), code);
-        log.info("Create account and send verification: " + account.getEmail());
+        log.info("Complete create account and send verification: " + account.getEmail());
         // hide information
         account.setImageUrl(null);
         account.setEmailVerified(null);

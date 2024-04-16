@@ -11,11 +11,15 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.hospitalx.emr.common.BaseResponse;
 
+import lombok.extern.slf4j.Slf4j;
+
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse> handleException(Exception exception) {
+        log.error("Exception: ", exception.getMessage());
         BaseResponse baseResponse = new BaseResponse();
         String message = "Lỗi hệ thống";
         baseResponse.setMessage(message);
@@ -26,6 +30,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({ NoHandlerFoundException.class, NoResourceFoundException.class })
     public ResponseEntity<BaseResponse> handleNoHandlerFoundException(Exception exception) {
+        log.error("Exception: ", exception.getMessage());
         BaseResponse baseResponse = new BaseResponse();
         String message = "Không tìm thấy trang";
         baseResponse.setMessage(message);
@@ -36,6 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InsufficientAuthenticationException.class)
     public ResponseEntity<BaseResponse> handleInsufficientAuthenticationException(Exception exception) {
+        log.error("Exception: ", exception.getMessage());
         BaseResponse baseResponse = new BaseResponse();
         String message = "Không có quyền truy cập";
         baseResponse.setMessage(message);
@@ -46,6 +52,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<BaseResponse> handleAccountAlreadyExistsException(CustomException exception) {
+        log.error("Exception: ", exception.getMessage());
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setMessage(exception.getMessage());
         baseResponse.setStatus(exception.getStatus());
@@ -56,6 +63,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<BaseResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception) {
+        log.error("Exception: ", exception.getMessage());
         BaseResponse baseResponse = new BaseResponse();
         String message = exception.getBindingResult().getFieldError().getDefaultMessage();
         baseResponse.setMessage(message);
