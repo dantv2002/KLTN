@@ -48,8 +48,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         Map<String, Object> attributes = principal.getAttributes();
         String name = attributes.getOrDefault("name", "").toString();
-        String imageUrl = attributes.getOrDefault("picture", appConfig.getImageDefault()).toString();
-
         String email = attributes.getOrDefault("email", "").toString();
         log.info("Login account: " + email + " - Auth provider: " + AuthProvider.GOOGLE);
         accountService.get(email, AuthProvider.GOOGLE).ifPresentOrElse(accDto -> {
@@ -57,7 +55,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 if (accDto.getDeleted()) {
                     accountService.delete(accDto.getId());
                     message = "Dữ liệu của tài khoản đã bị xóa";
-                    this.createAccount(name, imageUrl, email);
+                    this.createAccount(name, email);
                 } else {
                     message = "Tài khoản đã bị khóa";
                 }
@@ -65,7 +63,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 this.accountdDto = accDto;
             }
         }, () -> {
-            this.createAccount(name, imageUrl, email);
+            this.createAccount(name, email);
         });
         message = encoder.encode(message);
         if (accountdDto != null) {
@@ -89,10 +87,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.sendRedirect(targetUrl);
     }
 
-    private void createAccount(String name, String imageUrl, String email) {
+    private void createAccount(String name, String email) {
         accountdDto = new AccountDto();
         accountdDto.setFullName(name);
-        accountdDto.setImageUrl(imageUrl);
         accountdDto.setEmail(email);
         accountdDto.setAuthProvider(AuthProvider.GOOGLE);
         accountdDto = accountService.save(accountdDto);

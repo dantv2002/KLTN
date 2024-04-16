@@ -17,8 +17,6 @@ public class AppConfig {
     private RSAPrivateKey privateKey;
     @Value("${app.cookie.expiresTime}")
     private int expiresTime;
-    @Value("${app.imageDefault}")
-    private String imageDefault;
     @Value("${client.url}")
     private String clientUrl;
 }

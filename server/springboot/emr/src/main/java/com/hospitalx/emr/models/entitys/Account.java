@@ -16,7 +16,6 @@ public class Account {
     @Id
     private String id;
     private String fullName;
-    private String imageUrl;
     private String email;
 
     private Boolean emailVerified = false;

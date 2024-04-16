@@ -20,7 +20,6 @@ public class AccountDto {
 
     @JsonProperty("FullName")
     private String fullName;
-    private String imageUrl;
 
     @NotEmpty(message = "Vui lòng nhập email")
     @Email(message = "Vui lòng nhập đúng định dạng email")

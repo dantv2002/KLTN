@@ -35,8 +35,6 @@ public class AccountService implements IDAO<AccountDto> {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private AppConfig appConfig;
-    @Autowired
     private AuthenticationFacade authenticationFacade;
 
     private Account account = null;
@@ -80,7 +78,6 @@ public class AccountService implements IDAO<AccountDto> {
                     throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
                 });
         // hide information
-        this.account.setImageUrl(null);
         this.account.setEmailVerified(null);
         this.account.setPassword(null);
         this.account.setPasswordUpdate(null);
@@ -257,7 +254,6 @@ public class AccountService implements IDAO<AccountDto> {
             account.setId(id);
         }
         account.setFullName(fullName);
-        account.setImageUrl(appConfig.getImageDefault());
         account.setEmail(email);
         account.setPassword(BCrypt.hashpw(password, BCrypt.gensalt(10)));
         account.setVerify(
@@ -267,7 +263,6 @@ public class AccountService implements IDAO<AccountDto> {
         emailService.sendEmailVerify(account.getEmail(), account.getFullName(), code);
         log.info("Complete create account and send verification: " + account.getEmail());
         // hide information
-        account.setImageUrl(null);
         account.setEmailVerified(null);
         account.setPassword(null);
         account.setRole(null);
