@@ -13,7 +13,6 @@ app:
     expiresTime: 7
   cookie:
     expiresTime: 7
-  imageDefault: "https://res.cloudinary.com/daj4c7vpe/image/upload/v1712716406/avatars/qcowoo7pqqqmaoqeozne.png"
 
 spring:
   application:
