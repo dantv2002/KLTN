@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 public interface IDAO<T> {
     public T save(T t);
 
-    public Page<T> getAll(String keyword, Pageable pageable);
+    public Page<T> getAll(String keyword, String type, Pageable pageable);
 
     public T get(String id);
 

@@ -21,89 +21,88 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.common.BaseResponse;
-import com.hospitalx.emr.models.dtos.RecordDto;
-import com.hospitalx.emr.services.RecordService;
+import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
+import com.hospitalx.emr.services.HealthcareStaffService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
-public class RecordController {
-
+public class HealthcareStaffController {
     @Autowired
-    private RecordService recordService;
+    private HealthcareStaffService healthcareStaffService;
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @PostMapping("/patient/record/new")
-    public ResponseEntity<BaseResponse> create(@RequestBody @Valid RecordDto recordDto) {
-        recordService.save(recordDto);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/admin/healthcare-staff/new")
+    public ResponseEntity<BaseResponse> create(@RequestBody @Valid HealthcareStaffDto healthcareStaffDto) {
+        healthcareStaffService.save(healthcareStaffDto);
         BaseResponse response = new BaseResponse();
-        response.setMessage("Tạo hồ sơ thành công");
+        response.setMessage("Tạo nhân viên y tế thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @GetMapping("/patient/records")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/admin/healthcare-staffs")
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
+            @RequestParam(name = "type", defaultValue = "", required = false) String type,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
             @RequestParam(name = "sortBy", defaultValue = "id", required = false) String sortBy,
             @RequestParam(name = "sortDir", defaultValue = "asc", required = false) String sortDir) {
-
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<RecordDto> records = recordService.getAll(keyword, "", pageable);
+        Page<HealthcareStaffDto> data = healthcareStaffService.getAll(keyword, type, pageable);
         BaseResponse response = new BaseResponse();
+        response.setMessage("Lấy danh sách nhân viên y tế thành công");
+        response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<String, Object>() {
             {
-                put("Records", records.getContent());
-                put("CurrentPage", records.getNumber());
-                put("NumberOfItems", records.getNumberOfElements());
-                put("TotalItems", records.getTotalElements());
-                put("TotalPages", records.getTotalPages());
+                put("HealthCareStaffs", data.getContent());
+                put("CurrentPage", data.getNumber());
+                put("NumberOfItems", data.getNumberOfElements());
+                put("TotalItems", data.getTotalElements());
+                put("TotalPages", data.getTotalPages());
             }
         });
-        response.setMessage("Tải tất cả hồ sơ thành công");
-        response.setStatus(HttpStatus.OK.value());
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @GetMapping("/patient/record/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/admin/healthcare-staff/{id}")
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
-        RecordDto recordDto = recordService.get(id);
+        HealthcareStaffDto data = healthcareStaffService.get(id);
         BaseResponse response = new BaseResponse();
-        response.setMessage("Tải hồ sơ thành công");
+        response.setMessage("Tải thông tin nhân viên y tế thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<String, Object>() {
             {
-                put("Record", recordDto);
+                put("HealthCareStaff", data);
             }
         });
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @PutMapping("/patient/record")
-    public ResponseEntity<BaseResponse> update(@RequestBody @Valid RecordDto recordDto) {
-        recordService.update(recordDto);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/admin/healthcare-staff")
+    public ResponseEntity<BaseResponse> update(@RequestBody @Valid HealthcareStaffDto healthcareStaffDto) {
+        healthcareStaffService.update(healthcareStaffDto);
         BaseResponse response = new BaseResponse();
-        response.setMessage("Cập nhật hồ sơ thành công");
+        response.setMessage("Cập nhật thông tin nhân viên y tế thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @DeleteMapping("/patient/record/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/admin/healthcare-staff/{id}")
     public ResponseEntity<BaseResponse> delete(@PathVariable("id") String id) {
-        recordService.delete(id);
+        healthcareStaffService.delete(id);
         BaseResponse response = new BaseResponse();
-        response.setMessage("Xóa hồ sơ thành công");
+        response.setMessage("Xóa nhân viên y tế thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);

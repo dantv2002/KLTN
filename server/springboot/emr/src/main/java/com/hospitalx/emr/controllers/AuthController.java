@@ -1,13 +1,10 @@
 package com.hospitalx.emr.controllers;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -130,6 +127,7 @@ public class AuthController {
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
     // API logout
     @GetMapping("/logout")
     public ResponseEntity<BaseResponse> logout(HttpServletResponse response) {
@@ -146,8 +144,6 @@ public class AuthController {
 
         return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
     }
-
-
 
     // Set cookie
     private void setCookie(HttpServletResponse response, String name, String value, int maxAge, boolean httpOnly) {

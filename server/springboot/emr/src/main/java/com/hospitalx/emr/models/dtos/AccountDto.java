@@ -31,7 +31,7 @@ public class AccountDto {
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\\-+]).{8,20}$", message = "Mật khẩu phải chứa ít nhất 1 chữ số, 1 chữ thường, 1 chữ hoa, 1 ký tự đặc biệt và có độ dài từ 8-20 ký tự")
     @JsonProperty("Password")
     private String password;
-    
+
     @NotEmpty(message = "Vui lòng xác nhận mật khẩu")
     @JsonProperty("ConfirmPassword")
     private String confirmPassword;
@@ -42,4 +42,5 @@ public class AccountDto {
     private Boolean deleted;
     private Verify verify;
     private List<String> records;
+    private List<String> tickets;
 }

@@ -31,4 +31,6 @@ public class Account {
     private Verify verify;
 
     private List<String> records;
+
+    private List<String> tickets;
 }

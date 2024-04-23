@@ -56,7 +56,7 @@ public class RecordService implements IDAO<RecordDto> {
     }
 
     @Override
-    public Page<RecordDto> getAll(String keyword, Pageable pageable) {
+    public Page<RecordDto> getAll(String keyword, String type, Pageable pageable) {
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto accountDto = accountService.get(id);
         log.info("Get all records for account: " + accountDto.getId());
@@ -138,13 +138,15 @@ public class RecordService implements IDAO<RecordDto> {
     //
     //
     private void checkExistRecord(String identityCard, String id) {
-        Page<RecordDto> records = this.getAll("", Pageable.unpaged());
-        records.stream().forEach(record -> {
-            if (record.getIdentityCard().equals(identityCard) && (id == null || !record.getId().equals(id))) {
-                log.error("Record already exists with identity card: " + identityCard);
-                throw new CustomException("Hồ sơ của người này đã tồn tại!", HttpStatus.CONFLICT.value());
-            }
-        });
+        if (identityCard != null && !identityCard.isEmpty()) {
+            Page<RecordDto> records = this.getAll("", "", Pageable.unpaged());
+            records.stream().forEach(record -> {
+                if (record.getIdentityCard().equals(identityCard) && (id == null || !record.getId().equals(id))) {
+                    log.error("Record already exists with identity card: " + identityCard);
+                    throw new CustomException("Hồ sơ của người này đã tồn tại!", HttpStatus.CONFLICT.value());
+                }
+            });
+        }
 
     }
 }

@@ -2,7 +2,6 @@
 package com.hospitalx.emr.component;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,7 +1,6 @@
 package com.hospitalx.emr.component;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;

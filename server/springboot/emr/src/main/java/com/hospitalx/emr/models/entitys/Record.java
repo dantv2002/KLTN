@@ -17,10 +17,11 @@ public class Record {
     private String fullName;
     private Date dateOfBirth;
     private String gender;
-    private String numberPhone;
     private String identityCard = null;
     private String address;
     private String healthInsurance = null;
+    private String numberPhone;
+
     private Boolean locked = false;
     private Boolean deleted = false;
 }

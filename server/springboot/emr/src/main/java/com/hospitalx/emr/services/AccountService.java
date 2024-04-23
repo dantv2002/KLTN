@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.hospitalx.emr.common.AuthProvider;
 import com.hospitalx.emr.common.AuthenticationFacade;
-import com.hospitalx.emr.configs.AppConfig;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.UpdatePasswordDto;
@@ -207,7 +206,7 @@ public class AccountService implements IDAO<AccountDto> {
     }
 
     @Override
-    public Page<AccountDto> getAll(String keyword, Pageable pageable) {
+    public Page<AccountDto> getAll(String keyword, String type, Pageable pageable) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAll'");
     }

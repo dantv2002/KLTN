@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -50,6 +51,7 @@ public class TokenService {
         return this.jwtEncoder().encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
+    @Bean
     private JwtEncoder jwtEncoder() {
         JWK jwk = new RSAKey.Builder(appConfig.getPublicKey())
                 .privateKey(appConfig.getPrivateKey())
