@@ -44,10 +44,12 @@ public class RecordController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @GetMapping("/patient/records")
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_NURSE')")
+    @GetMapping({ "/patient/records", "/nurse/records" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
+            @RequestParam(name = "year", defaultValue = "", required = false) String year,
+            @RequestParam(name = "gender", defaultValue = "", required = false) String gender,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
             @RequestParam(name = "sortBy", defaultValue = "id", required = false) String sortBy,
@@ -56,6 +58,7 @@ public class RecordController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
+        keyword = keyword + "_" + year + "_" + gender;
         Page<RecordDto> records = recordService.getAll(keyword, "", pageable);
         BaseResponse response = new BaseResponse();
         response.setData(new HashMap<String, Object>() {

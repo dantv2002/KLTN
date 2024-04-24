@@ -1,6 +1,8 @@
 package com.hospitalx.emr.services;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,20 @@ public class RecordService implements IDAO<RecordDto> {
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto accountDto = accountService.get(id);
         log.info("Get all records for account: " + accountDto.getId());
+        if (accountDto.getRole().equals("NURSE")) {
+            String[] parts = keyword.split("_", -1);
+
+            Date starDate = createDateFromString(parts[1], 0);
+            Date endDate = createDateFromString(parts[1], 1);
+            log.info("Get all records for nurse with keyword: " + parts[0] + ", year: " + parts[1] + ", gender: "
+                    + parts[2]);
+            if (starDate == null || endDate == null) {
+                return recordRepository.findAllByKeyword(parts[0], parts[2], pageable)
+                        .map(record -> modelMapper.map(record, RecordDto.class));
+            }
+            return recordRepository.findAllByKeyword(parts[0], starDate, endDate, parts[2], pageable)
+                    .map(record -> modelMapper.map(record, RecordDto.class));
+        }
         if (accountDto.getRecords() == null || accountDto.getRecords().isEmpty()) {
             log.info("No records found for account: " + accountDto.getId());
             return Page.empty();
@@ -148,5 +164,17 @@ public class RecordService implements IDAO<RecordDto> {
             });
         }
 
+    }
+
+    private Date createDateFromString(String year, int plusYear) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            int yearInt = Integer.parseInt(year) + plusYear;
+            String dateString = "01/01/" + yearInt;
+            return formatter.parse(dateString);
+        } catch (Exception e) {
+            log.error("Parse date error: " + e.getMessage());
+            return null;
+        }
     }
 }
