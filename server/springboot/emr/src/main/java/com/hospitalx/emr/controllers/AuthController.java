@@ -24,13 +24,16 @@ import com.hospitalx.emr.services.TokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
+import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.BaseResponse;
 import com.hospitalx.emr.component.Encoder;
 import com.hospitalx.emr.configs.AppConfig;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class AuthController {
     @Autowired
     private AppConfig appConfig;
@@ -42,6 +45,8 @@ public class AuthController {
 
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
 
     // API register account local
     @PostMapping("/auth/register")
@@ -131,7 +136,7 @@ public class AuthController {
     // API logout
     @GetMapping("/logout")
     public ResponseEntity<BaseResponse> logout(HttpServletResponse response) {
-
+        String id = authenticationFacade.getAuthentication().getName();
         this.setCookie(response, "Token", null, 0, true);
         this.setCookie(response, "FullName", null, 0, false);
         this.setCookie(response, "Email", null, 0, false);
@@ -141,7 +146,7 @@ public class AuthController {
         baseResponse.setMessage("Đăng xuất thành công");
         baseResponse.setStatus(HttpStatus.OK.value());
         baseResponse.setData(null);
-
+        log.info("Account: " + id + " logged out");
         return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
     }
 

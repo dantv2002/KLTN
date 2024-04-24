@@ -48,6 +48,9 @@ public class HealthcareStaffController {
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "type", defaultValue = "", required = false) String type,
+            @RequestParam(name = "title", defaultValue = "", required = false) String title,
+            @RequestParam(name = "department", defaultValue = "", required = false) String department,
+            @RequestParam(name = "gender", defaultValue = "", required = false) String gender,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
             @RequestParam(name = "sortBy", defaultValue = "id", required = false) String sortBy,
@@ -55,6 +58,7 @@ public class HealthcareStaffController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
+        keyword = keyword + "_" + title + "_" + department + "_" + gender;
         Page<HealthcareStaffDto> data = healthcareStaffService.getAll(keyword, type, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Lấy danh sách nhân viên y tế thành công");

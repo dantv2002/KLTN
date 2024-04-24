@@ -52,18 +52,18 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
         }
         log.info("Get all healthcare staffs with type: " + type);
         Page<HealthcareStaff> entities = null;
+        String[] parts = keyword.split("_", -1);
         if (type.equals("doctor")) {
-            entities = healthcareStaffRepository.findByStaffTypeAndFullNameContainingIgnoreCase(StaffType.DOCTOR,
-                    keyword, pageable);
+            entities = healthcareStaffRepository.findByDoctor(StaffType.DOCTOR, parts[0], parts[1], parts[2],
+                    parts[3], pageable);
         } else if (type.equals("nurse")) {
             entities = healthcareStaffRepository.findByStaffTypeAndFullNameContainingIgnoreCase(StaffType.NURSE,
-                    keyword,
-                    pageable);
+                    parts[0], pageable);
         } else if (type.equals("receptionist")) {
             entities = healthcareStaffRepository.findByStaffTypeAndFullNameContainingIgnoreCase(StaffType.RECEPTIONIST,
-                    keyword, pageable);
+                    parts[0], pageable);
         } else {
-            entities = healthcareStaffRepository.findByFullNameContainingIgnoreCase(keyword, pageable);
+            entities = healthcareStaffRepository.findByFullNameContainingIgnoreCase(parts[0], pageable);
         }
         log.info("Get all healthcare staffs success with total staffs: " + entities.getTotalElements());
         return entities.map(entity -> modelMapper.map(entity, HealthcareStaffDto.class));

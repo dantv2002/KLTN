@@ -52,6 +52,7 @@ public class HealthcareStaffDto {
     private StaffType staffType; // loại nhân viên
     // Doctor
     @JsonProperty("Title")
+    @Pattern(regexp = "Ths|TS|BS|BSCKI|BSCKII", message = "Chức danh phải là Ths, TS, BS, BSCKI hoặc BSCKII")
     private String title;
     // Nurse
     @JsonProperty("Level")

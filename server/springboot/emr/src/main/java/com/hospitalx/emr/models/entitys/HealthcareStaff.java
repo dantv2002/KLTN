@@ -3,7 +3,6 @@ package com.hospitalx.emr.models.entitys;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.hospitalx.emr.common.NurseLevel;
