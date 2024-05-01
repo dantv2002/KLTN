@@ -88,29 +88,6 @@ public class AccountService implements IDAO<AccountDto> {
         return modelMapper.map(this.account, AccountDto.class);
     }
 
-    public void verifyResetPassword(String id, String code) {
-        log.info("Verify reset password: " + id + " - Code: " + code);
-        this.accountRepository.findById(id)
-                .ifPresentOrElse(acc -> {
-                    if (BCrypt.checkpw(code, acc.getVerify().getCode())
-                            && acc.getVerify().getExpireAt()
-                                    .isAfter(Instant.now())) {
-                        acc.setPassword(acc.getPasswordUpdate());
-                        acc.setPasswordUpdate(null);
-                        acc.setVerify(null);
-                        accountRepository.save(acc);
-                        log.info("Verify reset password success: " + acc.getEmail());
-                    } else {
-                        log.error("Verify reset password failed: " + acc.getEmail());
-                        throw new CustomException("Mã xác minh không hợp lệ hoặc đã hết hạn",
-                                HttpStatus.BAD_REQUEST.value());
-                    }
-                }, () -> {
-                    log.error(("Account not exists: " + id));
-                    throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
-                });
-    }
-
     public AccountDto loginAccount(String email, String password) {
         log.info("Login account: " + email + " - Auth provider: " + AuthProvider.LOCAL);
         return this.accountRepository.findByEmailAndAuthProvider(email, AuthProvider.LOCAL)
@@ -162,14 +139,19 @@ public class AccountService implements IDAO<AccountDto> {
         return modelMapper.map(this.account, AccountDto.class);
     }
 
-    public void verifyAccount(String id, String code) {
+    public void verifyAccount(String id, String code, int type) {
         log.info("Verify account: " + id + " - Code: " + code);
         this.accountRepository.findById(id)
                 .ifPresentOrElse(acc -> {
                     if (BCrypt.checkpw(code, acc.getVerify().getCode())
                             && acc.getVerify().getExpireAt()
                                     .isAfter(Instant.now())) {
-                        acc.setEmailVerified(true);
+                        if(type == 1){
+                            acc.setEmailVerified(true);
+                        }else{
+                            acc.setPassword(acc.getPasswordUpdate());
+                            acc.setPasswordUpdate(null);
+                        }
                         acc.setVerify(null);
                         accountRepository.save(acc);
                         log.info("Verify account success: " + acc.getEmail());
@@ -193,6 +175,15 @@ public class AccountService implements IDAO<AccountDto> {
         } else {
             log.error("Get account failed: " + email);
             return Optional.empty();
+        }
+    }
+
+    public void checkCreateAccountLocal(AccountDto accountDto) {
+        Account account = accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
+                .orElse(null);
+        if (account != null) {
+            log.error("Account already exists: " + account.getEmail());
+            throw new CustomException("Tài khoản đã tồn tại", HttpStatus.CONFLICT.value());
         }
     }
 
