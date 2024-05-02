@@ -10,5 +10,7 @@ public enum MedicalResult {
     // Nặng hơn
     WORSENED,
     // Tử vong
-    DEATH
+    DEATH,
+    // Tai nạn
+    ACCIDENT,
 }

@@ -91,7 +91,8 @@ public class RecordService implements IDAO<RecordDto> {
         log.info("Get record with ID: " + id);
         String accountId = authenticationFacade.getAuthentication().getName();
         AccountDto account = accountService.get(accountId);
-        if (account.getRecords() == null || account.getRecords().isEmpty() || !account.getRecords().contains(id)) {
+        if (!account.getRole().equals("NURSE") && (account.getRecords() == null || account.getRecords().isEmpty()
+                || !account.getRecords().contains(id))) {
             log.error("Record not found for account: " + account.getId());
             throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());
         }
