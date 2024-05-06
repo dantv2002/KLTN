@@ -111,4 +111,33 @@ public class HealthcareStaffController {
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    // API support for api create account for healthcare staff
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/admin/healthcare-staffs/account")
+    public ResponseEntity<BaseResponse> getAll(
+            @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
+            @RequestParam(name = "type", defaultValue = "", required = false) String type,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            @RequestParam(name = "sortBy", defaultValue = "id", required = false) String sortBy,
+            @RequestParam(name = "sortDir", defaultValue = "asc", required = false) String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<HealthcareStaffDto> data = healthcareStaffService.getAllForAccount(keyword, type, pageable);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Lấy danh sách nhân viên y tế thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(new HashMap<String, Object>() {
+            {
+                put("HealthCareStaffs", data.getContent());
+                put("CurrentPage", data.getNumber());
+                put("NumberOfItems", data.getNumberOfElements());
+                put("TotalItems", data.getTotalElements());
+                put("TotalPages", data.getTotalPages());
+            }
+        });
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }

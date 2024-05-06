@@ -33,8 +33,8 @@ public class RecordController {
     @Autowired
     private RecordService recordService;
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @PostMapping("/patient/record/new")
+    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_RECEPTIONIST')")
+    @PostMapping({ "/patient/record/new", "/receptionist/record/new" })
     public ResponseEntity<BaseResponse> create(@RequestBody @Valid RecordDto recordDto) {
         recordService.save(recordDto);
         BaseResponse response = new BaseResponse();
@@ -44,8 +44,8 @@ public class RecordController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_NURSE')")
-    @GetMapping({ "/patient/records", "/nurse/records" })
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_NURSE', 'ROLE_RECEPTIONIST')")
+    @GetMapping({ "/patient/records", "/nurse/records", "/receptionist/records" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "year", defaultValue = "", required = false) String year,
@@ -75,8 +75,8 @@ public class RecordController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @GetMapping("/patient/record/{id}")
+    @PreAuthorize("hasRole('ROLE_PATIENT','ROLE_NURSE', 'ROLE_RECEPTIONIST')")
+    @GetMapping({ "/patient/record/{id}", "/nurse/record/{id}", "/receptionist/record/{id}" })
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
         RecordDto recordDto = recordService.get(id);
         BaseResponse response = new BaseResponse();
@@ -90,8 +90,8 @@ public class RecordController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @PutMapping("/patient/record")
+    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_RECEPTIONIST')")
+    @PutMapping({ "/patient/record", "/receptionist/record" })
     public ResponseEntity<BaseResponse> update(@RequestBody @Valid RecordDto recordDto) {
         recordService.update(recordDto);
         BaseResponse response = new BaseResponse();

@@ -16,6 +16,7 @@ import com.hospitalx.emr.common.AuthProvider;
 import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
+import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.dtos.UpdatePasswordDto;
 import com.hospitalx.emr.models.entitys.Account;
 import com.hospitalx.emr.models.entitys.Verify;
@@ -34,9 +35,67 @@ public class AccountService implements IDAO<AccountDto> {
     @Autowired
     private EmailService emailService;
     @Autowired
+    private HealthcareStaffService healthcareStaffService;
+    @Autowired
     private AuthenticationFacade authenticationFacade;
 
     private Account account = null;
+
+    public void adminDeleteAccount(String id) {
+        log.info("Admin delete account: " + id);
+        AccountDto accountDto = this.get(id);
+        accountDto.setDeleted(true);
+        accountRepository.save(modelMapper.map(accountDto, Account.class));
+        log.info("Admin delete account success: " + id);
+    }
+
+    public void adminResetPassword(AccountDto accountDto) {
+        log.info("Admin reset password of account: " + accountDto.getId());
+        if (!accountDto.getPassword().equals(accountDto.getConfirmPassword())) {
+            log.error("Password and confirm password not match");
+            throw new CustomException("Mật khẩu và xác nhận lại mật khẩu không giống nhau",
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        String password = BCrypt.hashpw(accountDto.getPassword(), BCrypt.gensalt(10));
+        accountDto = this.get(accountDto.getId()); // check account exists
+        accountDto.setPassword(password);
+        accountRepository.save(modelMapper.map(accountDto, Account.class));
+        log.info("Admin reset password of account success: " + accountDto.getId());
+    }
+
+    public void setActive(String id, Boolean active) {
+        log.info("Set active account: " + id);
+        if (active == null) {
+            log.error("Active is null");
+            throw new CustomException("Trạng thái kích hoạt không hợp lệ", HttpStatus.BAD_REQUEST.value());
+        }
+        AccountDto account = this.get(id);
+        account.setActived(active);
+        accountRepository.save(modelMapper.map(account, Account.class));
+        log.info("Set active account success: " + id + " - Active: " + active);
+    }
+
+    public void adminCreateAccount(AccountDto accountDto, String id_healthcare_staff) {
+        HealthcareStaffDto healthcareStaffDto = healthcareStaffService.checkExistsAccount(id_healthcare_staff);
+        Account account = accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
+                .orElse(null);
+        if (account != null) {
+            log.error("Account already exists: " + account.getEmail());
+            throw new CustomException("Tài khoản đã tồn tại", HttpStatus.CONFLICT.value());
+        }
+        if (!accountDto.getPassword().equals(accountDto.getConfirmPassword())) {
+            throw new CustomException("Mật khẩu và xác nhận lại mật khẩu không giống nhau",
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        log.info("Create account: " + accountDto.getEmail());
+        accountDto.setEmailVerified(true);
+        accountDto.setRole(healthcareStaffDto.getStaffType().toString());
+        accountDto.setPassword(BCrypt.hashpw(accountDto.getPassword(), BCrypt.gensalt(10)));
+        account = accountRepository.save(modelMapper.map(accountDto, Account.class));
+        healthcareStaffDto.setAccountId(account.getId());
+        healthcareStaffService.update(healthcareStaffDto);
+        log.info("Create account success: " + accountDto.getEmail());
+    }
 
     public void updatePassword(UpdatePasswordDto updatePasswordDto) {
         if (!updatePasswordDto.getNewPassword().equals(updatePasswordDto.getConfirmNewPassword())) {
@@ -86,29 +145,6 @@ public class AccountService implements IDAO<AccountDto> {
         this.account.setDeleted(null);
         this.account.setVerify(null);
         return modelMapper.map(this.account, AccountDto.class);
-    }
-
-    public void verifyResetPassword(String id, String code) {
-        log.info("Verify reset password: " + id + " - Code: " + code);
-        this.accountRepository.findById(id)
-                .ifPresentOrElse(acc -> {
-                    if (BCrypt.checkpw(code, acc.getVerify().getCode())
-                            && acc.getVerify().getExpireAt()
-                                    .isAfter(Instant.now())) {
-                        acc.setPassword(acc.getPasswordUpdate());
-                        acc.setPasswordUpdate(null);
-                        acc.setVerify(null);
-                        accountRepository.save(acc);
-                        log.info("Verify reset password success: " + acc.getEmail());
-                    } else {
-                        log.error("Verify reset password failed: " + acc.getEmail());
-                        throw new CustomException("Mã xác minh không hợp lệ hoặc đã hết hạn",
-                                HttpStatus.BAD_REQUEST.value());
-                    }
-                }, () -> {
-                    log.error(("Account not exists: " + id));
-                    throw new CustomException("Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value());
-                });
     }
 
     public AccountDto loginAccount(String email, String password) {
@@ -162,14 +198,19 @@ public class AccountService implements IDAO<AccountDto> {
         return modelMapper.map(this.account, AccountDto.class);
     }
 
-    public void verifyAccount(String id, String code) {
+    public void verifyAccount(String id, String code, int type) {
         log.info("Verify account: " + id + " - Code: " + code);
         this.accountRepository.findById(id)
                 .ifPresentOrElse(acc -> {
                     if (BCrypt.checkpw(code, acc.getVerify().getCode())
                             && acc.getVerify().getExpireAt()
                                     .isAfter(Instant.now())) {
-                        acc.setEmailVerified(true);
+                        if (type == 1) {
+                            acc.setEmailVerified(true);
+                        } else {
+                            acc.setPassword(acc.getPasswordUpdate());
+                            acc.setPasswordUpdate(null);
+                        }
                         acc.setVerify(null);
                         accountRepository.save(acc);
                         log.info("Verify account success: " + acc.getEmail());
@@ -196,6 +237,15 @@ public class AccountService implements IDAO<AccountDto> {
         }
     }
 
+    public void checkCreateAccountLocal(AccountDto accountDto) {
+        Account account = accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
+                .orElse(null);
+        if (account != null) {
+            log.error("Account already exists: " + account.getEmail());
+            throw new CustomException("Tài khoản đã tồn tại", HttpStatus.CONFLICT.value());
+        }
+    }
+
     // Override methods
     @Override
     public AccountDto save(AccountDto t) {
@@ -207,8 +257,18 @@ public class AccountService implements IDAO<AccountDto> {
 
     @Override
     public Page<AccountDto> getAll(String keyword, String type, Pageable pageable) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+        if (type != null && !type.isEmpty() && !type.equals("patient") && !type.equals("doctor")
+                && !type.equals("nurse")
+                && !type.equals("receptionist")) {
+            log.error("Account type is invalid");
+            throw new CustomException("Loại quyền tài khoản không hợp lệ", HttpStatus.BAD_REQUEST.value());
+        }
+        log.info("Get all accounts with type: " + type);
+        return accountRepository.findByAllFullNameAndRole(keyword, type, pageable)
+                .map(account -> {
+                    account.setPassword(null);
+                    return modelMapper.map(account, AccountDto.class);
+                });
     }
 
     @Override

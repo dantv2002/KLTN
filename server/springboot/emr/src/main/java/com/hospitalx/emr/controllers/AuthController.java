@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.models.dtos.AccountDto;
-import com.hospitalx.emr.models.dtos.UpdatePasswordDto;
 import com.hospitalx.emr.models.dtos.VerificationCodeDto;
 import com.hospitalx.emr.services.AccountService;
 import com.hospitalx.emr.services.TokenService;
@@ -68,7 +67,7 @@ public class AuthController {
     public ResponseEntity<BaseResponse> verifyAccount(@RequestBody @Valid VerificationCodeDto verificationCodeDto,
             @PathVariable("id") String id) {
         BaseResponse response = new BaseResponse();
-        accountService.verifyAccount(id, verificationCodeDto.getCode());
+        accountService.verifyAccount(id, verificationCodeDto.getCode(), 1);
         response.setMessage("Tài khoản đã được xác minh");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
@@ -96,7 +95,7 @@ public class AuthController {
     public ResponseEntity<BaseResponse> verifyResetPassword(@RequestBody @Valid VerificationCodeDto verificationCodeDto,
             @PathVariable("id") String id) {
         BaseResponse response = new BaseResponse();
-        accountService.verifyResetPassword(id, verificationCodeDto.getCode());
+        accountService.verifyAccount(id, verificationCodeDto.getCode(), 2);
         response.setMessage("Đặt lại mật khẩu thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
@@ -121,16 +120,6 @@ public class AuthController {
         baseResponse.setData(null);
 
         return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
-    }
-
-    @PutMapping("/update-password")
-    public ResponseEntity<BaseResponse> updatePassword(@RequestBody @Valid UpdatePasswordDto updatePasswordDto) {
-        accountService.updatePassword(updatePasswordDto);
-        BaseResponse response = new BaseResponse();
-        response.setMessage("Đổi mật khẩu thành công");
-        response.setStatus(HttpStatus.OK.value());
-        response.setData(null);
-        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     // API logout

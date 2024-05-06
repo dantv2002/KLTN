@@ -85,17 +85,18 @@ public class MedicalService implements IDAO<MedicalDto> {
             }
         }
         Date duDate = null;
-        if (medical.getType() == MedicalType.INPATIENT && medical.getResult() == MedicalResult.DEATH) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date());
-            calendar.add(Calendar.YEAR, 20);
-            duDate = calendar.getTime();
-        } else {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date());
-            calendar.add(Calendar.YEAR, 10);
-            duDate = calendar.getTime();
+        int yearsToAdd = 10;
+        if (medical.getType() == MedicalType.INPATIENT) {
+            if (medical.getResult() == MedicalResult.DEATH) {
+                yearsToAdd = 20;
+            } else if (medical.getResult() == MedicalResult.ACCIDENT) {
+                yearsToAdd = 15;
+            }
         }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.YEAR, yearsToAdd);
+        duDate = calendar.getTime();
         medical.setLocked(true);
         if (medical.getType() == MedicalType.INPATIENT) {
             medical.setDaysTreatment(

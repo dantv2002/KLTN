@@ -26,6 +26,46 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
     @Autowired
     private ModelMapper modelMapper;
 
+    // Check healthcare staff exists account
+    public HealthcareStaffDto checkExistsAccount(String id) {
+        HealthcareStaffDto healthcareStaffDto = this.get(id);
+        if (healthcareStaffDto.getAccountId() != null) {
+            log.error("Healthcare staff is already exists account");
+            throw new CustomException("Nhân viên y tế này đã có tài khoản", HttpStatus.BAD_REQUEST.value());
+        }
+        return healthcareStaffDto;
+    }
+
+    // Get all healthcare staffs for creating new account
+    public Page<HealthcareStaffDto> getAllForAccount(String keyword, String type, Pageable pageable) {
+        type = type.toLowerCase();
+        if (type != null && !type.isEmpty() && !type.equals("doctor") && !type.equals("nurse")
+                && !type.equals("receptionist")) {
+            log.error("Staff type is invalid");
+            throw new CustomException("Loại nhân viên không hợp lệ", HttpStatus.BAD_REQUEST.value());
+        }
+        log.info("Get all healthcare staffs for creating new account with type: " + type);
+        StaffType staffType = null;
+        if (type.equals("doctor")) {
+            staffType = StaffType.DOCTOR;
+        } else if (type.equals("nurse")) {
+            staffType = StaffType.NURSE;
+        } else if (type.equals("receptionist")) {
+            staffType = StaffType.RECEPTIONIST;
+        }
+        Page<HealthcareStaff> entities = null;
+        if (staffType == null) {
+            entities = healthcareStaffRepository.findByFullNameContainingIgnoreCaseAndAccountId(keyword, pageable);
+        } else {
+            entities = healthcareStaffRepository.findByAllStaffTypeAndFullNameContainingIgnoreCaseAndAccountId(
+                    staffType, keyword,
+                    pageable);
+        }
+        return entities.map(entity -> {
+            return modelMapper.map(entity, HealthcareStaffDto.class);
+        });
+    }
+
     @Override
     public HealthcareStaffDto save(HealthcareStaffDto t) {
         // validate

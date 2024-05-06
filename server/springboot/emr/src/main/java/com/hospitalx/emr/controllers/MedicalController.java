@@ -32,7 +32,7 @@ public class MedicalController {
     @Autowired
     private MedicalService medicalService;
 
-    @PreAuthorize("hasRole('NURSE')")
+    @PreAuthorize("hasRole('ROLE_NURSE')")
     @PostMapping("/nurse/medical/new")
     public ResponseEntity<BaseResponse> create(@RequestBody @Valid MedicalDto medicalDto) {
         medicalService.save(medicalDto);
@@ -44,8 +44,8 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('NURSE')")
-    @GetMapping("/nurse/medicals")
+    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR')")
+    @GetMapping({"/nurse/medicals", "/doctor/medicals"})
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "mark", defaultValue = "", required = false) String mark,
@@ -72,7 +72,7 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('NURSE')")
+    @PreAuthorize("hasRole('ROLE_NURSE')")
     @GetMapping("/nurse/medical/{id}")
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
         MedicalDto medicalDto = medicalService.get(id);
@@ -87,7 +87,7 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('NURSE')")
+    @PreAuthorize("hasRole('ROLE_NURSE')")
     @GetMapping("/nurse/mark-medical/{id}")
     public ResponseEntity<BaseResponse> mark(@PathVariable("id") String id) {
         medicalService.markMedical(id);
@@ -98,7 +98,7 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('NURSE')")
+    @PreAuthorize("hasRole('ROLE_NURSE')")
     @GetMapping("/nurse/lock-medical/{id}")
     public ResponseEntity<BaseResponse> lock(@PathVariable("id") String id) {
         medicalService.lockMedical(id);
@@ -109,7 +109,7 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('NURSE')")
+    @PreAuthorize("hasRole('ROLE_NURSE')")
     @PutMapping("/nurse/medical")
     public ResponseEntity<BaseResponse> update(@RequestBody @Valid MedicalDto medicalDto) {
         medicalService.update(medicalDto);
@@ -120,7 +120,7 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('NURSE')")
+    @PreAuthorize("hasRole('ROLE_NURSE')")
     @DeleteMapping("/nurse/medical/{id}")
     public ResponseEntity<BaseResponse> delete(@PathVariable("id") String id) {
         medicalService.delete(id);
