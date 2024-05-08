@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title th:inline="text"> Xác nhận Phiếu Khám Bệnh: [[${ticket.id}]]</title>
+</head>
+
+<body>
+    <div style="font: small/1.5 Arial, Helvetica, sans-serif; overflow: hidden">
+        <p>
+            Cám ơn bạn đã sử dụng dịch vụ đăng ký khám bệnh trực tuyến của chúng
+            tôi, đây là phiếu khám bệnh của bạn, số thứ tự khám là <b th:inline="text">[[${ticket.number}]]</b><br />
+            Vui lòng mang theo phiếu khám bệnh này khi đến khám tại bệnh viện. Xin
+            chân thành cám ơn!
+        </p>
+        <table style="
+          border-collapse: collapse;
+          table-layout: fixed;
+          border-spacing: 0;
+          vertical-align: top;
+          min-width: 320px;
+          margin: 0 auto;
+          background-color: #ffffff;
+          width: 100%;
+        " cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr style="vertical-align: top">
+                    <td style="
+                word-break: break-word;
+                border-collapse: collapse !important;
+                vertical-align: top;
+              ">
+                        <div style="background-color: transparent">
+                            <div style="
+                    margin: 0 auto;
+                    min-width: 320px;
+                    max-width: 500px;
+                    word-wrap: break-word;
+                    word-break: break-word;
+                    background-color: transparent;
+                  ">
+                                <div style="
+                      border-collapse: collapse;
+                      display: table;
+                      width: 100%;
+                      background-color: transparent;
+                    ">
+                                    <div style="
+                        min-width: 320px;
+                        max-width: 500px;
+                        display: table-cell;
+                        vertical-align: top;
+                      ">
+                                        <div style="
+                          background-color: transparent;
+                          width: 100% !important;
+                        ">
+                                            <div style="
+                            border-top: 0px solid transparent;
+                            border-left: 0px solid transparent;
+                            border-bottom: 0px solid transparent;
+                            border-right: 0px solid transparent;
+                            padding-top: 5px;
+                            padding-bottom: 5px;
+                            padding-right: 0px;
+                            padding-left: 0px;
+                          ">
+                                                <div align="center" style="padding-right: 0px; padding-left: 0px"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background-color: transparent">
+                            <div style="
+                    margin: 0 auto;
+                    min-width: 320px;
+                    max-width: 500px;
+                    word-wrap: break-word;
+                    word-break: break-word;
+                    background-color: transparent;
+                  ">
+                                <div style="
+                      border-collapse: collapse;
+                      display: table;
+                      width: 100%;
+                      background-color: transparent;
+                    ">
+                                    <div style="
+                        min-width: 320px;
+                        max-width: 500px;
+                        display: table-cell;
+                        vertical-align: top;
+                      ">
+                                        <div style="
+                          background-color: transparent;
+                          width: 100% !important;
+                        ">
+                                            <div style="
+                            border-top: 0px solid transparent;
+                            border-left: 0px solid transparent;
+                            border-bottom: 0px solid transparent;
+                            border-right: 0px solid transparent;
+                            padding-top: 5px;
+                            padding-bottom: 5px;
+                            padding-right: 0px;
+                            padding-left: 0px;
+                          ">
+                                                <div style="
+                              font-size: 16px;
+                              font-family: Arial, 'Helvetica Neue', Helvetica,
+                                sans-serif;
+                              text-align: center;
+                            ">
+                                                    <div>
+                                                        <table align="center" style="
+                                  margin: 0 auto;
+                                  width: 325px;
+                                  height: 746px;
+                                  border: 5px solid #e0e6e8;
+                                  padding: 10px;
+                                ">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style="text-align: center">
+                                                                        <b>Bệnh viện X TPHCM</b>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: center">
+                                                                        PHIẾU KHÁM BỆNH<br /><i th:inline="text">(Mã
+                                                                            phiếu:
+                                                                            [[${ticket.id}]])</i>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: center" th:inline="text">
+                                                                        Khám [[${ticket.area}]]
+                                                                        <br />Phòng khám:
+                                                                        Phòng [[${ticket.clinic}]]
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: center" th:inline="text">
+                                                                        Chuyên khoa: [[${ticket.department}]]
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: center">
+                                                                        <p style="
+                                          color: #48a7f2;
+                                          font-size: 100px;
+                                          margin: 20px 0;
+                                          font-weight: bold;
+                                        ">
+                                                                            <b th:inline="text">[[${ticket.number}]]</b>
+                                                                        </p>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        Ngày khám: <b
+                                                                            th:inline="text">[[${ticket.date}]]</b>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        Giờ khám dự kiến:<b
+                                                                            th:inline="text">[[${ticket.time}]]</b>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        Họ tên: <b
+                                                                            th:inline="text">[[${ticket.namePatient}]]</b>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        Giới tính: <b
+                                                                            th:inline="text">[[${ticket.gender}]]</b>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        Năm sinh: <b
+                                                                            th:inline="text">[[${ticket.dateOfBirth}]]</b>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        Địa chỉ: <b
+                                                                            th:inline="text">[[${ticket.address}]]</b>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        BHYT: <b
+                                                                            th:inline="text">[[${ticket.healthInsurance}]]</b>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        <i>Vui lòng đến trực tiếp phòng khám trước
+                                                                            giờ hẹn 15-30 phút để khám bệnh.</i>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <hr style="
+                                          color: #e0e6e8;
+                                          margin-bottom: 1px;
+                                          margin-top: 1px;
+                                        " />
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        Số hồ sơ:<br />
+                                                                        <b th:inline="text">[[${ticket.recordId}]]</b>
+                                                                        <br />
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="text-align: left">
+                                                                        <i>Ghi chú: Phiếu khám bệnh chỉ có giá trị
+                                                                            trong ngày khám từ
+                                                                            <b>7h00 - 16h00</b>.</i>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

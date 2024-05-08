@@ -43,8 +43,8 @@ public class HealthcareStaffController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/admin/healthcare-staffs")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PATIENT')")
+    @GetMapping({"/admin/healthcare-staffs", "/patient/doctors"})
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "type", defaultValue = "", required = false) String type,
@@ -61,7 +61,7 @@ public class HealthcareStaffController {
         keyword = keyword + "_" + title + "_" + department + "_" + gender;
         Page<HealthcareStaffDto> data = healthcareStaffService.getAll(keyword, type, pageable);
         BaseResponse response = new BaseResponse();
-        response.setMessage("Lấy danh sách nhân viên y tế thành công");
+        response.setMessage("Tải danh sách nhân viên y tế thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<String, Object>() {
             {
@@ -112,7 +112,7 @@ public class HealthcareStaffController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    // API support for api create account for healthcare staff
+    // API support api create account for healthcare staff
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/healthcare-staffs/account")
     public ResponseEntity<BaseResponse> getAll(
@@ -127,7 +127,7 @@ public class HealthcareStaffController {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<HealthcareStaffDto> data = healthcareStaffService.getAllForAccount(keyword, type, pageable);
         BaseResponse response = new BaseResponse();
-        response.setMessage("Lấy danh sách nhân viên y tế thành công");
+        response.setMessage("Tải danh sách nhân viên y tế thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<String, Object>() {
             {

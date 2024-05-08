@@ -23,16 +23,13 @@ import com.hospitalx.emr.services.TokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.BaseResponse;
 import com.hospitalx.emr.component.Encoder;
 import com.hospitalx.emr.configs.AppConfig;
 
 @RestController
 @RequestMapping("/api")
-@Slf4j
 public class AuthController {
     @Autowired
     private AppConfig appConfig;
@@ -44,8 +41,6 @@ public class AuthController {
 
     @Autowired
     private TokenService tokenService;
-    @Autowired
-    private AuthenticationFacade authenticationFacade;
 
     // API register account local
     @PostMapping("/auth/register")
@@ -109,10 +104,10 @@ public class AuthController {
 
         AccountDto account = accountService.loginAccount(login.get("Email"), login.get("Password"));
 
-        this.setCookie(response, "Token", tokenService.createToken(account), appConfig.getExpiresTime(), true);
-        this.setCookie(response, "FullName", encoder.encode(account.getFullName()), appConfig.getExpiresTime(), false);
-        this.setCookie(response, "Email", account.getEmail(), appConfig.getExpiresTime(), false);
-        this.setCookie(response, "Role", account.getRole(), appConfig.getExpiresTime(), false);
+        AuthController.setCookie(response, "Token", tokenService.createToken(account), appConfig.getExpiresTime(), true);
+        AuthController.setCookie(response, "FullName", encoder.encode(account.getFullName()), appConfig.getExpiresTime(), false);
+        AuthController.setCookie(response, "Email", account.getEmail(), appConfig.getExpiresTime(), false);
+        AuthController.setCookie(response, "Role", account.getRole(), appConfig.getExpiresTime(), false);
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setMessage("Đăng nhập thành công");
@@ -121,26 +116,8 @@ public class AuthController {
 
         return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
     }
-
-    // API logout
-    @GetMapping("/logout")
-    public ResponseEntity<BaseResponse> logout(HttpServletResponse response) {
-        String id = authenticationFacade.getAuthentication().getName();
-        this.setCookie(response, "Token", null, 0, true);
-        this.setCookie(response, "FullName", null, 0, false);
-        this.setCookie(response, "Email", null, 0, false);
-        this.setCookie(response, "Role", null, 0, false);
-
-        BaseResponse baseResponse = new BaseResponse();
-        baseResponse.setMessage("Đăng xuất thành công");
-        baseResponse.setStatus(HttpStatus.OK.value());
-        baseResponse.setData(null);
-        log.info("Account: " + id + " logged out");
-        return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
-    }
-
     // Set cookie
-    private void setCookie(HttpServletResponse response, String name, String value, int maxAge, boolean httpOnly) {
+    public static void setCookie(HttpServletResponse response, String name, String value, int maxAge, boolean httpOnly) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(httpOnly);

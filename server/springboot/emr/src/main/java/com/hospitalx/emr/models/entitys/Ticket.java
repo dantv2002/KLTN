@@ -23,6 +23,7 @@ public class Ticket {
     private String time; // Giờ khám dự kiến
     private TicketStatus status; // Trạng thái
     private String namePatient; // Tên người khám
+    private String recordId; // Mã hồ sơ
     private Date dateOfBirth; // Ngày sinh
     private String gender; // Giới tính
     private String healthInsurance; // Bảo hiểm y tế

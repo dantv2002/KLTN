@@ -21,18 +21,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.BaseResponse;
 import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.UpdatePasswordDto;
 import com.hospitalx.emr.services.AccountService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class AccountController {
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/admin/account/new/{id}")
@@ -118,4 +124,22 @@ public class AccountController {
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    // API logout
+    @GetMapping("/logout")
+    public ResponseEntity<BaseResponse> logout(HttpServletResponse response) {
+        String id = authenticationFacade.getAuthentication().getName();
+        AuthController.setCookie(response, "Token", null, 0, true);
+        AuthController.setCookie(response, "FullName", null, 0, false);
+        AuthController.setCookie(response, "Email", null, 0, false);
+        AuthController.setCookie(response, "Role", null, 0, false);
+
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setMessage("Đăng xuất thành công");
+        baseResponse.setStatus(HttpStatus.OK.value());
+        baseResponse.setData(null);
+        log.info("Account: " + id + " logged out");
+        return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
+    }
+
 }

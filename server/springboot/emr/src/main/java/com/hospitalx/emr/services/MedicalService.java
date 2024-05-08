@@ -27,6 +27,9 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private ModelMapper modelMapper;
 
+    public Page<MedicalDto> getAllDelete(String keyword, String type, Pageable pageable) {
+        return null;
+    }
     public void lockMedical(String id) {
         log.info("Lock medical with ID: " + id);
         MedicalDto medical = this.get(id);
@@ -131,7 +134,8 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Override
     public Page<MedicalDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all medicals");
-        return medicalRepository.findAllByKeyword(keyword, type, pageable)
+        String[] parts = keyword.split("_", -1);
+        return medicalRepository.findAllByKeyword(parts[0], type, parts[1], pageable)
                 .map(medical -> modelMapper.map(medical, MedicalDto.class));
     }
 

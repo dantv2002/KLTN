@@ -48,6 +48,10 @@ public class RecordService implements IDAO<RecordDto> {
                     HttpStatus.BAD_REQUEST.value());
         }
         Record record = recordRepository.save(modelMapper.map(t, Record.class));
+        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        if (!role.equals("ROLE_PATIENT")) {
+            return modelMapper.map(record, RecordDto.class);
+        }
         if (account.getRecords() == null) {
             account.setRecords(new ArrayList<String>());
         }
@@ -62,7 +66,7 @@ public class RecordService implements IDAO<RecordDto> {
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto accountDto = accountService.get(id);
         log.info("Get all records for account: " + accountDto.getId());
-        if (accountDto.getRole().equals("NURSE")) {
+        if (!accountDto.getRole().equals("PATIENT")) {
             String[] parts = keyword.split("_", -1);
 
             Date starDate = createDateFromString(parts[1], 0);
@@ -91,7 +95,7 @@ public class RecordService implements IDAO<RecordDto> {
         log.info("Get record with ID: " + id);
         String accountId = authenticationFacade.getAuthentication().getName();
         AccountDto account = accountService.get(accountId);
-        if (!account.getRole().equals("NURSE") && (account.getRecords() == null || account.getRecords().isEmpty()
+        if (account.getRole().equals("PATIENT") && (account.getRecords() == null || account.getRecords().isEmpty()
                 || !account.getRecords().contains(id))) {
             log.error("Record not found for account: " + account.getId());
             throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());
@@ -107,21 +111,26 @@ public class RecordService implements IDAO<RecordDto> {
         log.info("Update record: " + t.toString());
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto account = accountService.get(id);
-        if (account.getRecords() == null || account.getRecords().isEmpty()
-                || !account.getRecords().contains(t.getId())) {
-            log.error("Record not found for account: " + account.getId());
-            throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());
+        if (account.getRole().equals(("PATIENT"))) {
+            if (account.getRecords() == null || account.getRecords().isEmpty()
+                    || !account.getRecords().contains(t.getId())) {
+                log.error("Record not found for account: " + account.getId());
+                throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());
+            }
+            checkExistRecord(t.getIdentityCard(), t.getId());
         }
-        checkExistRecord(t.getIdentityCard(), t.getId());
         Record record = recordRepository.findById(t.getId())
                 .orElseThrow(() -> new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value()));
         if (record.getLocked()) {
             log.info("Record is locked!");
+            String recordId = record.getId();
             t.setId(null);
             record = recordRepository.save(modelMapper.map(t, Record.class));
-            account.getRecords().remove(t.getId());
-            account.getRecords().add(record.getId());
-            accountService.update(account);
+            if (account.getRole().equals("PATIENT")) {
+                account.getRecords().remove(recordId);
+                account.getRecords().add(record.getId());
+                accountService.update(account);
+            }
             log.info("Update record success with ID: " + record.getId());
         } else {
             recordRepository.save(modelMapper.map(t, Record.class));

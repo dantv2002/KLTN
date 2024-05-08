@@ -202,7 +202,7 @@ public class AccountService implements IDAO<AccountDto> {
         log.info("Verify account: " + id + " - Code: " + code);
         this.accountRepository.findById(id)
                 .ifPresentOrElse(acc -> {
-                    if (BCrypt.checkpw(code, acc.getVerify().getCode())
+                    if (acc.getVerify() != null && BCrypt.checkpw(code, acc.getVerify().getCode())
                             && acc.getVerify().getExpireAt()
                                     .isAfter(Instant.now())) {
                         if (type == 1) {

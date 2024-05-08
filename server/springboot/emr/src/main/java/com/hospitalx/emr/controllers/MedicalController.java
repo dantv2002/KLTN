@@ -44,11 +44,12 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR')")
-    @GetMapping({"/nurse/medicals", "/doctor/medicals"})
+    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_PATIENT')")
+    @GetMapping({ "/nurse/medicals", "/doctor/medicals", "/patient/medicals" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "mark", defaultValue = "", required = false) String mark,
+            @RequestParam(name = "record", defaultValue = "", required = false) String recordId,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
             @RequestParam(name = "sortBy", defaultValue = "createDate", required = false) String sortBy,
@@ -56,6 +57,7 @@ public class MedicalController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
+        keyword = keyword + "_" + recordId;
         Page<MedicalDto> medicals = medicalService.getAll(keyword, mark, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải danh sách bệnh án thành công");
@@ -72,8 +74,8 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_NURSE')")
-    @GetMapping("/nurse/medical/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_PATIENT')")
+    @GetMapping({ "/nurse/medical/{id}", "/patient/medical/{id}" })
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
         MedicalDto medicalDto = medicalService.get(id);
         BaseResponse response = new BaseResponse();
@@ -88,7 +90,7 @@ public class MedicalController {
     }
 
     @PreAuthorize("hasRole('ROLE_NURSE')")
-    @GetMapping("/nurse/mark-medical/{id}")
+    @GetMapping({ "/nurse/mark-medical/{id}" })
     public ResponseEntity<BaseResponse> mark(@PathVariable("id") String id) {
         medicalService.markMedical(id);
         BaseResponse response = new BaseResponse();
@@ -128,6 +130,34 @@ public class MedicalController {
         response.setMessage("Xóa bệnh án thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/admin/medicals")
+    public ResponseEntity<BaseResponse> getAll(
+            @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
+            @RequestParam(name = "type", defaultValue = "", required = false) String type,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            @RequestParam(name = "sortBy", defaultValue = "createDate", required = false) String sortBy,
+            @RequestParam(name = "sortDir", defaultValue = "desc", required = false) String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<MedicalDto> medicals = medicalService.getAllDelete(keyword, type, pageable);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Tải danh sách bệnh án đến hạn thanh lý thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(new HashMap<String, Object>() {
+            {
+                put("Medicals", medicals.getContent());
+                put("CurrentPage", medicals.getNumber());
+                put("NumberOfItems", medicals.getNumberOfElements());
+                put("TotalItems", medicals.getTotalElements());
+                put("TotalPages", medicals.getTotalPages());
+            }
+        });
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

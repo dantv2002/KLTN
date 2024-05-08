@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import com.hospitalx.emr.models.dtos.TicketDto;
+
 import jakarta.mail.internet.MimeMessage;
 
 @Service
@@ -36,5 +38,24 @@ public class EmailService {
             }
         };
         javaMailSender.send(preparator);
+    }
+
+    public void sendEmailTicket(String ToEmail, TicketDto ticket) {
+        MimeMessagePreparator preparator = new MimeMessagePreparator() {
+            public void prepare(MimeMessage mimeMessage) throws Exception {
+                MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+                messageHelper.setTo(ToEmail);
+                messageHelper.setSubject("EMR - Phiếu Khám Bệnh");
+                //
+                Context context = new Context();
+                context.setVariable("ticket", ticket);
+
+                String content = templateEngine.process("VerifyTemplate", context);
+                System.out.println(content);
+                //
+                messageHelper.setText(content, true);
+            }
+        };
+        // javaMailSender.send(preparator);
     }
 }

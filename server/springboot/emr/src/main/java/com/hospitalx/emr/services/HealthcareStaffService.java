@@ -1,5 +1,7 @@
 package com.hospitalx.emr.services;
 
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -7,9 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.NurseLevel;
 import com.hospitalx.emr.common.StaffType;
 import com.hospitalx.emr.exception.CustomException;
+import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.entitys.HealthcareStaff;
 import com.hospitalx.emr.repositories.HealthcareStaffRepository;
@@ -25,6 +29,15 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
     private DepartmentService departmentService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
+
+    public List<HealthcareStaffDto> getAllByDepartmentId(String departmentId) {
+        log.info("Get all healthcare staffs by department ID: " + departmentId);
+        List<HealthcareStaff> entities = healthcareStaffRepository.findAllByDepartmentId(departmentId);
+        log.info("Get all healthcare staffs success with total staffs: " + entities.size());
+        return entities.stream().map(entity -> modelMapper.map(entity, HealthcareStaffDto.class)).toList();
+    }
 
     // Check healthcare staff exists account
     public HealthcareStaffDto checkExistsAccount(String id) {
@@ -84,6 +97,14 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
 
     @Override
     public Page<HealthcareStaffDto> getAll(String keyword, String type, Pageable pageable) {
+        String[] parts = keyword.split("_", -1);
+        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        if (role.equals(("ROLE_PATIENT"))) {
+            Page<HealthcareStaff> entities = healthcareStaffRepository.findByDoctorForPatient(StaffType.DOCTOR,
+                    parts[0], parts[1], parts[2],
+                    parts[3], pageable);
+            return entities.map(entity -> modelMapper.map(entity, HealthcareStaffDto.class));
+        }
         type = type.toLowerCase();
         if (type != null && !type.isEmpty() && !type.equals("doctor") && !type.equals("nurse")
                 && !type.equals("receptionist")) {
@@ -92,7 +113,6 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
         }
         log.info("Get all healthcare staffs with type: " + type);
         Page<HealthcareStaff> entities = null;
-        String[] parts = keyword.split("_", -1);
         if (type.equals("doctor")) {
             entities = healthcareStaffRepository.findByDoctor(StaffType.DOCTOR, parts[0], parts[1], parts[2],
                     parts[3], pageable);

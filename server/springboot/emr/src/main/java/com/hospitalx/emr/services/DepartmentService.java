@@ -30,8 +30,9 @@ public class DepartmentService implements IDAO<DepartmentDto> {
 
     @Override
     public Page<DepartmentDto> getAll(String keyword, String type, Pageable pageable) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+        log.info("Get all departments");
+        Page<Department> departments = departmentRepository.findByNameDepartment(keyword, pageable);
+        return departments.map(department -> modelMapper.map(department, DepartmentDto.class));
     }
 
     @Override
