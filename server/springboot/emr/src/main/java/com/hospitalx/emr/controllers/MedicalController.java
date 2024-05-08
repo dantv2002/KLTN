@@ -1,6 +1,8 @@
 package com.hospitalx.emr.controllers;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -122,12 +124,24 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_NURSE')")
-    @DeleteMapping("/nurse/medical/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/admin/medical/{id}")
     public ResponseEntity<BaseResponse> delete(@PathVariable("id") String id) {
         medicalService.delete(id);
         BaseResponse response = new BaseResponse();
         response.setMessage("Xóa bệnh án thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(null);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/admin/medicals")
+    public ResponseEntity<BaseResponse> delete(@RequestBody Map<String, List<String>> request) {
+        List<String> ids = request.get("Id");
+        medicalService.deleteAll(ids);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Xóa tất cả bệnh án thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);

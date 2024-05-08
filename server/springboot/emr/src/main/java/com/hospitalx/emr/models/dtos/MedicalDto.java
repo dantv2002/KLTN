@@ -31,7 +31,6 @@ public class MedicalDto {
     @NotNull(message = "Vui lòng nhập kết quả sinh hiệu")
     @JsonProperty("Biosignal")
     private Biosignal biosignal; // Dấu hiệu sinh tồn(Sinh hiệu)
-    @NotEmpty(message = "Vui lòng nhập kết quả khám các cơ quan")
     @JsonProperty("ExamineOrgans")
     private String examineOrgans; // Khám các cơ quan
 
@@ -43,6 +42,8 @@ public class MedicalDto {
     private String treatmentMethod; // Phương pháp điều trị
     @JsonProperty("DiagnosisDischarge")
     private String diagnosisDischarge; // Chuẩn đoán ra viện
+    @JsonProperty("Result")
+    private MedicalResult result; // Kết quả điều trị
     @JsonProperty("Locked")
     private Boolean locked; // Bệnh án đã khóa
     @JsonProperty("SaveDate")
@@ -94,8 +95,6 @@ public class MedicalDto {
     private Date dateDischarge; // Thời gian ra viện
     @JsonProperty("DaysTreatment")
     private Integer daysTreatment; // Số ngày điều trị
-    @JsonProperty("Result")
-    private MedicalResult result; // Kết quả điều trị
     //
     @NotEmpty(message = "Vui lòng nhập bác sĩ điều trị")
     @JsonProperty("DoctorIdTreatment")

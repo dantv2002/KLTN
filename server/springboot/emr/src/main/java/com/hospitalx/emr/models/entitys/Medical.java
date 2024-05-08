@@ -25,6 +25,7 @@ public class Medical {
     private String summary; // Tóm tắt kết quả chẩn đoán hình ảnh
     private String treatmentMethod; // Phương pháp điều trị
     private String diagnosisDischarge = ""; // Chuẩn đoán ra viện
+    private MedicalResult result; // Kết quả điều trị
     private Boolean locked = false; // Bệnh án đã khóa
     private Date saveDate; // Ngày lưu trữ
     private Date dueDate; // Ngày đến hạn thanh lý
@@ -46,7 +47,6 @@ public class Medical {
     private String prognosis; // Tiên lượng
     private Date dateDischarge; // Thời gian ra viện
     private Integer daysTreatment; // Số ngày điều trị
-    private MedicalResult result; // Kết quả điều trị
     //
     private String doctorIdTreatment;// Bác sĩ điều trị
     private String recordId; // Mã hồ sơ bệnh nhân

@@ -2,6 +2,7 @@ package com.hospitalx.emr.services;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,24 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private ModelMapper modelMapper;
 
-    public Page<MedicalDto> getAllDelete(String keyword, String type, Pageable pageable) {
-        return null;
+    public void deleteAll(List<String> ids) {
+        log.info("Delete all medicals");
+        ids.stream().forEach(id -> this.delete(id));
+        log.info("Delete all medicals success");
     }
+
+    public Page<MedicalDto> getAllDelete(String keyword, String type, Pageable pageable) {
+        log.info("Get all medicals delete");
+        if (!type.equalsIgnoreCase(MedicalResult.DEATH.toString())
+                && !type.equalsIgnoreCase(MedicalResult.ACCIDENT.toString())) {
+            return medicalRepository.findAllByDueDate(keyword, new Date(), pageable)
+                    .map(medical -> modelMapper.map(medical, MedicalDto.class));
+        }
+
+        return medicalRepository.findAllByDueDate(keyword, type, new Date(), pageable)
+                .map(medical -> modelMapper.map(medical, MedicalDto.class));
+    }
+
     public void lockMedical(String id) {
         log.info("Lock medical with ID: " + id);
         MedicalDto medical = this.get(id);
@@ -45,6 +61,14 @@ public class MedicalService implements IDAO<MedicalDto> {
         if (medical.getDiagnosisDischarge() == null || medical.getDiagnosisDischarge().isEmpty()) {
             log.error("Medical diagnosis discharge is empty with ID: " + id);
             throw new CustomException("Chuẩn đoán ra viện không được để trống!", HttpStatus.BAD_REQUEST.value());
+        }
+        if (medical.getExamineOrgans() == null || medical.getExamineOrgans().isEmpty()) {
+            log.error("Medical examine organs is empty with ID: " + id);
+            throw new CustomException("Khám các cơ quan không được để trống!", HttpStatus.BAD_REQUEST.value());
+        }
+        if (medical.getResult() == null) {
+            log.error("Medical result is empty with ID: " + id);
+            throw new CustomException("Kết quả điều trị không được để trống!", HttpStatus.BAD_REQUEST.value());
         }
         if (medical.getType() == MedicalType.INPATIENT) {
             if (medical.getSpecializedExamination() == null || medical.getSpecializedExamination().isEmpty()) {
@@ -72,11 +96,6 @@ public class MedicalService implements IDAO<MedicalDto> {
                 log.error("Medical date discharge is empty with ID: " + id);
                 throw new CustomException("Thời gian ra viện không được để trống!", HttpStatus.BAD_REQUEST.value());
             }
-            if (medical.getResult() == null) {
-                log.error("Medical result is empty with ID: " + id);
-                throw new CustomException("Kết quả điều trị không được để trống!", HttpStatus.BAD_REQUEST.value());
-            }
-
         } else {
             if (medical.getDate() == null) {
                 log.error("Medical date is empty with ID: " + id);
@@ -89,12 +108,10 @@ public class MedicalService implements IDAO<MedicalDto> {
         }
         Date duDate = null;
         int yearsToAdd = 10;
-        if (medical.getType() == MedicalType.INPATIENT) {
-            if (medical.getResult() == MedicalResult.DEATH) {
-                yearsToAdd = 20;
-            } else if (medical.getResult() == MedicalResult.ACCIDENT) {
-                yearsToAdd = 15;
-            }
+        if (medical.getResult() == MedicalResult.DEATH) {
+            yearsToAdd = 20;
+        } else if (medical.getResult() == MedicalResult.ACCIDENT) {
+            yearsToAdd = 15;
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
