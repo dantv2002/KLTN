@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.common.BaseResponse;
+import com.hospitalx.emr.common.MedicalType;
 import com.hospitalx.emr.models.dtos.MedicalDto;
 import com.hospitalx.emr.services.MedicalService;
 
@@ -37,7 +38,11 @@ public class MedicalController {
     @PreAuthorize("hasRole('ROLE_NURSE')")
     @PostMapping("/nurse/medical/new")
     public ResponseEntity<BaseResponse> create(@RequestBody @Valid MedicalDto medicalDto) {
-        medicalService.save(medicalDto);
+        if (medicalDto.getType().equals(MedicalType.INPATIENT)) {
+            medicalService.saveInpatient(medicalDto);
+        } else {
+            medicalService.save(medicalDto);
+        }
         BaseResponse response = new BaseResponse();
         response.setMessage(String.format("Tạo bệnh án %s thành công",
                 medicalDto.getType().toString().equals("INPATIENT") ? "nội trú" : "ngoại trú"));
@@ -76,8 +81,8 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_PATIENT')")
-    @GetMapping({ "/nurse/medical/{id}", "/patient/medical/{id}" })
+    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_PATIENT')")
+    @GetMapping({ "/nurse/medical/{id}", "/doctor/medical/{id}", "/patient/medical/{id}" })
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
         MedicalDto medicalDto = medicalService.get(id);
         BaseResponse response = new BaseResponse();
@@ -102,8 +107,8 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_NURSE')")
-    @GetMapping("/nurse/lock-medical/{id}")
+    @PreAuthorize("hasRole('ROLE_DOCTOR')")
+    @GetMapping("/doctor/lock-medical/{id}")
     public ResponseEntity<BaseResponse> lock(@PathVariable("id") String id) {
         medicalService.lockMedical(id);
         BaseResponse response = new BaseResponse();

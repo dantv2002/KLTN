@@ -11,9 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.MedicalResult;
 import com.hospitalx.emr.common.MedicalType;
 import com.hospitalx.emr.exception.CustomException;
+import com.hospitalx.emr.models.dtos.AccountDto;
+import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.dtos.MedicalDto;
 import com.hospitalx.emr.models.entitys.Medical;
 import com.hospitalx.emr.repositories.MedicalRepository;
@@ -26,7 +29,20 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private MedicalRepository medicalRepository;
     @Autowired
+    private RecordService recordService;
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
+    @Autowired
+    private HealthcareStaffService healthcareStaffService;
+    @Autowired
+    private DepartmentService departmentService;
+    @Autowired
     private ModelMapper modelMapper;
+
+    public void saveInpatient(MedicalDto medical) {
+        inpatientValidate(medical);
+        this.save(medical);
+    }
 
     public void deleteAll(List<String> ids) {
         log.info("Delete all medicals");
@@ -70,41 +86,28 @@ public class MedicalService implements IDAO<MedicalDto> {
             log.error("Medical result is empty with ID: " + id);
             throw new CustomException("Kết quả điều trị không được để trống!", HttpStatus.BAD_REQUEST.value());
         }
-        if (medical.getType() == MedicalType.INPATIENT) {
-            if (medical.getSpecializedExamination() == null || medical.getSpecializedExamination().isEmpty()) {
-                log.error("Medical specialized examination is empty with ID: " + id);
-                throw new CustomException("Khám chuyên khoa không được để trống!", HttpStatus.BAD_REQUEST.value());
-            }
-            if (medical.getDateAdmission() == null) {
-                log.error("Medical date admission is empty with ID: " + id);
-                throw new CustomException("Thời gian vào viện không được để trống!", HttpStatus.BAD_REQUEST.value());
-            }
-            if (medical.getDepartmentAdmission() == null || medical.getDepartmentAdmission().isEmpty()) {
-                log.error("Medical department admission is empty with ID: " + id);
-                throw new CustomException("Khoa vào viện không được để trống!", HttpStatus.BAD_REQUEST.value());
-            }
-            if (medical.getDiagnosisAdmission() == null || medical.getDiagnosisAdmission().isEmpty()) {
-                log.error("Medical diagnosis admission is empty with ID: " + id);
-                throw new CustomException("Chuẩn đoán khi vào khoa điều trị không được để trống!",
+        if (medical.getDiagnosticImages() != null && !medical.getDiagnosticImages().isEmpty()) {
+            if (medical.getSummary() == null || medical.getSummary().isEmpty()) {
+                log.error("Medical summary is empty with ID: " + id);
+                throw new CustomException("Tóm tắt kết quả chẩn đoán hình ảnh không được để trống!",
                         HttpStatus.BAD_REQUEST.value());
             }
-            if (medical.getPrognosis() == null || medical.getPrognosis().isEmpty()) {
-                log.error("Medical prognosis is empty with ID: " + id);
-                throw new CustomException("Tiên lượng không được để trống!", HttpStatus.BAD_REQUEST.value());
+        }
+        String accountId = authenticationFacade.getAuthentication().getName();
+        HealthcareStaffDto doctor = healthcareStaffService.getByAccountId(accountId);
+        medical.setDoctorIdTreatment(doctor.getId());
+        medicalValidate(medical);
+        if (medical.getType() == MedicalType.INPATIENT) {
+            if (medical.getSpecializedExamination() == null || medical.getSpecializedExamination().isEmpty()) {
+                log.error("Medical specialized examination is empty");
+                throw new CustomException("Khám chuyên khoa không được để trống!", HttpStatus.BAD_REQUEST.value());
             }
             if (medical.getDateDischarge() == null) {
                 log.error("Medical date discharge is empty with ID: " + id);
                 throw new CustomException("Thời gian ra viện không được để trống!", HttpStatus.BAD_REQUEST.value());
             }
         } else {
-            if (medical.getDate() == null) {
-                log.error("Medical date is empty with ID: " + id);
-                throw new CustomException("Thời gian đến khám không được để trống!", HttpStatus.BAD_REQUEST.value());
-            }
-            if (medical.getInitialDiagnosis() == null || medical.getInitialDiagnosis().isEmpty()) {
-                log.error("Medical initial diagnosis is empty with ID: " + id);
-                throw new CustomException("Chẩn đoán ban đầu không được để trống!", HttpStatus.BAD_REQUEST.value());
-            }
+            medical.setDepartmentId(doctor.getDepartmentId());
         }
         Date duDate = null;
         int yearsToAdd = 10;
@@ -118,11 +121,6 @@ public class MedicalService implements IDAO<MedicalDto> {
         calendar.add(Calendar.YEAR, yearsToAdd);
         duDate = calendar.getTime();
         medical.setLocked(true);
-        if (medical.getType() == MedicalType.INPATIENT) {
-            medical.setDaysTreatment(
-                    (int) ((medical.getDateDischarge().getTime() - medical.getDateAdmission().getTime())
-                            / (1000 * 60 * 60 * 24)));
-        }
         medical.setSaveDate(new Date());
         medical.setDueDate(duDate);
         medicalRepository.save(modelMapper.map(medical, Medical.class));
@@ -141,10 +139,12 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Override
     public MedicalDto save(MedicalDto t) {
         log.info("Save medical: " + t.toString());
+        recordService.get(t.getRecordId());
+        medicalValidate(t);
         Medical medical = modelMapper.map(t, Medical.class);
         medical.setCreateDate(new Date());
         medical = medicalRepository.save(medical);
-        log.info("Save medical success with ID: " + medical.getId() + " for doctor: " + t.getDoctorIdTreatment());
+        log.info("Save medical success with ID: " + medical.getId());
         return modelMapper.map(medical, MedicalDto.class);
     }
 
@@ -174,10 +174,15 @@ public class MedicalService implements IDAO<MedicalDto> {
             log.error("Medical is locked with ID: " + t.getId());
             throw new CustomException("Bệnh án đã khóa!", HttpStatus.BAD_REQUEST.value());
         }
-        if (t.getDateDischarge().before(t.getDateAdmission())) {
-            log.error("Medical date discharge is before date admission with ID: " + t.getId());
-            throw new CustomException("Thời gian ra viện không được trước thời gian vào viện!",
-                    HttpStatus.BAD_REQUEST.value());
+        if (t.getDateDischarge() != null) {
+            if (t.getDateDischarge().before(t.getDateAdmission())) {
+                log.error("Medical date discharge is before date admission with ID: " + t.getId());
+                throw new CustomException("Thời gian ra viện không được trước thời gian vào viện!",
+                        HttpStatus.BAD_REQUEST.value());
+            }
+            t.setDaysTreatment(
+                    (int) ((t.getDateDischarge().getTime() - t.getDateAdmission().getTime())
+                            / (1000 * 60 * 60 * 24)) + 1);
         }
         medicalRepository.save(modelMapper.map(t, Medical.class));
         log.info("Update medical success with ID: " + t.getId());
@@ -200,4 +205,51 @@ public class MedicalService implements IDAO<MedicalDto> {
         log.info("Delete medical success with ID: " + id);
     }
 
+    private void medicalValidate(MedicalDto medical) {
+        if (medical.getType() == MedicalType.INPATIENT) {
+            if (medical.getDateAdmission() == null) {
+                log.error("Medical date admission is empty");
+                throw new CustomException("Thời gian vào viện không được để trống!", HttpStatus.BAD_REQUEST.value());
+            }
+            if (medical.getDepartmentAdmission() == null || medical.getDepartmentAdmission().isEmpty()) {
+                log.error("Medical department admission is empty");
+                throw new CustomException("Khoa vào viện không được để trống!", HttpStatus.BAD_REQUEST.value());
+            }
+            if (medical.getDiagnosisAdmission() == null || medical.getDiagnosisAdmission().isEmpty()) {
+                log.error("Medical diagnosis admission is empty");
+                throw new CustomException("Chuẩn đoán khi vào khoa điều trị không được để trống!",
+                        HttpStatus.BAD_REQUEST.value());
+            }
+            if (medical.getPrognosis() == null || medical.getPrognosis().isEmpty()) {
+                log.error("Medical prognosis is empty");
+                throw new CustomException("Tiên lượng không được để trống!", HttpStatus.BAD_REQUEST.value());
+            }
+        } else {
+            if (medical.getDate() == null) {
+                log.error("Medical date is empty");
+                throw new CustomException("Thời gian đến khám không được để trống!", HttpStatus.BAD_REQUEST.value());
+            }
+            if (medical.getInitialDiagnosis() == null || medical.getInitialDiagnosis().isEmpty()) {
+                log.error("Medical initial diagnosis is empty");
+                throw new CustomException("Chẩn đoán ban đầu không được để trống!", HttpStatus.BAD_REQUEST.value());
+            }
+        }
+    }
+
+    private void inpatientValidate(MedicalDto medical) {
+        departmentService.get(medical.getDepartmentAdmission());
+        if (medical.getDateTransfer() != null) {
+            departmentService.get(medical.getDepartmentTransfer());
+            if (medical.getDateTransfer().before(medical.getDateAdmission())) {
+                log.error("Medical date transfer is before date admission");
+                throw new CustomException("Thời gian chuyển khoa không được trước thời gian vào viện!",
+                        HttpStatus.BAD_REQUEST.value());
+            }
+            if (medical.getDiagnosisTransfer() == null || medical.getDiagnosisTransfer().isEmpty()) {
+                log.error("Medical diagnosis transfer is empty");
+                throw new CustomException("Chuẩn đoán nơi chuyển đến không được để trống!",
+                        HttpStatus.BAD_REQUEST.value());
+            }
+        }
+    }
 }

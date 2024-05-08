@@ -32,6 +32,17 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
     @Autowired
     private AuthenticationFacade authenticationFacade;
 
+    public HealthcareStaffDto getByAccountId(String accountId) {
+        log.info("Get healthcare staff by account ID: " + accountId);
+        HealthcareStaff entity = healthcareStaffRepository.findByAccountId(accountId);
+        if (entity == null) {
+            log.error("Healthcare staff is not exists");
+            throw new CustomException("Không tìm thấy nhân viên y tế", HttpStatus.NOT_FOUND.value());
+        }
+        log.info("Get healthcare staff success");
+        return modelMapper.map(entity, HealthcareStaffDto.class);
+    }
+
     public List<HealthcareStaffDto> getAllByDepartmentId(String departmentId) {
         log.info("Get all healthcare staffs by department ID: " + departmentId);
         List<HealthcareStaff> entities = healthcareStaffRepository.findAllByDepartmentId(departmentId);
