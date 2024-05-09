@@ -10,6 +10,7 @@ import com.hospitalx.emr.common.MedicalResult;
 import com.hospitalx.emr.common.MedicalType;
 import com.hospitalx.emr.models.entitys.Biosignal;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -29,20 +30,22 @@ public class MedicalDto {
     @JsonProperty("MedicalHistory")
     private String medicalHistory; // Tiền sử bệnh
     @NotNull(message = "Vui lòng nhập kết quả sinh hiệu")
+    @Valid
     @JsonProperty("Biosignal")
     private Biosignal biosignal; // Dấu hiệu sinh tồn(Sinh hiệu)
-    @NotEmpty(message = "Vui lòng nhập kết quả khám các cơ quan")
     @JsonProperty("ExamineOrgans")
-    private String examineOrgans; // Khám các cơ quan
+    private String examineOrgans; // Khám các cơ quan ==> UPDATE
 
     @JsonProperty("DiagnosticImages")
-    private List<String> diagnosticImages; // Danh sách chẩn đoán hình ảnh
+    private List<String> diagnosticImages; // Danh sách chẩn đoán hình ảnh ==> UPDATE
     @JsonProperty("Summary")
-    private String summary; // Tóm tắt kết quả chẩn đoán hình ảnh
+    private String summary; // Tóm tắt kết quả chẩn đoán hình ảnh ==> UPDATE
     @JsonProperty("TreatmentMethod")
-    private String treatmentMethod; // Phương pháp điều trị
+    private String treatmentMethod; // Phương pháp điều trị ==> UPDATE
     @JsonProperty("DiagnosisDischarge")
-    private String diagnosisDischarge; // Chuẩn đoán ra viện
+    private String diagnosisDischarge; // Chẩn đoán ra viện ==> UPDATE
+    @JsonProperty("Result")
+    private MedicalResult result; // Kết quả điều trị ==> UPDATE
     @JsonProperty("Locked")
     private Boolean locked; // Bệnh án đã khóa
     @JsonProperty("SaveDate")
@@ -61,6 +64,8 @@ public class MedicalDto {
     @JsonProperty("Type")
     private MedicalType type; // Loại bệnh án
     // Ngoại trú
+    @JsonProperty("DepartmentId")
+    private String departmentId; // Khoa khám bệnh ==> UPDATE
     @JsonProperty("Date")
     @JsonFormat(pattern = "HH:mm dd/MM/yyyy")
     private Date date;// Thời gian đến khám
@@ -69,7 +74,7 @@ public class MedicalDto {
     // chẩn đoán khi ra viện
     // Nội trú
     @JsonProperty("SpecializedExamination")
-    private String specializedExamination; // Khám chuyên khoa
+    private String specializedExamination; // Khám chuyên khoa ==> UPDATE
     @JsonProperty("DateAdmission")
     @JsonFormat(pattern = "HH:mm dd/MM/yyyy")
     private Date dateAdmission; // Thời gian vào viện
@@ -77,7 +82,6 @@ public class MedicalDto {
     private String departmentAdmission; // Khoa vào viện
     @JsonProperty("DiagnosisAdmission")
     private String diagnosisAdmission; // Chuẩn đoán khi vào khoa điều trị
-    // Optional
     @JsonProperty("DateTransfer")
     @JsonFormat(pattern = "HH:mm dd/MM/yyyy")
     private Date dateTransfer; // Thời gian chuyển khoa
@@ -91,15 +95,12 @@ public class MedicalDto {
     private String prognosis; // Tiên lượng
     @JsonProperty("DateDischarge")
     @JsonFormat(pattern = "HH:mm dd/MM/yyyy")
-    private Date dateDischarge; // Thời gian ra viện
+    private Date dateDischarge; // Thời gian ra viện ==> UPDATE
     @JsonProperty("DaysTreatment")
-    private Integer daysTreatment; // Số ngày điều trị
-    @JsonProperty("Result")
-    private MedicalResult result; // Kết quả điều trị
+    private Integer daysTreatment; // Số ngày điều trị ==> UPDATE
     //
-    @NotEmpty(message = "Vui lòng nhập bác sĩ điều trị")
     @JsonProperty("DoctorIdTreatment")
-    private String doctorIdTreatment; // Bác sĩ điều trị
+    private String doctorIdTreatment; // Bác sĩ điều trị ==> UPDATE
     @NotEmpty(message = "Vui lòng chọn hồ sơ bệnh nhân")
     @JsonProperty("RecordId")
     private String recordId; // Mã hồ sơ bệnh nhân

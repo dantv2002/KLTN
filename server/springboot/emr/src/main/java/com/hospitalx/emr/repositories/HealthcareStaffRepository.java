@@ -43,4 +43,7 @@ public interface HealthcareStaffRepository extends MongoRepository<HealthcareSta
 
         @Query(value = "{'departmentId': ?0, 'deleted': false, 'staffType': 'DOCTOR', 'schedules': { $exists: true }}")
         public List<HealthcareStaff> findAllByDepartmentId(String departmentId);
+
+        @Query(value = "{ 'accountId' : ?0, 'deleted' : false}")
+        public HealthcareStaff findByAccountId(String accountId);
 }
