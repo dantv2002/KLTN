@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import Navbar from "../../components/home/Navbar"
 import { CircularProgress } from "@mui/material";
 import Records from "../../components/patient/Records";
+import { message } from "antd";
 
 const RecordsManagement = () => {
 
@@ -13,7 +14,17 @@ const RecordsManagement = () => {
       setLoading(true)
   
       setTimeout(() =>{
-        setLoading(false)
+        setLoading(false);
+        const SuccessMessage = sessionStorage.getItem("successMessage");
+        const ErrorMessage = sessionStorage.getItem("errorMessage")
+        if (SuccessMessage){
+            message.success(SuccessMessage);
+            sessionStorage.removeItem("successMessage")
+        }
+        if (ErrorMessage){
+            message.error(ErrorMessage);
+            sessionStorage.removeItem("errorMessage")
+        }
       },1000)
     },[location.pathname])
 
@@ -25,7 +36,7 @@ const RecordsManagement = () => {
     :
         <div>
             <Navbar/>
-            <Records/>    
+            <Records/>   
         </div>
     )
 }

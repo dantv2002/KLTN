@@ -7,6 +7,7 @@ import axios from "axios";
 import Register from "./Register";
 import { googleApi, loginApi } from "../../Api";
 
+
 const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
 
   const [showFormRegister, setShowFormRegister] = useState(false);
@@ -25,18 +26,6 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
       }, {
         withCredentials: true
       });
-      if (response.status === 200) {
-        sessionStorage.setItem("successMessage", response.data.Message)
-        window.location.reload();
-      }
-    } catch (error) {
-        message.error(error.response.data.Message); 
-    }
-  }
-  
-  const handleGoogle = async() => {
-    try {
-      let response = await axios.get(googleApi)
       if (response.status === 200) {
         sessionStorage.setItem("successMessage", response.data.Message)
         window.location.reload();
@@ -74,7 +63,9 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
           </Form.Item>
           <a onClick={openFormResetInternal} className="text-blue-700 text-[15px] font-medium font-rubik underline text-right">Quên mật khẩu</a>
           <span className="text-center">Hoặc</span>
-          <img onClick={handleGoogle} className="mx-auto w-[10px] h-auto min-w-[20px] max-w-[40px]" src={google} alt="google" />
+          <a href={googleApi}>
+            <img className="mx-auto w-[10px] h-auto min-w-[20px] max-w-[40px]" src={google} alt="google" />
+          </a>
           <div className="text-center">
             <span className="text-black text-[15px] font-normal font-rubik">Bạn chưa có tài khoản? </span>
             <a onClick={openFormRegister} className="text-red-600 text-[15px] font-medium font-rubik underline">Đăng ký</a>

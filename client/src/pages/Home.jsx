@@ -27,10 +27,15 @@ const Home = () => {
   
       setTimeout(() =>{
         setLoading(false);
-        const Message = sessionStorage.getItem("successMessage");
-        if (Message){
-            message.success(Message);
+        const SuccessMessage = sessionStorage.getItem("successMessage");
+        const ErrorMessage = sessionStorage.getItem("errorMessage")
+        if (SuccessMessage){
+            message.success(SuccessMessage);
             sessionStorage.removeItem("successMessage")
+        }
+        if (ErrorMessage){
+            message.error(ErrorMessage);
+            sessionStorage.removeItem("errorMessage")
         }
       },1000)
     },[location.pathname])

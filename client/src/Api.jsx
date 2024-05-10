@@ -17,9 +17,14 @@ export const confirmApi = (type, id) => `${host}/api/auth/${type}/${id}`
 //Change Password
 export const changeApi = `${host}/api/update-password`
 
-// Patient
+// Record
 
-//New records
+//New records (patient)
 export const newRecordsPatient = `${host}/api/patient/record/new`
-//Get all records
+//Get all records (patient)
 export const getAllRecordsPatient = `${host}/api/patient/records`
+//Update record (patient)
+export const updateRecordPatient = `${host}/api/patient/record`
+
+//Delete record
+export const deleteRecord = (id) => `${host}/api/patient/record/${id}`
