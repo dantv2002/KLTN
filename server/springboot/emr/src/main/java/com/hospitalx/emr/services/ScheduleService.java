@@ -40,6 +40,21 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     @Autowired
     private DepartmentService departmentService;
 
+    public List<ScheduleDto> getTime(String doctorId, String time) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        Date date = null;
+        try {
+            date = formatter.parse(time);
+        } catch (Exception e) {
+            log.error("Parse date error: " + e.getMessage());
+            throw new CustomException("Ngày không hợp lệ", HttpStatus.BAD_REQUEST.value());
+        }
+        log.info("Get time of doctor: {}", doctorId);
+        return scheduleRepository.getTimeDoctor(doctorId, date).stream()
+                .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
+                .collect(Collectors.toList());
+    }
+
     public int registerClinic(String DepartmentId, String clinic) {
         log.info("Registering clinic: {}", clinic);
         departmentService.get(DepartmentId); // Check department exists

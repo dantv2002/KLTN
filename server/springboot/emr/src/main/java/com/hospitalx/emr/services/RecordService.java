@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.hospitalx.emr.common.AuthProvider;
 import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
@@ -40,6 +42,21 @@ public class RecordService implements IDAO<RecordDto> {
     public RecordDto save(RecordDto t) {
         checkExistRecord(t.getIdentityCard(), null);
         log.info("Save record: " + t.toString());
+
+        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        if (!role.equals("ROLE_PATIENT")) {
+            Record record = recordRepository.save(modelMapper.map(t, Record.class));
+            AccountDto accountDto = new AccountDto();
+            accountDto.setFullName(record.getFullName());
+            accountDto.setEmail(record.getEmail());
+            accountDto.setPassword(BCrypt.hashpw("User@123", BCrypt.gensalt(10)));
+            accountDto.setAuthProvider(AuthProvider.LOCAL);
+            accountDto.setRecords(new ArrayList<>());
+            accountDto.getRecords().add(record.getId());
+            accountService.save(accountDto);
+
+            return modelMapper.map(record, RecordDto.class);
+        }
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto account = accountService.get(id);
         if (account.getRecords() != null && account.getRecords().size() == 10) {
@@ -48,10 +65,7 @@ public class RecordService implements IDAO<RecordDto> {
                     HttpStatus.BAD_REQUEST.value());
         }
         Record record = recordRepository.save(modelMapper.map(t, Record.class));
-        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
-        if (!role.equals("ROLE_PATIENT")) {
-            return modelMapper.map(record, RecordDto.class);
-        }
+
         if (account.getRecords() == null) {
             account.setRecords(new ArrayList<String>());
         }
@@ -71,7 +85,7 @@ public class RecordService implements IDAO<RecordDto> {
 
             Date starDate = createDateFromString(parts[1], 0);
             Date endDate = createDateFromString(parts[1], 1);
-            log.info("Get all records for nurse with keyword: " + parts[0] + ", year: " + parts[1] + ", gender: "
+            log.info("Get all records with keyword: " + parts[0] + ", year: " + parts[1] + ", gender: "
                     + parts[2]);
             if (starDate == null || endDate == null) {
                 return recordRepository.findAllByKeyword(parts[0], parts[2], pageable)

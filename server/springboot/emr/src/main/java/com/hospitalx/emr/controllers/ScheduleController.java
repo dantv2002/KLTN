@@ -1,5 +1,6 @@
 package com.hospitalx.emr.controllers;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.common.BaseResponse;
+import com.hospitalx.emr.models.dtos.RecordDto;
 import com.hospitalx.emr.models.dtos.ScheduleDto;
 import com.hospitalx.emr.services.ScheduleService;
 
@@ -45,8 +47,8 @@ public class ScheduleController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/admin/schedules/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PATIENT')")
+    @GetMapping({ "/admin/schedules/{id}", "/patient/schedules/{id}" })
     public ResponseEntity<BaseResponse> getAll(
             @PathVariable("id") String id,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
@@ -67,6 +69,21 @@ public class ScheduleController {
                 put("NumberOfItems", data.getNumberOfElements());
                 put("TotalItems", data.getTotalElements());
                 put("TotalPages", data.getTotalPages());
+            }
+        });
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
+    @GetMapping("/patient/get-time/schedule/{id}/{date}")
+    public ResponseEntity<BaseResponse> get(@PathVariable("id") String id, @PathVariable("date") String date) {
+        List<ScheduleDto> scheduleDto = scheduleService.getTime(id, date);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Tải buổi khám thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(new HashMap<String, Object>() {
+            {
+                put("Record", scheduleDto);
             }
         });
         return ResponseEntity.status(response.getStatus()).body(response);

@@ -52,7 +52,7 @@ public class MedicalController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_PATIENT')")
-    @GetMapping({ "/nurse/medicals", "/doctor/medicals", "/patient/medicals" })
+    @GetMapping({ "/nurse-doctor/medicals", "/patient/medicals" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "mark", defaultValue = "", required = false) String mark,
@@ -82,7 +82,7 @@ public class MedicalController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_PATIENT')")
-    @GetMapping({ "/nurse/medical/{id}", "/doctor/medical/{id}", "/patient/medical/{id}" })
+    @GetMapping({ "/nurse-doctor/medical/{id}", "/patient/medical/{id}" })
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
         MedicalDto medicalDto = medicalService.get(id);
         BaseResponse response = new BaseResponse();
@@ -96,8 +96,8 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_NURSE')")
-    @GetMapping({ "/nurse/mark-medical/{id}" })
+    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR')")
+    @GetMapping({ "/nurse-doctor/mark-medical/{id}" })
     public ResponseEntity<BaseResponse> mark(@PathVariable("id") String id) {
         medicalService.markMedical(id);
         BaseResponse response = new BaseResponse();
