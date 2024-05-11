@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
@@ -26,7 +27,8 @@ def predict():
         predictSv = predictService(imageURL, singleton_instance)
         result = predictSv.predict()
         # Return result
-        return result, 200
+        rs = json.dumps(result)
+        return rs, 200
     # except:
     #     return "Server error", 500
 

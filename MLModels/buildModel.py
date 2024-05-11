@@ -10,6 +10,7 @@ tf.random.set_seed(42)
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
+import joblib
 
 
 gpus = tf.config.list_physical_devices('GPU')
@@ -47,6 +48,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     shuffle=True,
     seed=123,
     validation_split=val_split,
+    batch_size=BATCH_SIZE,
     subset='training',
     interpolation='nearest',
 )
@@ -59,6 +61,7 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     shuffle=True,
     seed=123,
     validation_split=val_split,
+    batch_size=BATCH_SIZE,
     subset='validation',
     interpolation='nearest',
 )
@@ -71,6 +74,7 @@ test_ds = tf.keras.preprocessing.image_dataset_from_directory(
     shuffle=True,
     seed=123,
     validation_split=None,
+    batch_size=BATCH_SIZE,
     interpolation='nearest',
 )
 
@@ -112,20 +116,24 @@ def make_model(model, model_name, metrics=METRICS):
     tf.keras.utils.plot_model(model, model_name+".png",show_shapes=True)
     return model, model_name
 
-def train_model(model, name, train_ds=train_ds, valid_ds=val_ds, test_ds=test_ds, epochs=100, callbacks=CALLBACKS, batch_size=BATCH_SIZE):
+def train_model(model, name, train_ds=train_ds, valid_ds=val_ds, test_ds=test_ds, epochs=100, callbacks=CALLBACKS):
     # callbacks.append(tf.keras.callbacks.TensorBoard(log_dir=f"./log/{name}"))
     history = model.fit(
         train_ds,
         epochs=epochs,
         callbacks=callbacks,
         validation_data=valid_ds,
-        batch_size=batch_size)
+        )
     
     model.evaluate(test_ds)
-    model.save(name+".h5")
-    return history
+    hisName = name+"history"
+    modelName = name+".h5"
+    model.save(modelName)
+    his = history.history
+    joblib.dump(his, hisName)
+    return history, hisName, modelName
 
-# %% Model alexnet
+# %% Model like alexnet
 model = tf.keras.models.Sequential()
 
 # Input layer
@@ -153,28 +161,30 @@ model.add(tf.keras.layers.Dense(1024, activation="relu"))
 model.add(tf.keras.layers.Dropout(0.5))
 model.add(tf.keras.layers.Dense(NUM_CLASSES, activation="softmax"))
 
-alxnetModel, name = make_model(model, "alexnet")
+alxnetModel, alxnetModelName = make_model(model, "alexnet")
 # %%
-historyAlxnetModel = train_model(alxnetModel, name)
+historyAlxnetModel, hisSavedName, modelName = None, None, None
+new_training = 1
+if new_training:
+    historyAlxnetModel, hisSavedName, modelName = train_model(alxnetModel, alxnetModelName)
+else: 
+    alxnetModel = keras.models.load_model(modelName)
+    historyAlxnetModel = joblib.load(hisSavedName)
+    historyAlxnetModel.evaluate(test_ds)
 # %%
 resnet_base = tf.keras.applications.ResNet50(weights='imagenet', include_top=False, input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))
 
-# Freeze the base layers to prevent retraining them (optional)
+# Un-freeze the base layers to retraining them
 for layer in resnet_base.layers:
     layer.trainable = True
 
 # Extract features from the base model
 x = resnet_base.output
 
-x = tf.keras.layers.Flatten()(x)
-x = tf.keras.layers.Dense(2048, activation="relu")(x)
-x = tf.keras.layers.Dropout(0.5) (x)
-x = tf.keras.layers.Dense(1024, activation="relu") (x)
-x = tf.keras.layers.Dropout(0.5) (x)
-output = tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')(x)
+x = tf.keras.layers.GlobalAveragePooling2D()(x)
+outputs = tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')(x)
 
-# Create the final model
-model = tf.keras.Model(inputs=resnet_base.input, outputs=output)
+model = tf.keras.Model(inputs=resnet_base.input, outputs=outputs)
 
 resnet50Model, resnet50ModelName = make_model(model, "resnet50")
 # %% preprocess img
@@ -191,8 +201,22 @@ resnet_train_ds = train_ds.map(lambda x, y: resnetPreprocess(x, y))
 resnet_valid_ds = val_ds.map(lambda x, y: resnetPreprocess(x, y))
 resnet_test_ds = test_ds.map(lambda x, y: resnetPreprocess(x, y))
 
+resnet_train_ds = resnet_train_ds.unbatch()
+resnet_train_ds = resnet_train_ds.batch(16)
+resnet_valid_ds = resnet_valid_ds.unbatch()
+resnet_valid_ds = resnet_valid_ds.batch(16)
+resnet_test_ds = resnet_test_ds.unbatch()
+resnet_test_ds = resnet_test_ds.batch(16)
+
 # %%
-historyResnet50Model = train_model(resnet50Model, resnet50ModelName, train_ds=resnet_train_ds, valid_ds=val_ds, test_ds=test_ds, batch_size=4)
+historyResnet50Model, hisSavedName, modelName = None, None, None
+new_training = 1
+if new_training:
+    historyResnet50Model, hisSavedName, modelName = train_model(resnet50Model, resnet50ModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds)
+else: 
+    resnet50Model = keras.models.load_model(modelName)
+    historyResnet50Model = joblib.load(hisSavedName)
+    historyResnet50Model.evaluate(resnet_test_ds)
 # %% model like resnet
 
 def conv_block(input_tensor, filters, kernel_size, strides=(1, 1), padding='same'):
@@ -255,8 +279,16 @@ model = tf.keras.models.Model(inputs=input_layer, outputs=outputs)
 
 modelResnetCustom, resnetCustomModelName = make_model(model, "modelResnetCustom")
 # %%
-historyResnetCustom = train_model(modelResnetCustom, resnetCustomModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds, batch_size=20)
-# Try prediction:
+historyResnetCustom, hisSavedName, modelName = None, None, None
+new_training = 1
+if new_training:
+    historyResnetCustom, hisSavedName, modelName = train_model(modelResnetCustom, resnetCustomModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds)
+else: 
+    modelResnetCustom = keras.models.load_model(modelName)
+    historyResnetCustom = joblib.load(hisSavedName)
+    historyResnetCustom.evaluate(resnet_test_ds)
+
+# %% Try prediction:
 # if 10: 
 #     plt.figure(figsize=(12, 80))
 #     index = 0
