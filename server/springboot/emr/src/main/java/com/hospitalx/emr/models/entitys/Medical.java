@@ -50,6 +50,6 @@ public class Medical {
     private Date dateDischarge; // Thời gian ra viện
     private Integer daysTreatment; // Số ngày điều trị
     //
-    private String doctorIdTreatment;// Bác sĩ điều trị
+    private String doctorIdTreatment="";// Bác sĩ điều trị
     private String recordId; // Mã hồ sơ bệnh nhân
 }

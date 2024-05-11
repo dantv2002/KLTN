@@ -1,6 +1,5 @@
 package com.hospitalx.emr.controllers;
 
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.common.BaseResponse;
-import com.hospitalx.emr.models.dtos.RecordDto;
 import com.hospitalx.emr.models.dtos.ScheduleDto;
 import com.hospitalx.emr.services.ScheduleService;
 
