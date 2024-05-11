@@ -2,7 +2,6 @@ import numpy as np
 import os
 import shutil
 import tensorflow as tf
-import json
 
 class predictService:
     def __init__(self, url, model):
@@ -37,7 +36,7 @@ class predictService:
         for name in name_result_map:
             name_result_map[name] = self.result[name_result_map[name]]
         # print(name_result_map)
-        return json.dumps(name_result_map)
+        return name_result_map
     
     def preprocessImage(self):
         cache_subdir = os.path.join(os.getcwd(), "caches/")

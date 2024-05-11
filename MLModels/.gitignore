@@ -1,4 +1,11 @@
 alexnet.h5
+alexnethistory
+modelResnetCustom.h5
+modelResnetCustomhistory
+resnet50.h5
+resnet50history
+vgg19.h5
+vgg19history
 model_checkpoint.h5
 /log
 /data
