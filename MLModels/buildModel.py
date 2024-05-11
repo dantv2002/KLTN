@@ -10,6 +10,7 @@ tf.random.set_seed(42)
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
+import joblib
 
 
 gpus = tf.config.list_physical_devices('GPU')
@@ -122,8 +123,12 @@ def train_model(model, name, train_ds=train_ds, valid_ds=val_ds, test_ds=test_ds
         batch_size=batch_size)
     
     model.evaluate(test_ds)
-    model.save(name+".h5")
-    return history
+    hisName = name+"history"
+    modelName = name+".h5"
+    model.save(modelName)
+    his = history.history
+    joblib.dump(his, hisName)
+    return history, hisName, modelName
 
 # %% Model alexnet
 model = tf.keras.models.Sequential()
@@ -153,13 +158,20 @@ model.add(tf.keras.layers.Dense(1024, activation="relu"))
 model.add(tf.keras.layers.Dropout(0.5))
 model.add(tf.keras.layers.Dense(NUM_CLASSES, activation="softmax"))
 
-alxnetModel, name = make_model(model, "alexnet")
+alxnetModel, alxnetModelName = make_model(model, "alexnet")
 # %%
-historyAlxnetModel = train_model(alxnetModel, name)
+historyAlxnetModel, hisSavedName, modelName = None, None, None
+new_training = 1
+if new_training:
+    historyAlxnetModel, hisSavedName, modelName = train_model(alxnetModel, alxnetModelName)
+else: 
+    alxnetModel = keras.models.load_model(modelName)
+    historyAlxnetModel = joblib.load(hisSavedName)
+    historyAlxnetModel.evaluate(test_ds)
 # %%
 resnet_base = tf.keras.applications.ResNet50(weights='imagenet', include_top=False, input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))
 
-# Freeze the base layers to prevent retraining them (optional)
+# Un-freeze the base layers to retraining them
 for layer in resnet_base.layers:
     layer.trainable = True
 
@@ -192,7 +204,14 @@ resnet_valid_ds = val_ds.map(lambda x, y: resnetPreprocess(x, y))
 resnet_test_ds = test_ds.map(lambda x, y: resnetPreprocess(x, y))
 
 # %%
-historyResnet50Model = train_model(resnet50Model, resnet50ModelName, train_ds=resnet_train_ds, valid_ds=val_ds, test_ds=test_ds, batch_size=4)
+historyResnet50Model, hisSavedName, modelName = None, None, None
+new_training = 0
+if new_training:
+    historyResnet50Model, hisSavedName, modelName = train_model(resnet50Model, resnet50ModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds, batch_size=4)
+else: 
+    resnet50Model = keras.models.load_model(modelName)
+    historyResnet50Model = joblib.load(hisSavedName)
+    historyResnet50Model.evaluate(resnet_test_ds)
 # %% model like resnet
 
 def conv_block(input_tensor, filters, kernel_size, strides=(1, 1), padding='same'):
@@ -255,8 +274,15 @@ model = tf.keras.models.Model(inputs=input_layer, outputs=outputs)
 
 modelResnetCustom, resnetCustomModelName = make_model(model, "modelResnetCustom")
 # %%
-historyResnetCustom = train_model(modelResnetCustom, resnetCustomModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds, batch_size=20)
-# Try prediction:
+historyResnetCustom, hisSavedName, modelName = None, None, None
+new_training = 1
+if new_training:
+    historyResnetCustom, hisSavedName, modelName = train_model(modelResnetCustom, resnetCustomModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds, batch_size=20)
+else: 
+    modelResnetCustom = keras.models.load_model(modelName)
+    historyResnetCustom = joblib.load(hisSavedName)
+    historyResnetCustom.evaluate(resnet_test_ds)
+# %% Try prediction:
 # if 10: 
 #     plt.figure(figsize=(12, 80))
 #     index = 0

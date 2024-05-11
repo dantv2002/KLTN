@@ -1,3 +1,4 @@
 alexnet.h5
 model_checkpoint.h5
 /log
+/data
