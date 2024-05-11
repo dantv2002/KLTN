@@ -73,4 +73,19 @@ public class TicketController {
         });
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
+    @GetMapping("/patient/ticket/{id}")
+    public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
+        TicketDto ticketDto = ticketService.get(id);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Tải phiếu khám thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(new HashMap<String, Object>() {
+            {
+                put("Ticket", ticketDto);
+            }
+        });
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }

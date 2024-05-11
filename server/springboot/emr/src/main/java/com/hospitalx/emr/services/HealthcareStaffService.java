@@ -13,7 +13,6 @@ import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.NurseLevel;
 import com.hospitalx.emr.common.StaffType;
 import com.hospitalx.emr.exception.CustomException;
-import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.entitys.HealthcareStaff;
 import com.hospitalx.emr.repositories.HealthcareStaffRepository;
