@@ -45,7 +45,7 @@ public class RecordController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_RECEPTIONIST')")
-    @GetMapping({ "/patient/records", "/nurse/records", "/receptionist/records", "/doctor/records" })
+    @GetMapping({ "/patient/records", "/nurse-doctor/records", "/receptionist/records" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "year", defaultValue = "", required = false) String year,
@@ -76,7 +76,7 @@ public class RecordController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PATIENT','ROLE_NURSE','ROLE_DOCTOR', 'ROLE_RECEPTIONIST')")
-    @GetMapping({ "/patient/record/{id}", "/nurse/record/{id}", "/receptionist/record/{id}", "/doctor/record/{id}" })
+    @GetMapping({ "/patient/record/{id}", "/nurse-doctor/record/{id}", "/receptionist/record/{id}" })
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
         RecordDto recordDto = recordService.get(id);
         BaseResponse response = new BaseResponse();
