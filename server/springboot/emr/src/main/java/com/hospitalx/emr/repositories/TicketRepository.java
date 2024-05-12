@@ -11,5 +11,5 @@ import com.hospitalx.emr.models.entitys.Ticket;
 
 public interface TicketRepository extends MongoRepository<Ticket, String> {
     @Query(value = "{ _id: { $in: ?0 }, status: {$regex: ?1, $options: 'i'}}")
-    Page<Record> findAllByIdAndStatus(List<String> ids, String status, Pageable pageable);
+    Page<Ticket> findAllByIdAndStatus(List<String> ids, String status, Pageable pageable);
 }

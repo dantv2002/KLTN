@@ -159,6 +159,10 @@ public class MedicalService implements IDAO<MedicalDto> {
             doctorId = doctor.getId();
         }
         log.info("Get all medicals");
+        if (role.equals("ROLE_PATIENT"))
+            return medicalRepository.findAllByKeyword(parts[0], parts[1], pageable)
+                    .map(medical -> modelMapper.map(medical, MedicalDto.class));
+
         return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, pageable)
                 .map(medical -> modelMapper.map(medical, MedicalDto.class));
     }

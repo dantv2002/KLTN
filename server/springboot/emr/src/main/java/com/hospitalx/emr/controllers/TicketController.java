@@ -22,17 +22,15 @@ import com.hospitalx.emr.common.BaseResponse;
 import com.hospitalx.emr.models.dtos.TicketDto;
 import com.hospitalx.emr.services.TicketService;
 
-import jakarta.validation.Valid;
-
 @RestController
 @RequestMapping("/api")
 public class TicketController {
     @Autowired
     private TicketService ticketService;
-    
+
     // Booking ticket
     @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @PostMapping("/patient/ticket/new/{idDoctor}/{idSchedule}/{idRecord}")
+    @GetMapping("/patient/ticket/new/{idDoctor}/{idSchedule}/{idRecord}")
     public ResponseEntity<BaseResponse> create(
             @PathVariable("idRecord") String idRecord,
             @PathVariable("idSchedule") String idSchedule,

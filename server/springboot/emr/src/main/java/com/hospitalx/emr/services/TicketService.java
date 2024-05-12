@@ -1,7 +1,10 @@
 package com.hospitalx.emr.services;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +59,8 @@ public class TicketService implements IDAO<TicketDto> {
         // Set value for ticket
         int examinationTime = 15; // Thời gian khám bệnh (phút)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalTime starTime = scheduleDto.getTime().equals(ScheduleTime.MORNING) ? LocalTime.of(7, 00) : LocalTime.of(13, 00);
+        LocalTime starTime = scheduleDto.getTime().equals(ScheduleTime.MORNING) ? LocalTime.of(7, 00)
+                : LocalTime.of(13, 00);
         LocalTime predictTime = starTime.plusMinutes(examinationTime * scheduleDto.getNumber());
         TicketDto ticketDto = new TicketDto();
         scheduleDto.setNumber(scheduleDto.getNumber() + 1); // Update number of patients
@@ -65,12 +69,12 @@ public class TicketService implements IDAO<TicketDto> {
         ticketDto.setClinic(scheduleDto.getClinic()); // Phòng khám
         ticketDto.setDepartment(departmentDto.getNameDepartment()); // Khoa khám
         ticketDto.setNameDoctor(doctorDto.getFullName()); // Tên bác sĩ khám
-        ticketDto.setDate(scheduleDto.getDate());
+        ticketDto.setDate(new SimpleDateFormat("dd/MM/yyyy").format(scheduleDto.getDate())); // Ngày khám
         ticketDto.setTime(predictTime.format(formatter)); // Giờ khám dự kiến
         ticketDto.setStatus(TicketStatus.WAITING); // Trạng thái
         ticketDto.setNamePatient(recordDto.getFullName()); // Tên người khám
         ticketDto.setRecordId(idRecord); // Mã hồ sơ
-        ticketDto.setDateOfBirth(recordDto.getDateOfBirth()); // Ngày sinh
+        ticketDto.setDateOfBirth(new SimpleDateFormat("dd/MM/yyyy").format(recordDto.getDateOfBirth())); // Ngày sinh
         ticketDto.setGender(recordDto.getGender()); // Giới tính
         ticketDto.setHealthInsurance(recordDto.getHealthInsurance()); // Bảo hiểm y tế
         ticketDto.setAddress(recordDto.getAddress()); // Địa chỉ
@@ -80,6 +84,9 @@ public class TicketService implements IDAO<TicketDto> {
         emailService.sendEmailTicket(recordDto.getEmail(), ticketBooking);
         // add ticket to account
         AccountDto accountDto = accountService.get(authenticationFacade.getAuthentication().getName());
+        if (accountDto.getTickets() == null) {
+            accountDto.setTickets(new ArrayList<String>());
+        }
         accountDto.getTickets().add(ticketBooking.getId());
         accountService.update(accountDto);
         scheduleService.update(scheduleDto);

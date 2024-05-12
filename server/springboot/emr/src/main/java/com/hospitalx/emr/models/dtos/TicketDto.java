@@ -1,12 +1,8 @@
 package com.hospitalx.emr.models.dtos;
 
-import java.util.Date;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hospitalx.emr.common.TicketStatus;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -24,8 +20,7 @@ public class TicketDto {
     @JsonProperty("NameDoctor")
     private String nameDoctor; // Tên bác sĩ khám
     @JsonProperty("Date")
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date date; // Ngày khám
+    private String date; // Ngày khám
     @JsonProperty("Time")
     private String time; // Giờ khám dự kiến
     @JsonProperty("Status")
@@ -33,7 +28,7 @@ public class TicketDto {
     @JsonProperty("NamePatient")
     private String namePatient; // Tên người khám
     @JsonProperty("DateOfBirth")
-    private Date dateOfBirth; // Ngày sinh
+    private String dateOfBirth; // ngày sinh
     @JsonProperty("RecordId")
     private String recordId; // Mã hồ sơ
     @JsonProperty("Gender")

@@ -101,17 +101,30 @@ public class ScheduleController {
 
     // Register clinic
     @PreAuthorize("hasRole('ROLE_RECEPTIONIST')")
-    @PostMapping("/receptionist/register-clinic/{id}")
-    public ResponseEntity<BaseResponse> registerClinic(@PathVariable("id") String id,
-            @RequestBody Map<String, String> request) {
-        String clinic = request.get("Clinic");
-        int result = scheduleService.registerClinic(id, clinic);
+    @GetMapping("/receptionist/register-clinic/{id}")
+    public ResponseEntity<BaseResponse> registerClinic(@PathVariable("id") String id) {
+        int result = scheduleService.registerClinic(id);
         BaseResponse response = new BaseResponse();
         response.setMessage("Đăng ký phòng khám thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<String, Object>() {
             {
                 put("Number", result);
+            }
+        });
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_RECEPTIONIST')")
+    @GetMapping("/receptionist/schedules/{id}")
+    public ResponseEntity<BaseResponse> getSchedule(@PathVariable("id") String id) {
+        List<ScheduleDto> scheduleDto = scheduleService.getSchedule(id);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Tải thông tin lịch khám thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(new HashMap<String, Object>() {
+            {
+                put("Schedules", scheduleDto);
             }
         });
         return ResponseEntity.status(response.getStatus()).body(response);

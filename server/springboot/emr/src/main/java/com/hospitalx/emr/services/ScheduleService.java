@@ -41,12 +41,39 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     private HealthcareStaffService healthcareStaffService;
     @Autowired
     private DepartmentService departmentService;
+    private Date startDate = null;
+    private Date endDate = null;
+
+    public List<ScheduleDto> getSchedule(String departmentId) {
+        log.info("Get schedule of department: {}", departmentId);
+        departmentService.get(departmentId); // Check department exists
+        List<HealthcareStaffDto> doctors = healthcareStaffService.getAllByDepartmentId(departmentId);
+        List<ScheduleDto> schedules = new ArrayList<>();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+7"));
+        Date date = Date.from(now.toInstant());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        startDate = calendar.getTime();
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        endDate = calendar.getTime();
+        List<String> listDoctorId = doctors.stream().map(item -> item.getId()).collect(Collectors.toList());
+        listDoctorId.stream().forEach(doctorId -> {
+            scheduleRepository.findAllTimeDoctor(doctorId, startDate, endDate).forEach(schedule -> {
+                ScheduleDto scheduleDto = modelMapper.map(schedule, ScheduleDto.class);
+                schedules.add(scheduleDto);
+            });
+        });
+        return schedules;
+    }
 
     public List<ScheduleDto> getTime(String doctorId, String time) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         Date date = null;
-        Date startDate = null;
-        Date endDate = null;
         try {
             date = formatter.parse(time);
             Calendar calendar = Calendar.getInstance();
@@ -69,24 +96,12 @@ public class ScheduleService implements IDAO<ScheduleDto> {
                 .collect(Collectors.toList());
     }
 
-    public int registerClinic(String DepartmentId, String clinic) {
-        log.info("Registering clinic: {}", clinic);
-        departmentService.get(DepartmentId); // Check department exists
-        List<HealthcareStaffDto> doctors = healthcareStaffService.getAllByDepartmentId(DepartmentId);
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+7"));
-        int hour = now.getHour();
-        ScheduleTime time = hour < 12 ? ScheduleTime.MORNING : ScheduleTime.AFTERNOON;
-        List<Schedule> schedules = scheduleRepository.findByAllOfDate(Date.from(now.toInstant()), time, clinic);
-        List<String> listIdSchedule = doctors.stream().flatMap(doctor -> doctor.getSchedules().stream())
-                .collect(Collectors.toList());
-        for (Schedule schedule : schedules) {
-            if (listIdSchedule.contains(schedule.getId())) {
-                schedule.setNumber(schedule.getNumber() + 1);
-                this.update(modelMapper.map(schedule, ScheduleDto.class));
-                return schedule.getNumber();
-            }
-        }
-        throw new CustomException("Không tìm thấy lịch khám", HttpStatus.NOT_FOUND.value());
+    public int registerClinic(String scheduleId) {
+        log.info("Register clinic");
+        ScheduleDto scheduleDto = this.get(scheduleId);
+        scheduleDto.setNumber(scheduleDto.getNumber() + 1);
+        this.update(scheduleDto);
+        return scheduleDto.getNumber();
     }
 
     public void adminUpdateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {

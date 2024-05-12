@@ -50,12 +50,12 @@ public class EmailService {
                 Context context = new Context();
                 context.setVariable("ticket", ticket);
 
-                String content = templateEngine.process("VerifyTemplate", context);
+                String content = templateEngine.process("TicketTemplate", context);
                 System.out.println(content);
                 //
                 messageHelper.setText(content, true);
             }
         };
-        // javaMailSender.send(preparator);
+        javaMailSender.send(preparator);
     }
 }
