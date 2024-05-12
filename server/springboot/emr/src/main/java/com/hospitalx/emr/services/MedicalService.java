@@ -153,10 +153,11 @@ public class MedicalService implements IDAO<MedicalDto> {
         String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
         String doctorId = "";
         String[] parts = keyword.split("_", -1);
+        parts[1] = parts[1].isEmpty() ? parts[1] : "^" + parts[1] + "$";
         if (parts[2].equalsIgnoreCase("false") && role.equals("ROLE_DOCTOR")) {
             String id = authenticationFacade.getAuthentication().getName();
             HealthcareStaffDto doctor = healthcareStaffService.getByAccountId(id);
-            doctorId = doctor.getId();
+            doctorId = "^" + doctor.getId() + "$";
         }
         log.info("Get all medicals");
         if (role.equals("ROLE_PATIENT"))

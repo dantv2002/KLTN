@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;

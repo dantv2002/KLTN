@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.hospitalx.emr.common.AuthenticationFacade;
-import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.DiagnosticImageDto;
 import com.hospitalx.emr.models.dtos.MedicalDto;
 import com.hospitalx.emr.models.entitys.DiagnosticImage;

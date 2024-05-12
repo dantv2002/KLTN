@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +102,7 @@ public class TicketService implements IDAO<TicketDto> {
     public Page<TicketDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all tickets");
         AccountDto accountDto = accountService.get(authenticationFacade.getAuthentication().getName());
+        keyword = keyword.isEmpty() ? keyword : "^" + keyword + "$";
         return ticketRepository.findAllByIdAndStatus(accountDto.getTickets(), keyword, pageable)
                 .map(ticket -> modelMapper.map(ticket, TicketDto.class));
     }
