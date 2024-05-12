@@ -111,7 +111,7 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
         String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
         if (role.equals(("ROLE_PATIENT"))) {
             Page<HealthcareStaff> entities = healthcareStaffRepository.findByDoctorForPatient(StaffType.DOCTOR,
-                    parts[0], parts[1], parts[2],
+                    parts[0], "^" + parts[1]+ "$", parts[2],
                     parts[3], pageable);
             return entities.map(entity -> modelMapper.map(entity, HealthcareStaffDto.class));
         }

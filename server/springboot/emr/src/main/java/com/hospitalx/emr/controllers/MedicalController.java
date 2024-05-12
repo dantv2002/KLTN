@@ -55,6 +55,7 @@ public class MedicalController {
     @GetMapping({ "/nurse-doctor/medicals", "/patient/medicals" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
+            @RequestParam(name = "showAll", defaultValue = "false", required = false) String showAll,
             @RequestParam(name = "mark", defaultValue = "", required = false) String mark,
             @RequestParam(name = "record", defaultValue = "", required = false) String recordId,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
@@ -64,7 +65,7 @@ public class MedicalController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        keyword = keyword + "_" + recordId;
+        keyword = keyword + "_" + recordId + "_" +showAll;
         Page<MedicalDto> medicals = medicalService.getAll(keyword, mark, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải danh sách bệnh án thành công");

@@ -1,5 +1,6 @@
 package com.hospitalx.emr.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.DiagnosticImageDto;
+import com.hospitalx.emr.models.dtos.MedicalDto;
 import com.hospitalx.emr.models.entitys.DiagnosticImage;
 import com.hospitalx.emr.repositories.DiagnosticImageRepository;
 
@@ -27,7 +30,21 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
     @Autowired
     private AuthenticationFacade authenticationFacade;
     @Autowired
+    private MedicalService medicalService;
+    @Autowired
     private ModelMapper modelMapper;
+
+    public void saveResult(String medicalId, DiagnosticImageDto result){
+        log.info("Save result diagnostic image");
+        MedicalDto medical = medicalService.get(medicalId);
+        String resultId = this.save(result).getId();
+        if(medical.getDiagnosticImages() == null){
+            medical.setDiagnosticImages(new ArrayList<String>());
+        }
+        medical.getDiagnosticImages().add(resultId);
+        medicalService.update(medical);
+        log.info("Save result diagnostic image success");
+    }
 
     public Object diagnosisImage(String urlImage) {
         log.info("Run classification image medical");
@@ -38,7 +55,7 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
         headers.add("Content-Type", "application/json");
         Map<String, String> body = new HashMap<>() {
             {
-                put("ImageURL", urlImage);
+                put("image", urlImage);
             }
         };
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);

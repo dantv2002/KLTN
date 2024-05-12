@@ -9,6 +9,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -95,6 +96,20 @@ public class GlobalExceptionHandler {
         String message = exception.getBindingResult().getFieldError().getDefaultMessage();
         baseResponse.setMessage(message);
         baseResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        baseResponse.setData(null);
+        return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
+    }
+
+    // Lỗi khi gọi server flask
+    @ExceptionHandler(HttpClientErrorException.class)
+    public ResponseEntity<BaseResponse> handleHttpClientErrorException(HttpClientErrorException exception) {
+        if(exception.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
+            this.handleException(exception);
+        }
+        log.error("Exception: " + exception.getMessage());
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setMessage(exception.getResponseBodyAsString());
+        baseResponse.setStatus(exception.getStatusCode().value());
         baseResponse.setData(null);
         return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
     }

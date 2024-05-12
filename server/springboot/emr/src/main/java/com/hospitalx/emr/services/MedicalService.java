@@ -138,6 +138,7 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Override
     public MedicalDto save(MedicalDto t) {
         log.info("Save medical: " + t.toString());
+        t.setId(null);
         recordService.get(t.getRecordId());
         medicalValidate(t);
         Medical medical = modelMapper.map(t, Medical.class);
@@ -151,13 +152,13 @@ public class MedicalService implements IDAO<MedicalDto> {
     public Page<MedicalDto> getAll(String keyword, String type, Pageable pageable) {
         String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
         String doctorId = "";
-        if (role.equals("ROLE_DOCTOR")) {
+        String[] parts = keyword.split("_", -1);
+        if (parts[2].equalsIgnoreCase("false") && role.equals("ROLE_DOCTOR")) {
             String id = authenticationFacade.getAuthentication().getName();
             HealthcareStaffDto doctor = healthcareStaffService.getByAccountId(id);
             doctorId = doctor.getId();
         }
         log.info("Get all medicals");
-        String[] parts = keyword.split("_", -1);
         return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, pageable)
                 .map(medical -> modelMapper.map(medical, MedicalDto.class));
     }

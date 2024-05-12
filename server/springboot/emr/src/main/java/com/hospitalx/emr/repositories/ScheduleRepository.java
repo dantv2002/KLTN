@@ -19,6 +19,6 @@ public interface ScheduleRepository extends MongoRepository<Schedule, String> {
     @Query("{ 'date' : { $gt : ?0 } }")
     List<Schedule> findAll(Date currentDate);
 
-    @Query("{ 'doctorId' : ?0, 'date' : ?1 }")
-    List<Schedule> getTimeDoctor(String doctorId, Date date);
+    @Query("{ 'doctorId' : ?0, 'date' : { $gte : ?1, $lte : ?2 } }")
+    List<Schedule> findAllTimeDoctor(String doctorId, Date startDate, Date endDate);
 }

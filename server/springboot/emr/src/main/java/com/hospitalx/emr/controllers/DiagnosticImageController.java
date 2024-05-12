@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,9 +39,9 @@ public class DiagnosticImageController {
     }
 
     @PreAuthorize("hasRole('ROLE_DOCTOR')")
-    @PostMapping("/diagnostic-image/save")
-    public ResponseEntity<BaseResponse> save(@RequestBody @Valid DiagnosticImageDto body) {
-        diagnosticImageService.save(body);
+    @PostMapping("/diagnostic-image/save/{id}")
+    public ResponseEntity<BaseResponse> save(@PathVariable("id") String id, @RequestBody @Valid DiagnosticImageDto body) {
+        diagnosticImageService.saveResult(id, body);
         BaseResponse response = new BaseResponse();
         response.setMessage("Đã lưu kết quả chẩn đoán hình ảnh thành công");
         response.setStatus(HttpStatus.OK.value());

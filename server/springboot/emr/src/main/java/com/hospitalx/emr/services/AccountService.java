@@ -246,6 +246,12 @@ public class AccountService implements IDAO<AccountDto> {
         }
     }
 
+    public AccountDto checkCreateAccountLocal(String email) {
+        Account account = accountRepository.findByEmailAndAuthProvider(email, AuthProvider.LOCAL)
+                .orElse(null);
+        return modelMapper.map(account, AccountDto.class);
+    }
+
     // Override methods
     @Override
     public AccountDto save(AccountDto t) {

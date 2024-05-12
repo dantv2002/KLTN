@@ -75,8 +75,8 @@ public class RecordController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_PATIENT','ROLE_NURSE','ROLE_DOCTOR', 'ROLE_RECEPTIONIST')")
-    @GetMapping({ "/patient/record/{id}", "/nurse-doctor/record/{id}", "/receptionist/record/{id}" })
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_RECEPTIONIST')")
+    @GetMapping({ "/patient/record/{id}", "/receptionist/record/{id}" })
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
         RecordDto recordDto = recordService.get(id);
         BaseResponse response = new BaseResponse();

@@ -23,7 +23,6 @@ public class TicketDto {
     private String department; // Khoa khám
     @JsonProperty("NameDoctor")
     private String nameDoctor; // Tên bác sĩ khám
-    @NotNull(message = "Vui lòng chọn ngày khám")
     @JsonProperty("Date")
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date date; // Ngày khám

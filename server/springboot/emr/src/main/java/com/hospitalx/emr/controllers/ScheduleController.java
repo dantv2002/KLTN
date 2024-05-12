@@ -73,7 +73,7 @@ public class ScheduleController {
     }
 
     @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @GetMapping("/patient/get-time/schedule/{id}/{date}")
+    @GetMapping("/patient/schedule/get-time/{id}/{date}")
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id, @PathVariable("date") String date) {
         List<ScheduleDto> scheduleDto = scheduleService.getTime(id, date);
         BaseResponse response = new BaseResponse();

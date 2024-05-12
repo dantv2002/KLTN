@@ -30,7 +30,6 @@ public class DepartmentController {
     @GetMapping("/receptionist/departments")
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
-            @RequestParam(name = "gender", defaultValue = "", required = false) String gender,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
             @RequestParam(name = "sortBy", defaultValue = "id", required = false) String sortBy,

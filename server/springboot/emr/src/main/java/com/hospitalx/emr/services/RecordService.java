@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.AuthProvider;
 import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
@@ -46,15 +44,6 @@ public class RecordService implements IDAO<RecordDto> {
         String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
         if (!role.equals("ROLE_PATIENT")) {
             Record record = recordRepository.save(modelMapper.map(t, Record.class));
-            AccountDto accountDto = new AccountDto();
-            accountDto.setFullName(record.getFullName());
-            accountDto.setEmail(record.getEmail());
-            accountDto.setPassword(BCrypt.hashpw("User@123", BCrypt.gensalt(10)));
-            accountDto.setAuthProvider(AuthProvider.LOCAL);
-            accountDto.setRecords(new ArrayList<>());
-            accountDto.getRecords().add(record.getId());
-            accountService.save(accountDto);
-
             return modelMapper.map(record, RecordDto.class);
         }
         String id = authenticationFacade.getAuthentication().getName();
@@ -122,6 +111,7 @@ public class RecordService implements IDAO<RecordDto> {
 
     @Override
     public void update(RecordDto t) {
+        checkExistRecord(t.getIdentityCard(), t.getId());
         log.info("Update record: " + t.toString());
         String id = authenticationFacade.getAuthentication().getName();
         AccountDto account = accountService.get(id);
@@ -131,7 +121,6 @@ public class RecordService implements IDAO<RecordDto> {
                 log.error("Record not found for account: " + account.getId());
                 throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());
             }
-            checkExistRecord(t.getIdentityCard(), t.getId());
         }
         Record record = recordRepository.findById(t.getId())
                 .orElseThrow(() -> new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value()));
@@ -179,7 +168,7 @@ public class RecordService implements IDAO<RecordDto> {
     //
     private void checkExistRecord(String identityCard, String id) {
         if (identityCard != null && !identityCard.isEmpty()) {
-            Page<RecordDto> records = this.getAll("", "", Pageable.unpaged());
+            Page<RecordDto> records = this.getAll("___", "", Pageable.unpaged());
             records.stream().forEach(record -> {
                 if (record.getIdentityCard().equals(identityCard) && (id == null || !record.getId().equals(id))) {
                     log.error("Record already exists with identity card: " + identityCard);

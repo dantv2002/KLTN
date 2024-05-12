@@ -4,10 +4,12 @@ import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,14 +45,26 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     public List<ScheduleDto> getTime(String doctorId, String time) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         Date date = null;
+        Date startDate = null;
+        Date endDate = null;
         try {
             date = formatter.parse(time);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            startDate = calendar.getTime();
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            endDate = calendar.getTime();
         } catch (Exception e) {
             log.error("Parse date error: " + e.getMessage());
             throw new CustomException("Ngày không hợp lệ", HttpStatus.BAD_REQUEST.value());
         }
         log.info("Get time of doctor: {}", doctorId);
-        return scheduleRepository.getTimeDoctor(doctorId, date).stream()
+        return scheduleRepository.findAllTimeDoctor(doctorId, startDate, endDate).stream()
                 .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
                 .collect(Collectors.toList());
     }

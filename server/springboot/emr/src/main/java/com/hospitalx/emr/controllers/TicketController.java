@@ -32,14 +32,12 @@ public class TicketController {
     
     // Booking ticket
     @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @PostMapping("/patient/ticket/new/{idDoctor}/{idSchedule}/{idRecord}/{time}")
+    @PostMapping("/patient/ticket/new/{idDoctor}/{idSchedule}/{idRecord}")
     public ResponseEntity<BaseResponse> create(
             @PathVariable("idRecord") String idRecord,
             @PathVariable("idSchedule") String idSchedule,
-            @PathVariable("idDoctor") String idDoctor,
-            @PathVariable("time") String time,
-            @RequestBody @Valid TicketDto ticketDto) {
-        ticketService.createTicket(ticketDto, idRecord, idDoctor, idSchedule, time);
+            @PathVariable("idDoctor") String idDoctor) {
+        ticketService.createTicket(idRecord, idDoctor, idSchedule);
         BaseResponse response = new BaseResponse();
         response.setMessage("Đặt lịch khám thành công");
         response.setStatus(HttpStatus.OK.value());

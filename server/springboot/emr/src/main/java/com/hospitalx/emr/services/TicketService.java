@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.common.TicketStatus;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
@@ -46,8 +47,8 @@ public class TicketService implements IDAO<TicketDto> {
     @Autowired
     private EmailService emailService;
 
-    public void createTicket(TicketDto ticketDto, String idRecord, String idDoctor, String idSchedule, String time) {
-        log.info("Create ticket: " + ticketDto.toString());
+    public void createTicket(String idRecord, String idDoctor, String idSchedule) {
+        log.info("Create ticket");
         RecordDto recordDto = recordService.get(idRecord);
         HealthcareStaffDto doctorDto = healthcareStaffService.get(idDoctor);
         DepartmentDto departmentDto = departmentService.get(doctorDto.getDepartmentId());
@@ -55,14 +56,16 @@ public class TicketService implements IDAO<TicketDto> {
         // Set value for ticket
         int examinationTime = 15; // Thời gian khám bệnh (phút)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalTime starTime = time.equalsIgnoreCase("am") ? LocalTime.of(7, 00) : LocalTime.of(13, 00);
+        LocalTime starTime = scheduleDto.getTime().equals(ScheduleTime.MORNING) ? LocalTime.of(7, 00) : LocalTime.of(13, 00);
         LocalTime predictTime = starTime.plusMinutes(examinationTime * scheduleDto.getNumber());
+        TicketDto ticketDto = new TicketDto();
         scheduleDto.setNumber(scheduleDto.getNumber() + 1); // Update number of patients
         ticketDto.setNumber(scheduleDto.getNumber()); // STT
         ticketDto.setArea(departmentDto.getLocation()); // Khu vực khám
         ticketDto.setClinic(scheduleDto.getClinic()); // Phòng khám
         ticketDto.setDepartment(departmentDto.getNameDepartment()); // Khoa khám
         ticketDto.setNameDoctor(doctorDto.getFullName()); // Tên bác sĩ khám
+        ticketDto.setDate(scheduleDto.getDate());
         ticketDto.setTime(predictTime.format(formatter)); // Giờ khám dự kiến
         ticketDto.setStatus(TicketStatus.WAITING); // Trạng thái
         ticketDto.setNamePatient(recordDto.getFullName()); // Tên người khám
