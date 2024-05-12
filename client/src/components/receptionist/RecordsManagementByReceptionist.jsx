@@ -1,13 +1,19 @@
 import axios from "axios";
 import moment from "moment"
 import { message, Button, Table, Form, Modal, Space, Input, DatePicker, Select } from "antd";
-import { EditOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusCircleOutlined, EditOutlined } from '@ant-design/icons';
 import { useState, useEffect } from "react";
-import { deleteRecord, getAllRecordsPatient, newRecordsPatient, updateRecordPatient } from "../../Api";
+import { createRecordReception, getDepartment, getListSchedule, getRecordReceptionist, registerNumberSchedule, updateRecordReception } from "../../Api";
+import { useLocation } from "react-router-dom";
 
-const Records = () => {
+//In phieu kham chua lam, chua phan trang , chua loading
+const RecordsManagementByReceptionist = () => {
 
-  //Data
+  const location = useLocation();
+  const [data, setData] = useState([]);
+  const [gender, setGender] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [year, setYear] = useState("");
   const [insertEmail, setInsertEmail] = useState("")
   const [insertFullName, setInsertFullName] = useState("");
   const [insertBirthday, setInsertBirthDay] = useState("");
@@ -24,12 +30,16 @@ const Records = () => {
   const [updateIdentity, setUpdateIdentity] = useState("");
   const [updateAddress, setUpdateAddress] = useState("");
   const [updateHealth, setUpdateHealth] = useState("");
-  const [data, setData] = useState([]);
   const [visibleInsert, setVisibleInsert] = useState(false);
   const [formInsert] = Form.useForm();
   const [visibleUpdate, setVisibleUpdate] = useState(false);
   const [idUpdate, setIdUpdate] = useState("");
   const [formUpdate] = Form.useForm();
+  const [dataSchedules, setDataSchedules] = useState([]);
+  const [visibleRead, setVisibleRead] = useState(false);
+  const [dataDepartment, setDataDepartment] = useState([]);
+  const [visibleDepartment, setVisibleDepartment] = useState(false);
+  const [keywordDepartment, setKeywordDepartment] = useState("");
 
   // Enable/disable update
   const [editingEmail, setEditingEmail] = useState(false);
@@ -42,21 +52,143 @@ const Records = () => {
   const [editingHealth, setEditingHealth] = useState(false);
 
 
-  useEffect(() => {
-    const fetchPatientRecords = async() => {
-      try {
-        let response = await axios.get(getAllRecordsPatient, {
-          withCredentials: true
-        })
-        if (response.status === 200) {
-          setData(response.data.Data.Records)
-        }
-      } catch(error) {
-        message.error(error.response.data.Message)
+  const columnsRecords = [
+    {
+      title: 'Số thứ tự',
+      dataIndex: 'sequenceNumber',
+      key: 'sequenceNumber',
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: 'Họ tên',
+      dataIndex: 'FullName',
+      key: 'FullName',
+    },
+    {
+      title: 'Ngày sinh',
+      dataIndex: 'DateOfBirth',
+      key: 'DateOfBirth',
+    },
+    {
+      title: 'CMND/CCCD',
+      dataIndex: 'IdentityCard',
+      key: 'IdentityCard',
+    },
+    {
+      title: 'Tùy chọn',
+      dataIndex: 'options',
+      key: 'options',
+      render: (_, records) => (
+        <Space size="middle">
+          <Button type="link" className="readupdate" onClick={() => handleReadUpdate(records)}>
+            Xem
+          </Button>
+          <Button type="link" className="register" onClick={() => handleReadDepartment()} >
+            Đăng ký phòng khám
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const columnsDepartments = [
+    {
+      title: 'Tên khoa',
+      dataIndex: 'NameDepartment',
+      key: 'NameDepartment',
+    },
+    {
+      title: 'Vị trí',
+      dataIndex: 'Location',
+      key: 'Location',
+    },
+    {
+      title: 'Số phòng',
+      dataIndex: 'NumberOfRooms',
+      key: 'NumberOfRooms',
+    },
+    {
+      title: 'Tùy chọn',
+      dataIndex: 'options',
+      key: 'options',
+      render: (_, deparments) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => handleReadSchedules(deparments.Id)}>
+            Xem lịch khám
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const columnsSchedules = [
+    {
+      title: 'Ngày khám',
+      dataIndex: 'Date',
+      key: 'Date',
+    },
+    {
+      title: 'Buổi',
+      dataIndex: 'Time',
+      key: 'Time',
+    },
+    {
+      title: 'Số',
+      dataIndex: 'Number',
+      key: 'Number',
+    },
+    {
+      title: 'Phòng',
+      dataIndex: 'Clinic',
+      key: 'Clinic',
+    },
+    {
+      title: 'Tùy chọn',
+      dataIndex: 'options',
+      key: 'options',
+      render: (_, schedules) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => handleRegisterSchedule(schedules.Id)}>
+            Đăng ký
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const fetchRecord = async () => {
+    try {
+      let response = await axios.get(getRecordReceptionist("", "", ""), {
+        withCredentials: true
+      });
+      if (response.status === 200) {
+        message.success(response.data.Message);
+        setData(response.data.Data.Records);
       }
+    } catch(error) {
+      message.error(error.response.data.Message);
     }
-    fetchPatientRecords();
-  },[])
+  };
+
+  useEffect(() => {
+      fetchRecord();
+  }, [location.pathname]);
+
+  const handleSearch = async () => {
+    const searchGender = gender === undefined ? "" : gender;
+    try {
+      let response = await axios.get(getRecordReceptionist(searchGender, keyword, year), {
+        withCredentials: true
+      });
+      if (response.status === 200) {
+
+        message.success(response.data.Message);
+        setData(response.data.Data.Records);
+      }
+    } catch(error) {
+      message.error(error.response.data.Message);
+    }
+  };
 
   const formLayout = {
     labelCol: { span: 6 },
@@ -72,7 +204,7 @@ const Records = () => {
   const handleNewRecord = async() => {
     let dateofbirth = moment(insertBirthday).format("DD/MM/YYYY");
     try {
-      let response = await axios.post(newRecordsPatient, {
+      let response = await axios.post(createRecordReception, {
         Email: insertEmail,
         FullName: insertFullName,
         DateOfBirth: dateofbirth,
@@ -85,9 +217,9 @@ const Records = () => {
         withCredentials: true
       })
       if (response.status === 200){
-        sessionStorage.setItem("successMessage", response.data.Message)
-        window.location.reload();
-
+        message.success(response.data.Message)
+        setVisibleInsert(false);
+        fetchRecord();
       }
     }catch(error){
       message.error(error.response.data.Message)
@@ -120,7 +252,7 @@ const Records = () => {
   const handleReadUpdateRecord = async() => {
     let dateofbirth = moment(updateBirthday).format("DD/MM/YYYY");
     try {
-      let response = await axios.put(updateRecordPatient, {
+      let response = await axios.put(updateRecordReception, {
         Id: idUpdate,
         Email: updateEmail,
         FullName: updateFullName,
@@ -134,9 +266,17 @@ const Records = () => {
         withCredentials: true
       })
       if (response.status === 200){
-        sessionStorage.setItem("successMessage", response.data.Message)
-        window.location.reload();
-
+        message.success(response.data.Message)
+        setVisibleUpdate(false);
+        setEditingEmail(false);
+        setEditingFullName(false);
+        setEditingBirthday(false);
+        setEditingGender(false);
+        setEditingPhone(false);
+        setEditingIdentity(false);
+        setEditingAddress(false);
+        setEditingHealth(false);
+        fetchRecord();
       }
     }catch(error){
       message.error(error.response.data.Message)
@@ -154,26 +294,7 @@ const Records = () => {
     setEditingAddress(false);
     setEditingHealth(false);
   };
-
-  const handleDelete = async(id) => {
-    try {
-      let response = await axios.delete(deleteRecord(id),{
-        withCredentials:true
-      });
-      if (response.status === 200){
-        sessionStorage.setItem("successMessage", response.data.Message)
-        window.location.reload();
-      }
-    }catch(error){
-      sessionStorage.setItem("errorMessage", error.response.data.Message)
-    }
-
-  }
-
-  const handleReadBloodPressure = async() => {
-    
-  }
-
+  
   const handleEditEmail = () => {
     setEditingEmail(true);
   };
@@ -198,59 +319,90 @@ const Records = () => {
   const handleEditHealth = () => {
     setEditingHealth(true);
   };
-  
-  const columns = [
-    {
-      title: 'Số thứ tự',
-      dataIndex: 'sequenceNumber',
-      key: 'sequenceNumber',
-      render: (_, __, index) => index + 1,
-    },
-    {
-      title: 'Họ tên',
-      dataIndex: 'FullName',
-      key: 'FullName',
-    },
-    {
-      title: 'Ngày sinh',
-      dataIndex: 'DateOfBirth',
-      key: 'DateOfBirth',
-    },
-    {
-      title: 'CMND/CCCD',
-      dataIndex: 'IdentityCard',
-      key: 'IdentityCard',
-    },
-    {
-      title: 'Tùy chọn',
-      dataIndex: 'options',
-      key: 'options',
-      render: (_, records) => (
-        <Space size="middle">
-          <Button type="link" className="readupdate" onClick={() => handleReadUpdate(records)}>
-            Xem
-          </Button>
-          <Button type="link" danger className="delete" onClick={() => handleDelete(records.Id)}>
-            Xóa
-          </Button>
-          <Button type="link" className="blood" onClick={() => handleReadBloodPressure(records)}>
-            Huyết áp
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+
+  const handleReadSchedules = async(id) => {
+    try{
+      let response = await axios.get(getListSchedule(id),{
+        withCredentials: true
+      })
+      if (response.status === 200){
+        setVisibleRead(true);
+        setDataSchedules(response.data.Data.Schedules)
+        message.success(response.data.Message)
+      }
+    }catch(error){
+      message.error(error.response.data.Message)
+    }
+  }
+
+  const handleCancelRead = () => {
+    setVisibleRead(false);
+    setKeywordDepartment("");
+  }
+
+  const handleRegisterSchedule = async(id) => {
+    try{
+      let response = await axios.get(registerNumberSchedule(id),{
+        withCredentials: true,
+      })
+      if (response.status === 200){
+        message.success(response.data.Message)
+      }
+    }catch(error){
+      message.error(error.response.data.Message)
+    }
+  }
+
+  const handleCancelDepartment = () => {
+    setVisibleDepartment(false);
+  }
+
+  const handleReadDepartment = async() => {
+    try{
+      let response = await axios.get(getDepartment(keywordDepartment),{
+        withCredentials: true
+      })
+      if (response.status === 200){
+        setVisibleDepartment(true);
+        setDataDepartment(response.data.Data.Departments)
+        message.success(response.data.Message)
+      }
+    }catch(error){
+      message.error(error.response.data.Message)
+    }
+  }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center lg:px-32 px-5 items-center"  >
-      <h1 className=" text-3xl font-rubik text-blue-700 mb-6 mt-28">Quản lý hồ sơ</h1>
-      <button onClick={handleInsert} className="text-[15px] bg-cyan-400 h-9 text-white px-4 py-2 rounded-[5px] hover:bg-hoverColor transition duration-300 ease-in-out mb-4">
-        Thêm hồ sơ
-      </button>
+    <div>
+      <Select
+        className="w-96 mt-3 mr-3"
+        placeholder="Tìm theo giới tính"
+        value={gender}
+        onChange={(value) => setGender(value)}
+        allowClear
+      >
+        <Select.Option value="Nam">Nam</Select.Option>
+        <Select.Option value="Nữ">Nữ</Select.Option>
+        <Select.Option value="Khác">Khác</Select.Option>
+      </Select>
+      <Input
+        className="w-96 mt-3 mr-3"
+        placeholder="Tìm theo tên"
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
+      />
+      <Input
+        className="w-96 mt-3 mr-3"
+        placeholder="Tìm theo năm sinh"
+        value={year}
+        onChange={(e) => setYear(e.target.value)}
+      />
+      <Button onClick={() => handleSearch()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+      <br/>
+      <Button onClick={() => handleInsert()} className="bg-cyan-400 text-black mt-4 mb-4" htmlType="submit" icon={<PlusCircleOutlined />} >Thêm bệnh nhân mới</Button>
       <Table 
-        columns={columns} 
+        columns={columnsRecords} 
         dataSource={data}
-        pagination={false}
       />
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Thêm hồ sơ</h1>}
@@ -437,8 +589,43 @@ const Records = () => {
           </Form.Item>
         </Form>
       </Modal>
+      <Modal
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem phòng khám</h1>}
+        visible={visibleDepartment}
+        onCancel={handleCancelDepartment}
+        cancelText="Thoát"
+        okButtonProps={{ hidden: true }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+        className="w-full max-w-xl mx-auto mt-10"
+      >
+        <Input
+          className="w-80 mt-3 mr-3"
+          placeholder="Tìm theo tên khoa"
+          value={keywordDepartment}
+          onChange={(e) => setKeywordDepartment(e.target.value)}
+        />
+        <Button onClick={() => handleReadDepartment()} className="bg-blue-700 text-white mt-3 mb-4" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+        <Table 
+          columns={columnsDepartments} 
+          dataSource={dataDepartment}
+        />
+      </Modal>
+      <Modal
+          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem lịch khám</h1>}
+          visible={visibleRead}
+          onCancel={handleCancelRead}
+          cancelText="Thoát"
+          okButtonProps={{ hidden: true }}
+          cancelButtonProps={{ className: "bg-red-600" }}
+          className="w-full max-w-xl mx-auto mt-10"
+        >
+          <Table 
+            columns={columnsSchedules} 
+            dataSource={dataSchedules}
+          />
+        </Modal>
     </div>
   )
 }
 
-export default Records
+export default RecordsManagementByReceptionist

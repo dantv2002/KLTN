@@ -6,6 +6,8 @@ import { Form, Input, Button, message} from 'antd'
 import axios from "axios";
 import Register from "./Register";
 import { googleApi, loginApi } from "../../Api";
+import Cookies from "js-cookie"
+import { useNavigate } from "react-router-dom";
 
 
 const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
@@ -13,6 +15,7 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
   const [showFormRegister, setShowFormRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const openFormResetInternal = () => {
     openFormReset();
@@ -28,7 +31,18 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
       });
       if (response.status === 200) {
         sessionStorage.setItem("successMessage", response.data.Message)
-        window.location.reload();
+        let role = Cookies.get("Role")
+        if (role === "PATIENT") {
+          window.location.reload();
+        } else if (role === "NURSE") {
+          navigate("/nurse/records");
+        } else if (role === "RECEPTIONIST") {
+          navigate("/receptionist/records");
+        } else if (role === "DOCTOR") {
+          navigate("/doctor/records");
+        } else if (role === "ADMIN") {
+          navigate("/admin/statistic");
+        }       
       }
     } catch (error) {
         message.error(error.response.data.Message); 

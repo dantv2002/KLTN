@@ -5,13 +5,13 @@ import Login from "../../models/auth/Login";
 import Register from "../../models/auth/Register";
 import ResetPassword from "../../models/auth/ResetPassword";
 import ConfirmPassword from "../../models/auth/ConfirmPassword";
-import Appointment from "../../models/patient/Appointment";
 import ChangePassword from "../../models/ChangePassword";
 import logo from "../../assets/img/logo2.png"
-import { logoutApi } from "../../Api";
+import { createTicker, getAllRecordsPatient, getDoctorPatient, getSchedulePatient, logoutApi } from "../../Api";
 import Cookies from "js-cookie"
 import axios from "axios";
-import { message } from "antd";
+import { Modal, message, Button, Space, Select, Input, Table } from "antd";
+import {SearchOutlined} from "@ant-design/icons"
 import replacePlusWithSpace from "../../content/ReplacePlusWithSpace";
 import { useNavigate } from 'react-router-dom';
 
@@ -21,11 +21,131 @@ const Navbar = () => {
   const [showFormRegister, setShowFormRegister] = useState(false);
   const [showFormReset, setShowFormReset] = useState(false);
   const [showFormConfirm, setShowFormConfirm] = useState(false);
-  const [showFormAppointment, setShowFormAppointment] = useState(false);
   const [showFormChangePassword, setShowFormChangePassword] = useState(false);
   const fullname = Cookies.get("FullName")
   const name =  fullname ? replacePlusWithSpace(fullname) : ""
   const navigate = useNavigate();
+  const [idDoctor, setIdDoctor] = useState("");
+  const [idSchedule, setIdSchedule] = useState("");
+  const [dataDoctors, setDataDoctors] = useState([]);
+  const [keyword, setKeyword] = useState("");
+  const [title, setTitle] = useState("");
+  const [department, setDepartment] = useState("");
+  const [gender, setGender] = useState("");
+  const [visibleDoctor, setVisibleDoctor] = useState(false);
+  const [dataSchedules, setDataSchedules] = useState([]);
+  const [visibleSchedule, setVisibleSchedule] = useState(false);
+  const [dataRecords, setDataRecords] = useState([]);
+  const [visibleRecord, setVisibleRecord] = useState(false);
+
+
+
+  const columnsDoctors = [
+    {
+      title: 'STT',
+      dataIndex: 'sequenceNumber',
+      key: 'sequenceNumber',
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: 'Họ tên',
+      dataIndex: 'FullName',
+      key: 'FullName',
+    },
+    {
+      title: 'Chức danh',
+      dataIndex: 'Title',
+      key: 'Title',
+    },
+    {
+      title: 'Khoa',
+      dataIndex: 'DepartmentId',
+      key: 'DepartmentId',
+    },
+    {
+      title: 'Tùy chọn',
+      dataIndex: 'options',
+      key: 'options',
+      render: (_, doctor) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => handleReadSchedules(doctor.Id)}>
+            Chọn
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const columnsSchedules = [
+    {
+      title: 'Ngày khám',
+      dataIndex: 'Date',
+      key: 'Date',
+    },
+    {
+      title: 'Buổi',
+      dataIndex: 'Time',
+      key: 'Time',
+    },
+    {
+      title: 'Số',
+      dataIndex: 'Number',
+      key: 'Number',
+    },
+    {
+      title: 'Phòng',
+      dataIndex: 'Clinic',
+      key: 'Clinic',
+    },
+    {
+      title: 'Tùy chọn',
+      dataIndex: 'options',
+      key: 'options',
+      render: (_,schedule) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => handleReadRecord(schedule.Id)}>
+            Chọn
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+  
+  const columnsRecords = [
+    {
+      title: 'Số thứ tự',
+      dataIndex: 'sequenceNumber',
+      key: 'sequenceNumber',
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: 'Họ tên',
+      dataIndex: 'FullName',
+      key: 'FullName',
+    },
+    {
+      title: 'Ngày sinh',
+      dataIndex: 'DateOfBirth',
+      key: 'DateOfBirth',
+    },
+    {
+      title: 'CMND/CCCD',
+      dataIndex: 'IdentityCard',
+      key: 'IdentityCard',
+    },
+    {
+      title: 'Tùy chọn',
+      dataIndex: 'options',
+      key: 'options',
+      render: (_,record) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => handleAppointment(record.Id)}>
+            Đăng ký
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
   const handleChange = () => {
     setMenu(!menu);
@@ -61,15 +181,6 @@ const Navbar = () => {
     setShowFormRegister(false)
   };
 
-  const openFormAppointment = () => {
-    setShowFormAppointment(true)
-    setMenu(false)
-  }
-
-  const closeFormAppointment = () => {
-    setShowFormAppointment(false)
-  }
-
   const openFormChangePassword = () => {
     setShowFormChangePassword(true)
     setMenu(false)
@@ -88,6 +199,82 @@ const Navbar = () => {
         sessionStorage.setItem("successMessage", response.data.Message)
         navigate("/")
         window.location.reload();
+      }
+    }catch(error){
+      message.error(error.response.data.Message)
+    }
+  }
+
+  const handleReadDoctor = async () => {
+    try {
+      const searchGender = gender === undefined ? "" : gender;
+      let response = await axios.get(getDoctorPatient(keyword, title, department, searchGender), {
+        withCredentials: true
+      });
+      if (response.status === 200) {
+        setVisibleDoctor(true);
+        message.success(response.data.Message);
+        setDataDoctors(response.data.Data.HealthCareStaffs);
+      }
+    } catch(error) {
+      message.error(error.response.data.Message);
+    }
+  };
+
+  const handleCancelDoctor = () => {
+    setVisibleDoctor(false);
+  }
+
+  const handleReadSchedules = async(id) => {
+    setIdDoctor(id);
+    try{
+      let response = await axios.get(getSchedulePatient(id),{
+        withCredentials: true
+      })
+      if (response.status === 200){
+        setVisibleSchedule(true);
+        setDataSchedules(response.data.Data.Schedules)
+        message.success(response.data.Message)
+      }
+    }catch(error){
+      message.error(error.response.data.Message)
+    }
+  }
+
+  const handleCancelSchedule = () => {
+    setVisibleSchedule(false);
+  }
+
+  const handleReadRecord = async(id) => {
+    setIdSchedule(id);
+    try{
+      let response = await axios.get(getAllRecordsPatient,{
+        withCredentials: true
+      })
+      if (response.status === 200){
+        setVisibleRecord(true);
+        setDataRecords(response.data.Data.Records)
+        message.success(response.data.Message)
+      }
+    }catch(error){
+      message.error(error.response.data.Message)
+    }
+  }
+
+  const handleCancelRecord = () => {
+    setVisibleRecord(false);
+  }
+
+  const handleAppointment = async(id) => {
+    try {
+      let response = await axios.get(createTicker(idDoctor, idSchedule, id),{
+        withCredentials: true
+      })
+      if (response.status === 200){
+        message.success(response.data.Message)
+        setVisibleRecord(false);
+        setVisibleSchedule(false);
+        setVisibleDoctor(false)
       }
     }catch(error){
       message.error(error.response.data.Message)
@@ -201,7 +388,7 @@ const Navbar = () => {
                   <li className="py-2 px-4 rounded-md hover:bg-blue-700">
                     <button
                       className="hover:text-hoverColor transition-all cursor-pointer block"
-                      onClick={openFormAppointment}
+                      onClick={() => handleReadDoctor()}
                     >
                       Đặt lịch khám
                     </button>
@@ -223,7 +410,6 @@ const Navbar = () => {
             {showFormRegister && <Register closeFormRegister={()=> setShowFormRegister(false)} openFormLogin={openFormLogin} openFormConfirm={openFormConfirm}/>}
             {showFormReset && <ResetPassword closeFormReset={()=> setShowFormReset(false)} openFormConfirm={openFormConfirm}/>}
             {showFormConfirm && <ConfirmPassword closeFormConfirm={()=> setShowFormConfirm(false)}/>}
-            {showFormAppointment && <Appointment closeFormAppointment={closeFormAppointment}/>}
             {showFormChangePassword && <ChangePassword closeFormChangePassword={closeFormChangePassword}/>}
             
             <div className=" lg:hidden flex items-center">
@@ -330,7 +516,6 @@ const Navbar = () => {
               </button>
               <button
                 className="hover:text-hoverColor transition-all cursor-pointer block"
-                onClick={openFormAppointment}
               >
                 Đặt lịch khám
               </button>
@@ -343,6 +528,78 @@ const Navbar = () => {
             </div>
           )}
         </div>
+        <Modal
+          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Chọn bác sĩ</h1>}
+          visible={visibleDoctor}
+          onCancel={handleCancelDoctor}
+          cancelText="Thoát"
+          okButtonProps={{ hidden: true }}
+          cancelButtonProps={{ className: "bg-red-600" }}
+          width={1000}
+        >
+          <Input
+            className="w-40 mt-3 mr-3"
+            placeholder="Tìm theo tên"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+          <Input
+            className="w-40 mt-3 mr-3"
+            placeholder="Tìm theo chức danh"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <Input
+            className="w-40 mt-3 mr-3"
+            placeholder="Tìm theo khoa"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+          />
+          <Select
+            className="w-40 mt-3 mr-3"
+            placeholder="Tìm theo giới tính"
+            value={gender}
+            onChange={(value) => setGender(value)}
+            allowClear
+          >
+            <Select.Option value="Nam">Nam</Select.Option>
+            <Select.Option value="Nữ">Nữ</Select.Option>
+            <Select.Option value="Khác">Khác</Select.Option>
+          </Select>
+          <Button onClick={() => handleReadDoctor()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+          <Table
+            columns={columnsDoctors} 
+            dataSource={dataDoctors}
+          />
+        </Modal>
+        <Modal
+          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Chọn lịch khám</h1>}
+          visible={visibleSchedule}
+          onCancel={handleCancelSchedule}
+          cancelText="Thoát"
+          okButtonProps={{ hidden: true }}
+          cancelButtonProps={{ className: "bg-red-600" }}
+          width={800}
+        >
+          <Table 
+            columns={columnsSchedules} 
+            dataSource={dataSchedules}
+          />
+        </Modal>
+        <Modal
+          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Chọn hồ sơ</h1>}
+          visible={visibleRecord}
+          onCancel={handleCancelRecord}
+          cancelText="Thoát"
+          okButtonProps={{ hidden: true }}
+          cancelButtonProps={{ className: "bg-red-600" }}
+          width={800}
+        >
+          <Table 
+            columns={columnsRecords} 
+            dataSource={dataRecords}
+          />
+        </Modal>
       </div>  
   );
 };

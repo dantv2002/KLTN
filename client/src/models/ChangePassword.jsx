@@ -1,10 +1,10 @@
-
 import logo from "../assets/img/logo2.png"
 import { Form, Input, Button, message } from 'antd'
 import axios from "axios";
 import { PropTypes } from 'prop-types';
 import { useState } from "react";
 import { changeApi, logoutApi } from "../Api";
+import { useNavigate } from "react-router-dom";
 
 
 const ChangePassword = ({closeFormChangePassword}) => {
@@ -12,6 +12,7 @@ const ChangePassword = ({closeFormChangePassword}) => {
     const [oldpass, setOldPass] = useState("");
     const [newpass, setNewPass] = useState("");
     const [confirm, setConfirm] = useState("");
+    const navigate = useNavigate();
 
     const handleChange = async() => {
         try {
@@ -27,6 +28,7 @@ const ChangePassword = ({closeFormChangePassword}) => {
                     withCredentials: true
                 });
                 sessionStorage.setItem("successMessage", response.data.Message);
+                navigate("/")
                 window.location.reload();
             }
         } catch(error) {
