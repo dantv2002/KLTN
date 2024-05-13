@@ -163,14 +163,14 @@ model.add(tf.keras.layers.Dense(NUM_CLASSES, activation="softmax"))
 
 alxnetModel, alxnetModelName = make_model(model, "alexnet")
 # %%
-historyAlxnetModel, hisSavedName, modelName = None, None, None
-new_training = 1
+historyAlxnetModel, hisSavedName, modelName = None, "alexnethistory", "alexnet.h5"
+new_training = 0
 if new_training:
     historyAlxnetModel, hisSavedName, modelName = train_model(alxnetModel, alxnetModelName)
 else: 
     alxnetModel = keras.models.load_model(modelName)
     historyAlxnetModel = joblib.load(hisSavedName)
-    historyAlxnetModel.evaluate(test_ds)
+    alxnetModel.evaluate(test_ds)
 # %%
 resnet_base = tf.keras.applications.ResNet50(weights='imagenet', include_top=False, input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))
 
@@ -209,14 +209,14 @@ resnet_test_ds = resnet_test_ds.unbatch()
 resnet_test_ds = resnet_test_ds.batch(16)
 
 # %%
-historyResnet50Model, hisSavedName, modelName = None, None, None
-new_training = 1
+historyResnet50Model, hisSavedName, modelName = None, "resnet50history", "resnet50.h5"
+new_training = 0
 if new_training:
     historyResnet50Model, hisSavedName, modelName = train_model(resnet50Model, resnet50ModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds)
 else: 
     resnet50Model = keras.models.load_model(modelName)
     historyResnet50Model = joblib.load(hisSavedName)
-    historyResnet50Model.evaluate(resnet_test_ds)
+    resnet50Model.evaluate(resnet_test_ds)
 # %% model like resnet
 
 def conv_block(input_tensor, filters, kernel_size, strides=(1, 1), padding='same'):
@@ -279,32 +279,56 @@ model = tf.keras.models.Model(inputs=input_layer, outputs=outputs)
 
 modelResnetCustom, resnetCustomModelName = make_model(model, "modelResnetCustom")
 # %%
-historyResnetCustom, hisSavedName, modelName = None, None, None
+historyResnetCustom, hisSavedName, modelName = None, "modelResnetCustomhistory", "modelResnetCustom.h5"
 new_training = 1
 if new_training:
     historyResnetCustom, hisSavedName, modelName = train_model(modelResnetCustom, resnetCustomModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds)
 else: 
     modelResnetCustom = keras.models.load_model(modelName)
     historyResnetCustom = joblib.load(hisSavedName)
-    historyResnetCustom.evaluate(resnet_test_ds)
+    modelResnetCustom.evaluate(resnet_test_ds)
 
 # %% Try prediction:
-# if 10: 
-#     plt.figure(figsize=(12, 80))
-#     index = 0
-#     test_set_raw = test_set_raw.shuffle(buffer_size=50)
-#     for image, label in test_set_raw.take(30):
-#         index += 1
-#         plt.subplot(15, 2, index)
-#         plt.imshow(image)
+class_names = train_ds.class_names
+model = keras.models.load_model("modelResnetCustom.h5")
+if 10: 
+    
+    for images, labels in resnet_test_ds.take(2):
+        for i in range(4):
+            ax = plt.subplot(2, 2, i + 1)
+            # img = images[i].numpy().astype("uint8")
+            img = images[i]
+            plt.imshow(img, cmap="gray")
+            img_array = np.expand_dims(img, axis=0)
+            predictions = model.predict(img_array)
+    #         print(predictions)
+            score = tf.nn.softmax(predictions)
+    #         print(score)
+    #         predicted_classes = np.argmax(score)
+    #         print(np.argmax(score))
+    #         print(np.argsort(np.max(score, axis=0))[-2])
+    #         print(score)
+            plt.title("P:{} {:.1f}%;R:{}".format(test_ds.class_names[np.argmax(score)], 100 * np.max(score), test_ds.class_names[np.argmax(labels[i])])) 
+            plt.axis("off")
 
-#         test_img, label = preprocess(image, label)
-#         #with tf.device('/cpu'):
-#         prediction =  model(test_img, training=False) 
-#         prediction_lbl = np.argmax(prediction.numpy())
-#         prediction_score = np.max(prediction.numpy())
+# %%
+testURL = "https://www.aboutcancer.com/mri_gbm3.jpg"
+cache_subdir = os.path.join(os.getcwd(), "caches/")
+print("cache dir: " + cache_subdir)
+image = tf.keras.preprocessing.image.load_img(tf.keras.utils.get_file(origin=testURL, cache_subdir=cache_subdir), target_size=None, color_mode = "rgb")
+image_arr = tf.keras.preprocessing.image.img_to_array(image)
+# image_arr = np.expand_dims(image_arr, axis=0)
+ax = plt.subplot(1, 2, 1)
+plt.imshow(image, cmap="gray")
+plt.axis("off")
 
-#         plt.title("Label: {} \nTop-1 predict: {} ({}%)".format(class_names[label],class_names[prediction_lbl], round(prediction_score*100,1)), fontsize=20)
-#         plt.axis("off")
+preprocessed_image, _ = resnetPreprocess(image_arr, None)
+preprocessed_image = preprocessed_image.numpy().astype("uint8")
+ax = plt.subplot(1, 2, 2)
+plt.imshow(preprocessed_image, cmap="gray")
+plt.axis("off")
+print(model.predict(preprocessed_image))
+
+# %% Confusion matrix
 
 # %%

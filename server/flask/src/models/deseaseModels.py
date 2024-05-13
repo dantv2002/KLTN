@@ -31,7 +31,7 @@ class deseaseModels:
                 # print(row['index'])
         # print(self.labels)
                 
-        file_id = '1iqvUhEnCw7PUQI8C2NfK4mqvgQaUd9F7'
+        file_id = '1baaiaH9q2L9qGEJijjtTWZFO0ptFUNnk'
         url = f'https://drive.google.com/uc?id={file_id}'
         file_name = 'models/model_weights.h5'
         if not os.path.exists(path+file_name):

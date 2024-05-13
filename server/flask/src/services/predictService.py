@@ -3,6 +3,8 @@ import os
 import shutil
 import tensorflow as tf
 
+IMAGE_HEIGHT_INPUT, IMAGE_WIDTH_INPUT = 224, 224
+
 class predictService:
     def __init__(self, url, model):
         """
@@ -41,27 +43,22 @@ class predictService:
     def preprocessImage(self):
         cache_subdir = os.path.join(os.getcwd(), "caches/")
         print("cache dir: " + cache_subdir)
-        image = tf.keras.preprocessing.image.load_img(tf.keras.utils.get_file(origin=self.imageURL, cache_subdir=cache_subdir), target_size=(300, 300), color_mode = "rgb")
-         # Get original image dimensions
-        original_height, original_width = image.height, image.width
+        image = tf.keras.preprocessing.image.load_img(tf.keras.utils.get_file(origin=self.imageURL, cache_subdir=cache_subdir), target_size=None, color_mode = "rgb")
+        image_arr = tf.keras.preprocessing.image.img_to_array(image)
+        image_arr = np.expand_dims(image_arr, axis=0)
 
-        # Calculate resize ratio while preserving aspect ratio
-        if original_height > original_width:
-            resize_ratio = 224.0 / original_height
-        else:
-            resize_ratio = 224.0 / original_width
-
-        # Resize image dimensions based on the calculated ratio
-        new_height = int(original_height * resize_ratio)
-        new_width = int(original_width * resize_ratio)
-
-        # Resize the image using tf.image.resize()
-        resized_image = tf.image.resize(
-            image, (new_height, new_width), method=tf.image.ResizeMethod.NEAREST_NEIGHBOR  # Choose appropriate resize method
-        )
-        image_array = tf.keras.preprocessing.image.img_to_array(resized_image)
-        image_array = np.expand_dims(image_array, axis=0)
-        image_array = image_array / 255.0
+        preprocessed_image = self.resnetPreprocess(image_arr)
+        preprocessed_image = preprocessed_image.numpy().astype("uint8")
+        
         shutil.rmtree(cache_subdir)
-        # print(image_array)
-        return image_array
+        return preprocessed_image
+    
+    def resnetPreprocess(self, img, target_height=IMAGE_HEIGHT_INPUT, target_width=IMAGE_WIDTH_INPUT):
+        img = tf.image.resize_with_pad(
+        img, 
+        target_height, target_width, 
+        method=tf.image.ResizeMethod.NEAREST_NEIGHBOR,
+        antialias=False
+        )
+        img = tf.keras.applications.resnet.preprocess_input(img)
+        return img
