@@ -55,4 +55,8 @@ public class RecordDto {
     @JsonProperty("HealthInsurance")
     @Pattern(regexp = "^[a-zA-Z]{2}[0-9]{13}$", message = "Vui lòng nhập đúng định dạng mã thẻ bảo hiểm y tế")
     private String healthInsurance;
+
+    @JsonProperty("CreatedAt")
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private Date createdAt;
 }

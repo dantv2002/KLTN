@@ -1,7 +1,9 @@
 package com.hospitalx.emr.models.dtos;
 
+import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hospitalx.emr.common.AuthProvider;
@@ -43,4 +45,8 @@ public class AccountDto {
     private Verify verify;
     private List<String> records;
     private List<String> tickets;
+    
+    @JsonProperty("CreatedAt")
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private Date createdAt;
 }

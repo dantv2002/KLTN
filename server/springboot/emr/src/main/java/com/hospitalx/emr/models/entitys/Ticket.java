@@ -1,6 +1,8 @@
 package com.hospitalx.emr.models.entitys;
 
 
+import java.util.Date;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -27,4 +29,5 @@ public class Ticket {
     private String gender; // Giới tính
     private String healthInsurance; // Bảo hiểm y tế
     private String address; // Địa chỉ
+    private Date createdAt = new Date(); // Ngày tạo
 }

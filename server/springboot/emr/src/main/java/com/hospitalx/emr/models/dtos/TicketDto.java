@@ -1,5 +1,8 @@
 package com.hospitalx.emr.models.dtos;
 
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hospitalx.emr.common.TicketStatus;
 
@@ -37,4 +40,8 @@ public class TicketDto {
     private String healthInsurance; // Bảo hiểm y tế
     @JsonProperty("Address")
     private String address; // Địa chỉ
+
+    @JsonProperty("CreatedAt")
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private Date createdAt;
 }

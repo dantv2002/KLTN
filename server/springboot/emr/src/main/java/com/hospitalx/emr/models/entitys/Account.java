@@ -1,5 +1,6 @@
 package com.hospitalx.emr.models.entitys;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -33,4 +34,6 @@ public class Account {
     private List<String> records;
 
     private List<String> tickets;
+
+    private Date createdAt = new Date();
 }
