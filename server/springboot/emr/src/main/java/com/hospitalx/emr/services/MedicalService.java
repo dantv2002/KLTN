@@ -1,8 +1,12 @@
 package com.hospitalx.emr.services;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.MedicalResult;
 import com.hospitalx.emr.common.MedicalType;
 import com.hospitalx.emr.exception.CustomException;
+import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.dtos.MedicalDto;
 import com.hospitalx.emr.models.entitys.Medical;
@@ -30,6 +35,8 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private RecordService recordService;
     @Autowired
+    private AccountService accountService;
+    @Autowired
     private AuthenticationFacade authenticationFacade;
     @Autowired
     private HealthcareStaffService healthcareStaffService;
@@ -37,6 +44,39 @@ public class MedicalService implements IDAO<MedicalDto> {
     private DepartmentService departmentService;
     @Autowired
     private ModelMapper modelMapper;
+
+    public List<Map<String, Object>> biosignalStatistical(String recordId, Map<String, String> request) {
+        log.info("Get biosignal statistical");
+        // Check record exist
+        String accountId = authenticationFacade.getAuthentication().getName();
+        AccountDto account = accountService.get(accountId);
+        if (!account.getRecords().contains(recordId)) {
+            log.error("Record not found with ID: " + recordId);
+            throw new CustomException("Hồ sơ không tồn tại!", HttpStatus.NOT_FOUND.value());
+        }
+        Date startDate = convertDate(request.get("StartDate"));
+        Date endDate = convertDate(request.get("EndDate"));
+        if (startDate.after(endDate)) {
+            log.error("Start date is after end date");
+            throw new CustomException("Ngày bắt đầu không thể sau ngày kết thúc!", HttpStatus.BAD_REQUEST.value());
+        }
+        List<Medical> medicals = medicalRepository.findAllByRecordIdAndDateBetween(recordId, startDate, endDate);
+        List<Map<String, Object>> data = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        medicals.stream().forEach((medical -> {
+            calendar.setTime(medical.getCreateDate());
+            Map<String, Object> item = new HashMap<>();
+            item.put("Date", (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
+                    + calendar.get(Calendar.DAY_OF_MONTH)));
+            item.put("HeartRate", Double.parseDouble(medical.getBiosignal().getHeartRate()));
+            item.put("Temperature", Double.parseDouble(medical.getBiosignal().getTemperature()));
+            item.put("BloodPressure", Double.parseDouble(medical.getBiosignal().getBloodPressure()));
+            item.put("RespiratoryRate", Double.parseDouble(medical.getBiosignal().getRespiratoryRate()));
+            item.put("Weight", Double.parseDouble(medical.getBiosignal().getWeight()));
+            data.add(item);
+        }));
+        return data;
+    }
 
     public void saveInpatient(MedicalDto medical) {
         inpatientValidate(medical);
@@ -262,6 +302,16 @@ public class MedicalService implements IDAO<MedicalDto> {
                 throw new CustomException("Chuẩn đoán nơi chuyển đến không được để trống!",
                         HttpStatus.BAD_REQUEST.value());
             }
+        }
+    }
+
+    private Date convertDate(String date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            return formatter.parse(date);
+        } catch (Exception e) {
+            log.error("Convert date error: " + e.getMessage());
+            throw new CustomException("Lỗi chuyển đổi ngày tháng!", HttpStatus.BAD_REQUEST.value());
         }
     }
 }

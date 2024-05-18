@@ -55,7 +55,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
             log.error("Schedule is empty");
             throw new CustomException("Không tìm thấy lịch khám", HttpStatus.NOT_FOUND.value());
         }
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+7"));
+        ZonedDateTime now = ZonedDateTime.now();
         ScheduleTime time = now.getHour() < 12 ? ScheduleTime.MORNING : ScheduleTime.AFTERNOON;
         ScheduleDto scheduleDto = scheduleDtos.stream()
                 .filter(item -> item.getClinic().equals(numberClinic) && item.getTime().equals(time))
@@ -77,7 +77,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
         departmentService.get(departmentId); // Check department exists
         List<HealthcareStaffDto> doctors = healthcareStaffService.getAllByDepartmentId(departmentId);
         List<ScheduleDto> schedules = new ArrayList<>();
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+7"));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+0"));
         Date date = Date.from(now.toInstant());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -189,7 +189,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     @Override
     public Page<ScheduleDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all schedules with doctorId: " + keyword);
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+7"));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+0"));
         return scheduleRepository.findByAllDoctorId(keyword, Date.from(now.toInstant()), pageable)
                 .map(schedule -> modelMapper.map(schedule, ScheduleDto.class));
     }
@@ -231,7 +231,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
             throw new CustomException("Có lịch khám trùng nhau", HttpStatus.BAD_REQUEST.value());
         }
         // check in database
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+7"));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+0"));
         List<Schedule> schedules = scheduleRepository.findAll(Date.from(now.toInstant()));
         Set<String> set = schedules.stream()
                 .map(item -> {

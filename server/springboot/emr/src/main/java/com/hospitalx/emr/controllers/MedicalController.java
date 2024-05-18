@@ -65,7 +65,7 @@ public class MedicalController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        keyword = keyword + "_" + recordId + "_" +showAll;
+        keyword = keyword + "_" + recordId + "_" + showAll;
         Page<MedicalDto> medicals = medicalService.getAll(keyword, mark, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải danh sách bệnh án thành công");
@@ -176,6 +176,23 @@ public class MedicalController {
                 put("NumberOfItems", medicals.getNumberOfElements());
                 put("TotalItems", medicals.getTotalElements());
                 put("TotalPages", medicals.getTotalPages());
+            }
+        });
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
+    @PostMapping("/patient/biosignal-statistical/{recordId}")
+    public ResponseEntity<BaseResponse> biosignalStatistical(@PathVariable("recordId") String recordId,
+            @RequestBody Map<String, String> request) {
+
+        List<Map<String, Object>> result = medicalService.biosignalStatistical(recordId, request);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Thống kê dữ liệu sinh hiệu thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(new HashMap<>() {
+            {
+                put("Statistical", result);
             }
         });
         return ResponseEntity.status(response.getStatus()).body(response);
