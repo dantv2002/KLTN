@@ -114,7 +114,12 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
             Page<HealthcareStaff> entities = healthcareStaffRepository.findByDoctorForPatient(StaffType.DOCTOR,
                     parts[0], parts[1], parts[2],
                     parts[3], pageable);
-            return entities.map(entity -> modelMapper.map(entity, HealthcareStaffDto.class));
+            return entities.map(entity -> {
+                HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
+                String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId()).getNameDepartment();
+                healthcareStaffDto.setDepartmentName(departmentName);
+                return healthcareStaffDto;
+            });
         }
         type = type.toLowerCase();
         if (type != null && !type.isEmpty() && !type.equals("doctor") && !type.equals("nurse")
@@ -137,7 +142,12 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
             entities = healthcareStaffRepository.findByFullNameContainingIgnoreCase(parts[0], pageable);
         }
         log.info("Get all healthcare staffs success with total staffs: " + entities.getTotalElements());
-        return entities.map(entity -> modelMapper.map(entity, HealthcareStaffDto.class));
+        return entities.map(entity -> {
+            HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
+            String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId()).getNameDepartment();
+            healthcareStaffDto.setDepartmentName(departmentName);
+            return healthcareStaffDto;
+        });
     }
 
     @Override

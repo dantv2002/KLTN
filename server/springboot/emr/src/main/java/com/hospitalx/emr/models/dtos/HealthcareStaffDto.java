@@ -69,4 +69,7 @@ public class HealthcareStaffDto {
     @NotEmpty(message = "Vui lòng chọn khoa làm việc cho nhân viên này")
     @JsonProperty("DepartmentId")
     private String departmentId;
+
+    @JsonProperty("DepartmentName")
+    private String departmentName;
 }

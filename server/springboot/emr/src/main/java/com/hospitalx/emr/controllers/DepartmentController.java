@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,8 +27,8 @@ public class DepartmentController {
     @Autowired
     private DepartmentService departmentService;
 
-    @PreAuthorize("hasRole('ROLE_RECEPTIONIST')")
-    @GetMapping("/receptionist/departments")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RECEPTIONIST')")
+    @GetMapping({ "/receptionist/departments", "/admin/departments" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
@@ -39,7 +40,7 @@ public class DepartmentController {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<DepartmentDto> data = departmentService.getAll(keyword, "", pageable);
         BaseResponse response = new BaseResponse();
-        response.setMessage("Tải danh sách phòng khám thành công");
+        response.setMessage("Tải danh sách khoa thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<>() {
             {
@@ -48,6 +49,21 @@ public class DepartmentController {
                 put("NumberOfItems", data.getNumberOfElements());
                 put("TotalItems", data.getTotalElements());
                 put("TotalPages", data.getTotalPages());
+            }
+        });
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/admin/department/{id}")
+    public ResponseEntity<BaseResponse> getOne(@PathVariable("id") String id) {
+        DepartmentDto department = departmentService.get(id);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Tải thông tin khoa thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(new HashMap<>() {
+            {
+                put("Department", department);
             }
         });
         return ResponseEntity.status(response.getStatus()).body(response);
