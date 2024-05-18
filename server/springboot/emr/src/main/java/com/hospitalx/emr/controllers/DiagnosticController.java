@@ -54,7 +54,7 @@ public class DiagnosticController {
     }
 
     @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @PostMapping("/doctor/medical-consultation")
+    @PostMapping("/patient/medical-consultation")
     public ResponseEntity<BaseResponse> medicalConsultation(@RequestBody Map<String, String> request) {
         String text = request.get("Text");
         Object result = diagnosticService.medicalConsultation(text);
