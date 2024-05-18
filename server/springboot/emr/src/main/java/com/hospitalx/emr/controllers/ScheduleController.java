@@ -129,4 +129,20 @@ public class ScheduleController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    // Call next patient
+    @PreAuthorize("hasRole('ROLE_NURSE')")
+    @GetMapping("/nurse/call-next/{numberClinic}")
+    public ResponseEntity<BaseResponse> getNumberWaiting(@PathVariable("numberClinic") String numberClinic) {
+        int result = scheduleService.callNext(numberClinic);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Gọi bệnh nhân tiếp theo thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(new HashMap<String, Object>() {
+            {
+                put("Number", result);
+            }
+        });
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
 }

@@ -29,6 +29,9 @@ public class ScheduleDto {
     @JsonProperty("Number")
     private Integer number;
 
+    @JsonProperty("CallNumber")
+    private Integer callNumber;
+
     @NotEmpty(message = "Vui lòng chọn phòng khám")
     @JsonProperty("Clinic")
     private String clinic;

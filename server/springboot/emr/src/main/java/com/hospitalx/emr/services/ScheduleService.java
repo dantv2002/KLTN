@@ -19,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
@@ -39,8 +41,36 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     private HealthcareStaffService healthcareStaffService;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
     private Date startDate = null;
     private Date endDate = null;
+
+    public int callNext(String numberClinic) {
+        log.info("Call next number of clinic: {}", numberClinic);
+        String accountId = authenticationFacade.getAuthentication().getName();
+        HealthcareStaffDto nurse = healthcareStaffService.getByAccountId(accountId);
+        List<ScheduleDto> scheduleDtos = this.getSchedule(nurse.getDepartmentId());
+        if (scheduleDtos == null || scheduleDtos.isEmpty()) {
+            log.error("Schedule is empty");
+            throw new CustomException("Không tìm thấy lịch khám", HttpStatus.NOT_FOUND.value());
+        }
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+7"));
+        ScheduleTime time = now.getHour() < 12 ? ScheduleTime.MORNING : ScheduleTime.AFTERNOON;
+        ScheduleDto scheduleDto = scheduleDtos.stream()
+                .filter(item -> item.getClinic().equals(numberClinic) && item.getTime().equals(time))
+                .findFirst()
+                .orElseThrow(() -> new CustomException("Không tìm thấy lịch khám", HttpStatus.NOT_FOUND.value()));
+        if (scheduleDto.getCallNumber() < scheduleDto.getNumber()) {
+            scheduleDto.setCallNumber(scheduleDto.getCallNumber() + 1);
+            this.update(scheduleDto);
+        } else {
+            log.error("Number is invalid");
+            throw new CustomException("Đã gọi hết bệnh nhân chờ khám", HttpStatus.BAD_REQUEST.value());
+        }
+        log.info("Called number: {}", scheduleDto.getCallNumber());
+        return scheduleDto.getCallNumber();
+    }
 
     public List<ScheduleDto> getSchedule(String departmentId) {
         log.info("Get schedule of department: {}", departmentId);

@@ -54,7 +54,7 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
         headers.add("Content-Type", "application/json");
         Map<String, String> body = new HashMap<>() {
             {
-                put("image", urlImage);
+                put("imageURL", urlImage);
             }
         };
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);

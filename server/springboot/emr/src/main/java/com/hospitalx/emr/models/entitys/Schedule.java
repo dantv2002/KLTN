@@ -17,6 +17,7 @@ public class Schedule {
     private Date date; // Ngày khám
     private ScheduleTime time; // Buổi khám
     private Integer number = 0; // Số lượng chờ
+    private Integer callNumber = 0; // Số lượng đã gọi
     private String clinic; // Phòng khám
     private String doctorId; // Mã bác sĩ
 }
