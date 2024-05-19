@@ -29,5 +29,5 @@ public class Ticket {
     private String gender; // Giới tính
     private String healthInsurance; // Bảo hiểm y tế
     private String address; // Địa chỉ
-    private Date createdAt = new Date(); // Ngày tạo
+    private Date createdAt; // Ngày tạo
 }

@@ -45,6 +45,26 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private ModelMapper modelMapper;
 
+    public List<Medical> getDashboard(Date startDate, Date endDate) {
+        return medicalRepository.findAllByDateBetween(startDate, endDate);
+    }
+
+    public int totalMedical() {
+        return medicalRepository.totalMedical();
+    }
+
+    public int totalMedicalNew() {
+        return medicalRepository.totalMedicalNew();
+    }
+
+    public int totalMedicalLocked() {
+        return medicalRepository.totalMedicalLocked();
+    }
+
+    public int totalMedicalExpired() {
+        return medicalRepository.totalMedicalExpired(new Date());
+    }
+
     public List<Map<String, Object>> biosignalStatistical(String recordId, Map<String, String> request) {
         log.info("Get biosignal statistical");
         // Check record exist
@@ -64,7 +84,7 @@ public class MedicalService implements IDAO<MedicalDto> {
         List<Map<String, Object>> data = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         medicals.stream().forEach((medical -> {
-            calendar.setTime(medical.getCreateDate());
+            calendar.setTime(medical.getCreatedAt());
             Map<String, Object> item = new HashMap<>();
             item.put("Date", (calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-"
                     + calendar.get(Calendar.DAY_OF_MONTH)));
@@ -182,7 +202,7 @@ public class MedicalService implements IDAO<MedicalDto> {
         recordService.get(t.getRecordId());
         medicalValidate(t);
         Medical medical = modelMapper.map(t, Medical.class);
-        medical.setCreateDate(new Date());
+        medical.setCreatedAt(new Date());
         medical = medicalRepository.save(medical);
         log.info("Save medical success with ID: " + medical.getId());
         return modelMapper.map(medical, MedicalDto.class);

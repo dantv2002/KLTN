@@ -56,7 +56,7 @@ public class MedicalDto {
     private Date dueDate; // Ngày đến hạn thanh lý
     @JsonProperty("CreateDate")
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date createDate; // Ngày tạo
+    private Date createdAt; // Ngày tạo
     @JsonProperty("Mark")
     private String mark = "NO"; // Đánh dấu
 

@@ -19,4 +19,10 @@ public interface RecordRepository extends MongoRepository<Record, String> {
 
     @Query(value = "{ 'fullName': { $regex: ?0, $options: 'i' }, 'gender': { $regex: ?1} }")
     Page<Record> findAllByKeyword(String keyword, String gender, Pageable pageable);
+
+    @Query(value = "{ 'createdAt': {$gte: ?0, $lt: ?1}, 'deleted': false }")
+    List<Record> findAllByDateBetween(Date startDate, Date endDate);
+
+    @Query(value = "{'deleted': false }", count = true)
+    int totalRecord();
 }

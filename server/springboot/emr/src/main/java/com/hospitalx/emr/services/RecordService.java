@@ -3,6 +3,7 @@ package com.hospitalx.emr.services;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +35,24 @@ public class RecordService implements IDAO<RecordDto> {
     private AuthenticationFacade authenticationFacade;
 
     //
+    public List<Record> getDashboard(Date startDate, Date endDate) {
+        return recordRepository.findAllByDateBetween(startDate, endDate);
+    }
+
+    public int totalRecord() {
+        return recordRepository.totalRecord();
+    }
 
     // Override methods
     @Override
     public RecordDto save(RecordDto t) {
         checkExistRecord(t.getIdentityCard(), null);
         log.info("Save record: " + t.toString());
-
+        Record recordSave = modelMapper.map(t, Record.class);
+        recordSave.setCreatedAt(new Date());
         String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
         if (!role.equals("ROLE_PATIENT")) {
-            Record record = recordRepository.save(modelMapper.map(t, Record.class));
+            Record record = recordRepository.save(recordSave);
             return modelMapper.map(record, RecordDto.class);
         }
         String id = authenticationFacade.getAuthentication().getName();
@@ -53,7 +62,7 @@ public class RecordService implements IDAO<RecordDto> {
             throw new CustomException("Số lượng hồ sơ đã đạt giới hạn tối đa!",
                     HttpStatus.BAD_REQUEST.value());
         }
-        Record record = recordRepository.save(modelMapper.map(t, Record.class));
+        Record record = recordRepository.save(recordSave);
 
         if (account.getRecords() == null) {
             account.setRecords(new ArrayList<String>());

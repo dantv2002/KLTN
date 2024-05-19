@@ -30,7 +30,7 @@ public class Medical {
     private Date saveDate; // Ngày lưu trữ
     private Date dueDate; // Ngày đến hạn thanh lý
     private MedicalType type; // Loại bệnh án
-    private Date createDate; // Ngày tạo
+    private Date createdAt; // Ngày tạo
     private String mark = "NO"; // Đánh dấu
     // Ngoại trú
     private String departmentId; // Khoa khám

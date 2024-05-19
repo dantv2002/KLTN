@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,14 @@ public class TicketService implements IDAO<TicketDto> {
     @Autowired
     private EmailService emailService;
 
+    public List<Ticket> getDashboard(Date startDate, Date endDate) {
+        return ticketRepository.findAllByCreatedAtBetween(startDate, endDate);
+    }
+
+    public int totalTicket() {
+        return ticketRepository.totalTicket();
+    }
+
     public void createTicket(String idRecord, String idDoctor, String idSchedule) {
         log.info("Create ticket");
         RecordDto recordDto = recordService.get(idRecord);
@@ -77,6 +87,7 @@ public class TicketService implements IDAO<TicketDto> {
         ticketDto.setGender(recordDto.getGender()); // Giới tính
         ticketDto.setHealthInsurance(recordDto.getHealthInsurance()); // Bảo hiểm y tế
         ticketDto.setAddress(recordDto.getAddress()); // Địa chỉ
+        ticketDto.setCreatedAt(new Date());
         // Save ticket
         TicketDto ticketBooking = save(ticketDto);
         // Send email

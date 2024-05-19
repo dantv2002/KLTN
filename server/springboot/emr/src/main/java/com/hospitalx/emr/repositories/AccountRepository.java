@@ -1,5 +1,7 @@
 package com.hospitalx.emr.repositories;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -18,4 +20,10 @@ public interface AccountRepository extends MongoRepository<Account, String> {
     // $nor: not or
     @Query("{ 'fullName': { $regex: ?0, $options: 'i' }, $nor: [{ 'role': 'ADMIN' }], 'role': { $regex: ?1, $options: 'i' }, 'deleted': false}")
     Page<Account> findByAllFullNameAndRole(String fullName, String role, Pageable pageable);
+
+    @Query("{ 'createdAt': {$gte: ?0, $lt: ?1}, 'deleted': false }")
+    List<Account> findAllByCreatedAtBetween(Date startDate, Date endDate);
+
+    @Query(value = "{'deleted': false}", count = true)
+    int totalAccount();
 }

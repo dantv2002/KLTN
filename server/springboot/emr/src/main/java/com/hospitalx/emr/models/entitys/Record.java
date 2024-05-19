@@ -25,5 +25,5 @@ public class Record {
     private Boolean locked = false;
     private Boolean deleted = false;
 
-    private Date createdAt = new Date();
+    private Date createdAt;
 }

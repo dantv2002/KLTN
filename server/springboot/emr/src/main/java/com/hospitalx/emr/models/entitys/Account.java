@@ -35,5 +35,5 @@ public class Account {
 
     private List<String> tickets;
 
-    private Date createdAt = new Date();
+    private Date createdAt;
 }

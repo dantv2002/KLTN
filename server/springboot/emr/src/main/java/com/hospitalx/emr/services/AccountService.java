@@ -1,6 +1,8 @@
 package com.hospitalx.emr.services;
 
 import java.time.Instant;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -40,6 +42,14 @@ public class AccountService implements IDAO<AccountDto> {
     private AuthenticationFacade authenticationFacade;
 
     private Account account = null;
+
+    public List<Account> getDashboard(Date startDate, Date endDate) {
+        return accountRepository.findAllByCreatedAtBetween(startDate, endDate);
+    }
+    
+    public int totalAccount() {
+        return accountRepository.totalAccount();
+    }
 
     public void adminDeleteAccount(String id) {
         log.info("Admin delete account: " + id);
@@ -91,6 +101,7 @@ public class AccountService implements IDAO<AccountDto> {
         accountDto.setEmailVerified(true);
         accountDto.setRole(healthcareStaffDto.getStaffType().toString());
         accountDto.setPassword(BCrypt.hashpw(accountDto.getPassword(), BCrypt.gensalt(10)));
+        accountDto.setCreatedAt(new Date());
         account = accountRepository.save(modelMapper.map(accountDto, Account.class));
         healthcareStaffDto.setAccountId(account.getId());
         healthcareStaffService.update(healthcareStaffDto);
@@ -257,6 +268,7 @@ public class AccountService implements IDAO<AccountDto> {
     public AccountDto save(AccountDto t) {
         log.info("Save account: " + t.toString());
         Account account = modelMapper.map(t, Account.class);
+        account.setCreatedAt(new Date());
         log.info("Save account success: " + account.getEmail());
         return modelMapper.map(accountRepository.save(account), AccountDto.class);
     }
@@ -324,6 +336,7 @@ public class AccountService implements IDAO<AccountDto> {
         account.setVerify(
                 new Verify(BCrypt.hashpw(code, BCrypt.gensalt(10)),
                         Instant.now().plusSeconds(5 * 60))); // 5 minutes
+        account.setCreatedAt(new Date());
         account = accountRepository.save(account);
         emailService.sendEmailVerify(account.getEmail(), account.getFullName(), code);
         log.info("Complete create account and send verification: " + account.getEmail());
