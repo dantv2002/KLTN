@@ -27,8 +27,8 @@ public class DepartmentController {
     @Autowired
     private DepartmentService departmentService;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RECEPTIONIST')")
-    @GetMapping({ "/receptionist/departments", "/admin/departments" })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RECEPTIONIST', 'ROLE_PATIENT')")
+    @GetMapping({ "/receptionist/departments", "/admin/departments", "/patient/departments" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
