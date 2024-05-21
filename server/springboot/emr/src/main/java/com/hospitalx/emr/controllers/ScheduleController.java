@@ -104,13 +104,13 @@ public class ScheduleController {
     @PreAuthorize("hasRole('ROLE_RECEPTIONIST')")
     @GetMapping("/receptionist/register-clinic/{id}")
     public ResponseEntity<BaseResponse> registerClinic(@PathVariable("id") String id) {
-        int result = scheduleService.registerClinic(id);
+        ScheduleDto result = scheduleService.registerClinic(id);
         BaseResponse response = new BaseResponse();
         response.setMessage("Đăng ký phòng khám thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<String, Object>() {
             {
-                put("Number", result);
+                put("Schedule", result);
             }
         });
         return ResponseEntity.status(response.getStatus()).body(response);

@@ -124,12 +124,12 @@ public class ScheduleService implements IDAO<ScheduleDto> {
                 .collect(Collectors.toList());
     }
 
-    public int registerClinic(String scheduleId) {
+    public ScheduleDto registerClinic(String scheduleId) {
         log.info("Register clinic");
         ScheduleDto scheduleDto = this.get(scheduleId);
         scheduleDto.setNumber(scheduleDto.getNumber() + 1);
         this.update(scheduleDto);
-        return scheduleDto.getNumber();
+        return scheduleDto;
     }
 
     public void adminUpdateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
