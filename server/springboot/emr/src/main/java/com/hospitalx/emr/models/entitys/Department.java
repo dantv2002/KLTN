@@ -12,9 +12,5 @@ public class Department {
     @Id
     private String id;
     private String nameDepartment;
-    private String location;
-    private Integer numberOfRooms; // Số lượng phòng khám của khoa
     private Boolean deleted = false;
-
-    private String managerId = null;
 }

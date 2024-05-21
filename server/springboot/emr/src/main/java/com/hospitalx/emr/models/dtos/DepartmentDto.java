@@ -14,15 +14,5 @@ public class DepartmentDto {
     @NotEmpty(message = "Vui lòng nhập tên khoa")
     @JsonProperty("NameDepartment")
     private String nameDepartment;
-    @NotEmpty(message = "Vui lòng nhập vị trí")
-    @JsonProperty("Location")
-    private String location;
-    @NotEmpty(message = "Vui lòng nhập số lượng phòng")
-    @JsonProperty("NumberOfRooms")
-    private Integer numberOfRooms;
     private Boolean deleted = false;
-
-    @NotEmpty(message = "Vui lòng nhập mã trưởng khoa")
-    @JsonProperty("ManagerId")
-    private String managerId;
 }

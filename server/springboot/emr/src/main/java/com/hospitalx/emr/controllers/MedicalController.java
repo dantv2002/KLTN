@@ -119,8 +119,8 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_NURSE')")
-    @PutMapping("/nurse/medical")
+    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR')")
+    @PutMapping("/nurse-doctor/medical")
     public ResponseEntity<BaseResponse> update(@RequestBody @Valid MedicalDto medicalDto) {
         medicalService.update(medicalDto);
         BaseResponse response = new BaseResponse();

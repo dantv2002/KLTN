@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.exception.CustomException;
-import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.dtos.ScheduleDto;
 import com.hospitalx.emr.models.entitys.Schedule;
@@ -46,7 +45,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     private Date startDate = null;
     private Date endDate = null;
 
-    public int callNext(String numberClinic) {
+    public int callNext(String numberClinic, String location) {
         log.info("Call next number of clinic: {}", numberClinic);
         String accountId = authenticationFacade.getAuthentication().getName();
         HealthcareStaffDto nurse = healthcareStaffService.getByAccountId(accountId);
@@ -58,7 +57,8 @@ public class ScheduleService implements IDAO<ScheduleDto> {
         ZonedDateTime now = ZonedDateTime.now();
         ScheduleTime time = now.getHour() < 12 ? ScheduleTime.MORNING : ScheduleTime.AFTERNOON;
         ScheduleDto scheduleDto = scheduleDtos.stream()
-                .filter(item -> item.getClinic().equals(numberClinic) && item.getTime().equals(time))
+                .filter(item -> item.getLocation().equalsIgnoreCase(location) && item.getClinic().equals(numberClinic)
+                        && item.getTime().equals(time))
                 .findFirst()
                 .orElseThrow(() -> new CustomException("Không tìm thấy lịch khám", HttpStatus.NOT_FOUND.value()));
         if (scheduleDto.getCallNumber() < scheduleDto.getNumber()) {
@@ -135,11 +135,11 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     public void adminUpdateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Updating schedule");
         HealthcareStaffDto healthcareStaffDto = healthcareStaffService.get(idDoctor); // Check doctor exists
-        DepartmentDto departmentDto = departmentService.get(healthcareStaffDto.getDepartmentId()); // Get department of
-                                                                                                   // doctor
-        Integer numberOfRooms = departmentDto.getNumberOfRooms();
         for (ScheduleDto scheduleDto : scheduleDtoList) {
-            this.checkSchedule(numberOfRooms, scheduleDto);
+            if (scheduleDto.getDate().before(new Date())) {
+                log.error("Date is invalid");
+                throw new CustomException("Ngày khám phải sau ngày hiện tại", HttpStatus.BAD_REQUEST.value());
+            }
         }
         this.checkSchedule(scheduleDtoList);
         Boolean flag = false;
@@ -161,11 +161,11 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     public void adminCreateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Creating schedule for doctor: {}", idDoctor);
         HealthcareStaffDto healthcareStaffDto = healthcareStaffService.get(idDoctor); // Check doctor exists
-        DepartmentDto departmentDto = departmentService.get(healthcareStaffDto.getDepartmentId()); // Get department of
-                                                                                                   // doctor
-        Integer numberOfRooms = departmentDto.getNumberOfRooms();
         for (ScheduleDto scheduleDto : scheduleDtoList) {
-            this.checkSchedule(numberOfRooms, scheduleDto);
+            if (scheduleDto.getDate().before(new Date())) {
+                log.error("Date is invalid");
+                throw new CustomException("Ngày khám phải sau ngày hiện tại", HttpStatus.BAD_REQUEST.value());
+            }
         }
         this.checkSchedule(scheduleDtoList);
         if (healthcareStaffDto.getSchedules() == null) {
@@ -223,7 +223,8 @@ public class ScheduleService implements IDAO<ScheduleDto> {
         Map<String, Long> map = scheduleDtoList.stream()
                 .map(item -> {
                     String formattedDate = formatter.format(item.getDate());
-                    return formattedDate + "_" + item.getClinic() + "_" + item.getTime().toString();
+                    return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                            + item.getTime().toString();
                 })
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         if (map.values().stream().anyMatch(value -> value > 1)) {
@@ -233,43 +234,60 @@ public class ScheduleService implements IDAO<ScheduleDto> {
         // check in database
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+0"));
         List<Schedule> schedules = scheduleRepository.findAll(Date.from(now.toInstant()));
-        Set<String> set = schedules.stream()
+        Set<String> scheduleSet = schedules.stream()
                 .map(item -> {
                     String formattedDate = formatter.format(item.getDate());
-                    return formattedDate + "_" + item.getClinic() + "_" + item.getTime().toString();
+                    return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                            + item.getTime().toString();
                 })
                 .collect(Collectors.toSet());
         scheduleDtoList.stream()
                 .filter(item -> item.getId() == null)
                 .map(item -> {
                     String formattedDate = formatter.format(item.getDate());
-                    return formattedDate + "_" + item.getClinic() + "_" + item.getTime().toString();
+                    return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                            + item.getTime().toString();
                 })
-                .filter(set::contains)
+                .filter(scheduleSet::contains)
                 .findFirst()
                 .ifPresent(item -> {
                     log.error("Schedule is invalid");
                     String[] split = item.split("_", -1);
                     throw new CustomException(
-                            "Lịch khám: ngày " + split[0] + ", phòng " + split[1] + ", buổi "
-                                    + (split[2].equals("MORNING")
+                            "Lịch khám: ngày " + split[0] + ", vị trí " + split[1] + ", phòng " + split[2] + ", buổi "
+                                    + (split[3].equals("MORNING")
                                             ? "sáng"
                                             : "chiều")
                                     + " đã tồn tại",
                             HttpStatus.BAD_REQUEST.value());
                 });
-    }
-
-    private void checkSchedule(Integer numberOfRooms, ScheduleDto scheduleDto) {
-        if (scheduleDto.getDate().before(new Date())) {
-            log.error("Date is invalid");
-            throw new CustomException("Ngày khám phải sau ngày hiện tại", HttpStatus.BAD_REQUEST.value());
-        }
-        Integer clinic = Integer.parseInt(scheduleDto.getClinic());
-        if (clinic <= 0 || clinic > numberOfRooms) {
-            log.error("NumberOfRooms is invalid");
-            throw new CustomException("Trong khoa không có phòng khám " + clinic,
-                    HttpStatus.BAD_REQUEST.value());
-        }
+        Map<String, String> scheduleMap = scheduleDtoList.stream()
+                .filter(item -> item.getId() != null)
+                .collect(Collectors.toMap(item -> item.getId(), item -> {
+                    String formattedDate = formatter.format(item.getDate());
+                    return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                            + item.getTime().toString();
+                }));
+        Map<String, String> scheduleDBMap = schedules.stream().collect(Collectors.toMap(item -> item.getId(), item -> {
+            String formattedDate = formatter.format(item.getDate());
+            return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                    + item.getTime().toString();
+        }));
+        scheduleMap.entrySet().stream()
+                .filter(item -> scheduleDBMap.entrySet().stream()
+                        .anyMatch(entry -> entry.getValue().equals(item.getValue())
+                                && !entry.getKey().equals(item.getKey())))
+                .findFirst()
+                .ifPresent(item -> {
+                    log.error("Schedule is invalid");
+                    String[] split = item.getValue().split("_", -1);
+                    throw new CustomException(
+                            "Lịch khám: ngày " + split[0] + ", vị trí " + split[1] + ", phòng " + split[2] + ", buổi "
+                                    + (split[3].equals("MORNING")
+                                            ? "sáng"
+                                            : "chiều")
+                                    + " đã tồn tại",
+                            HttpStatus.BAD_REQUEST.value());
+                });
     }
 }

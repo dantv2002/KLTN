@@ -1,5 +1,8 @@
 package com.hospitalx.emr.exception;
 
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -15,6 +18,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.hospitalx.emr.common.BaseResponse;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
@@ -100,10 +104,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<BaseResponse> handleConstraintViolationException(ConstraintViolationException exception) {
+        log.error("Exception: " + exception.getMessage());
+        BaseResponse baseResponse = new BaseResponse();
+        String message = exception.getConstraintViolations().stream().map(item -> item.getMessage())
+                .collect(Collectors.joining(", "));
+        baseResponse.setMessage(message);
+        baseResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        baseResponse.setData(null);
+        return ResponseEntity.status(baseResponse.getStatus()).body(baseResponse);
+    }
+
     // Lỗi khi gọi server flask
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<BaseResponse> handleHttpClientErrorException(HttpClientErrorException exception) {
-        if(exception.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
+        if (exception.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
             this.handleException(exception);
         }
         log.error("Exception: " + exception.getMessage());

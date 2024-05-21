@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +29,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
+@Validated
 public class ScheduleController {
     @Autowired
     private ScheduleService scheduleService;
@@ -35,7 +37,7 @@ public class ScheduleController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/admin/schedule/new/{id}")
     public ResponseEntity<BaseResponse> create(@PathVariable("id") String id,
-            @RequestBody @Valid List<ScheduleDto> scheduleDtoList) {
+            @RequestBody List<@Valid ScheduleDto> scheduleDtoList) {
         scheduleService.adminCreateSchedule(id, scheduleDtoList);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tạo lịch khám thành công");
@@ -89,7 +91,7 @@ public class ScheduleController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/admin/schedules/{id}")
     public ResponseEntity<BaseResponse> update(@PathVariable("id") String id,
-            @RequestBody @Valid List<ScheduleDto> scheduleDtoList) {
+            @RequestBody List<@Valid ScheduleDto> scheduleDtoList) {
         scheduleService.adminUpdateSchedule(id, scheduleDtoList);
         BaseResponse response = new BaseResponse();
         response.setMessage("Cập nhật lịch khám thành công");
@@ -131,9 +133,10 @@ public class ScheduleController {
 
     // Call next patient
     @PreAuthorize("hasRole('ROLE_NURSE')")
-    @GetMapping("/nurse/call-next/{numberClinic}")
-    public ResponseEntity<BaseResponse> getNumberWaiting(@PathVariable("numberClinic") String numberClinic) {
-        int result = scheduleService.callNext(numberClinic);
+    @GetMapping("/nurse/call-next/{numberClinic}/{location}")
+    public ResponseEntity<BaseResponse> getNumberWaiting(@PathVariable("numberClinic") String numberClinic,
+            @PathVariable("location") String location) {
+        int result = scheduleService.callNext(numberClinic, location);
         BaseResponse response = new BaseResponse();
         response.setMessage("Gọi bệnh nhân tiếp theo thành công");
         response.setStatus(HttpStatus.OK.value());
