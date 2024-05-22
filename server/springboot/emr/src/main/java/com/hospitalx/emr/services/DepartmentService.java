@@ -21,11 +21,25 @@ public class DepartmentService implements IDAO<DepartmentDto> {
     private DepartmentRepository departmentRepository;
     @Autowired
     private ModelMapper modelMapper;
+    private Department departmentTemp;
+
+    public void create(DepartmentDto departmentDto) {
+        this.checkDepartmentExist(departmentDto.getNameDepartment());
+        if (departmentTemp != null) {
+            log.info("Restore department with name: {}", departmentTemp.getNameDepartment());
+            departmentTemp.setDeleted(false);
+            departmentRepository.save(departmentTemp);
+            return;
+        }
+        this.save(departmentDto);
+    }
 
     @Override
     public DepartmentDto save(DepartmentDto t) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'save'");
+        log.info("Create new department with name: {}", t.getNameDepartment());
+        Department department = modelMapper.map(t, Department.class);
+        department = departmentRepository.save(department);
+        return modelMapper.map(department, DepartmentDto.class);
     }
 
     @Override
@@ -50,14 +64,39 @@ public class DepartmentService implements IDAO<DepartmentDto> {
 
     @Override
     public void update(DepartmentDto t) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        log.info("Update department with id: {}", t.getId());
+        this.checkDepartmentExist(t.getId(), t.getNameDepartment());
+        Department department = modelMapper.map(t, Department.class);
+        departmentRepository.save(department);
     }
 
     @Override
     public void delete(String id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        log.info("Delete department with id: {}", id);
+        DepartmentDto departmentDto = this.get(id);
+        departmentDto.setDeleted(true);
+        departmentRepository.save(modelMapper.map(departmentDto, Department.class));
+    }
+
+    private void checkDepartmentExist(String name) {
+        name = "^" + name + "$";
+        departmentTemp = null;
+        departmentRepository.findByNameDepartment(name).ifPresent(department -> {
+            if (!department.getDeleted()) {
+                log.error("Department is existed");
+                throw new CustomException("Khoa đã tồn tại", HttpStatus.BAD_REQUEST.value());
+            } else {
+                departmentTemp = department;
+            }
+        });
+    }
+
+    private void checkDepartmentExist(String id, String name) {
+        name = "^" + name + "$";
+        departmentRepository.findByNotIdAndNameDepartment(id, name).ifPresent(department -> {
+            log.error("Department is existed");
+            throw new CustomException("Khoa đã tồn tại", HttpStatus.BAD_REQUEST.value());
+        });
     }
 
 }

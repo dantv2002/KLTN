@@ -15,4 +15,10 @@ public interface DepartmentRepository extends MongoRepository<Department, String
 
     @Query("{'_id': ?0}")
     Optional<Department> findById(String id);
+
+    @Query("{'nameDepartment': {$regex: ?0, $options: 'i'}}")
+    Optional<Department> findByNameDepartment(String nameDepartment);
+
+    @Query("{'_id': {$ne: ?0}, 'nameDepartment': {$regex: ?1, $options: 'i'}}")
+    Optional<Department> findByNotIdAndNameDepartment(String id, String nameDepartment);
 }
