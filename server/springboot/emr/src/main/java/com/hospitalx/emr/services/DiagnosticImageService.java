@@ -27,10 +27,13 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
     @Autowired
     private AuthenticationFacade authenticationFacade;
     @Autowired
+    private MedicalService medicalService;
+    @Autowired
     private ModelMapper modelMapper;
 
-    public void saveResult(String medicalId, DiagnosticImageDto result){
+    public void saveResult(String medicalId, DiagnosticImageDto result) {
         log.info("Save result diagnostic image");
+        medicalService.get(medicalId); // check medical exist
         result.setMedicalId(medicalId);
         this.save(result);
         log.info("Save result diagnostic image success");
@@ -60,10 +63,6 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
         t.setDoctorIdPerform(doctorId);
         return modelMapper.map(diagnosticImageRepository.save(modelMapper.map(t, DiagnosticImage.class)),
                 DiagnosticImageDto.class);
-    }
-
-    public boolean checkExistByMedicalId(String id) {
-        return diagnosticImageRepository.existsByMedicalId(id);
     }
 
     @Override

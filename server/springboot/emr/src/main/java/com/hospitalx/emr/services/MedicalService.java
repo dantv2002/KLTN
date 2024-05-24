@@ -43,8 +43,6 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private DiagnosticImageService diagnosticImageService;
-    @Autowired
     private ModelMapper modelMapper;
 
     public List<Medical> getDashboard(Date startDate, Date endDate) {
@@ -148,12 +146,10 @@ public class MedicalService implements IDAO<MedicalDto> {
             throw new CustomException("Kết quả điều trị không được để trống!", HttpStatus.BAD_REQUEST.value());
         }
 
-        if (diagnosticImageService.checkExistByMedicalId(medical.getId())) {
-            if (medical.getSummary() == null || medical.getSummary().isEmpty()) {
-                log.error("Medical summary is empty with ID: " + id);
-                throw new CustomException("Tóm tắt kết quả chẩn đoán hình ảnh không được để trống!",
-                        HttpStatus.BAD_REQUEST.value());
-            }
+        if (medical.getSummary() == null || medical.getSummary().isEmpty()) {
+            log.error("Medical summary is empty with ID: " + id);
+            throw new CustomException("Tóm tắt kết quả chẩn đoán hình ảnh không được để trống!",
+                    HttpStatus.BAD_REQUEST.value());
         }
         String accountId = authenticationFacade.getAuthentication().getName();
         HealthcareStaffDto doctor = healthcareStaffService.getByAccountId(accountId);
