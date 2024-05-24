@@ -30,4 +30,5 @@ public class Ticket {
     private String healthInsurance; // Bảo hiểm y tế
     private String address; // Địa chỉ
     private Date createdAt; // Ngày tạo
+    private String accountId; // Mã tài khoản
 }

@@ -30,7 +30,6 @@ public class HealthcareStaff {
     private StaffType staffType; // loại nhân viên
     // Doctor
     private String title;
-    private List<String> schedules;
     // Nurse
     private NurseLevel level;
     // Receptionist

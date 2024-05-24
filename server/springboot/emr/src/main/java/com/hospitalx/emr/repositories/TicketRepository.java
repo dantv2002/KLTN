@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.repository.Query;
 import com.hospitalx.emr.models.entitys.Ticket;
 
 public interface TicketRepository extends MongoRepository<Ticket, String> {
-    @Query(value = "{ _id: { $in: ?0 }, status: {$regex: ?1, $options: 'i'}}")
-    Page<Ticket> findAllByIdAndStatus(List<String> ids, String status, Pageable pageable);
+    @Query(value = "{ accountId: ?0, status: {$regex: ?1, $options: 'i'}}")
+    Page<Ticket> findAllByIdAndStatus(String accountId, String status, Pageable pageable);
 
     @Query(value = "{'createdAt': {$gte: ?0, $lt: ?1} }")
     List<Ticket> findAllByCreatedAtBetween(Date startDate, Date endDate);

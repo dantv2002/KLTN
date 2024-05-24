@@ -33,7 +33,5 @@ public class Account {
 
     private List<String> records;
 
-    private List<String> tickets;
-
     private Date createdAt;
 }
