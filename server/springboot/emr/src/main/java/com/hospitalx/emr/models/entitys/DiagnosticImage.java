@@ -16,4 +16,6 @@ public class DiagnosticImage {
     private String conclude; // Kết luận
     private String doctorIdPerform; // Id bác sĩ thực hiện
     private Boolean locked = false;
+
+    private String medicalId; // Id bệnh án
 }

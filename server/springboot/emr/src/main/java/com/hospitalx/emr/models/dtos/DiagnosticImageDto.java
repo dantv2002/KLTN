@@ -27,4 +27,7 @@ public class DiagnosticImageDto {
     private String doctorIdPerform; // Id bác sĩ thực hiện
     @JsonProperty("Locked")
     private Boolean locked = false;
+
+    @JsonProperty("MedicalId")
+    private String medicalId; // Id bệnh án
 }
