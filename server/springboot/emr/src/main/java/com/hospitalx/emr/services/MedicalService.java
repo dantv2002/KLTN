@@ -165,8 +165,6 @@ public class MedicalService implements IDAO<MedicalDto> {
                 log.error("Medical date discharge is empty with ID: " + id);
                 throw new CustomException("Thời gian ra viện không được để trống!", HttpStatus.BAD_REQUEST.value());
             }
-        } else {
-            medical.setDepartmentId(doctor.getDepartmentId());
         }
         Date duDate = null;
         int yearsToAdd = 10;
@@ -222,10 +220,10 @@ public class MedicalService implements IDAO<MedicalDto> {
         log.info("Get all medicals");
         if (role.equals("ROLE_PATIENT"))
             return medicalRepository.findAllByKeyword(parts[0], parts[1], pageable)
-                    .map(medical -> modelMapper.map(medical, MedicalDto.class));
+                    .map(medical -> this.addDepartment(modelMapper.map(medical, MedicalDto.class)));
 
         return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, pageable)
-                .map(medical -> modelMapper.map(medical, MedicalDto.class));
+                .map(medical -> this.addDepartment(modelMapper.map(medical, MedicalDto.class)));
     }
 
     @Override
@@ -235,7 +233,7 @@ public class MedicalService implements IDAO<MedicalDto> {
             log.error("Medical not found with ID: " + id);
             return new CustomException("Không tìm thấy bệnh án!", HttpStatus.NOT_FOUND.value());
         });
-        return modelMapper.map(medical, MedicalDto.class);
+        return this.addDepartment(modelMapper.map(medical, MedicalDto.class));
     }
 
     @Override
@@ -333,5 +331,14 @@ public class MedicalService implements IDAO<MedicalDto> {
             log.error("Convert date error: " + e.getMessage());
             throw new CustomException("Lỗi chuyển đổi ngày tháng!", HttpStatus.BAD_REQUEST.value());
         }
+    }
+
+    private MedicalDto addDepartment(MedicalDto medical) {
+        if (medical.getDoctorIdTreatment() != null && !medical.getDoctorIdTreatment().equals("") && medical.getType() == MedicalType.OUTPATIENT) {
+            HealthcareStaffDto doctor = healthcareStaffService.get(medical.getDoctorIdTreatment());
+            String departmentId = doctor.getDepartmentId();
+            medical.setDepartmentId(departmentId);
+        }
+        return medical;
     }
 }
