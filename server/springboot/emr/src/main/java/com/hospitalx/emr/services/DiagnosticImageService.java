@@ -1,6 +1,5 @@
 package com.hospitalx.emr.services;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.models.dtos.DiagnosticImageDto;
-import com.hospitalx.emr.models.dtos.MedicalDto;
 import com.hospitalx.emr.models.entitys.DiagnosticImage;
 import com.hospitalx.emr.repositories.DiagnosticImageRepository;
 
@@ -33,15 +31,11 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
     @Autowired
     private ModelMapper modelMapper;
 
-    public void saveResult(String medicalId, DiagnosticImageDto result){
+    public void saveResult(String medicalId, DiagnosticImageDto result) {
         log.info("Save result diagnostic image");
-        MedicalDto medical = medicalService.get(medicalId);
-        String resultId = this.save(result).getId();
-        if(medical.getDiagnosticImages() == null){
-            medical.setDiagnosticImages(new ArrayList<String>());
-        }
-        medical.getDiagnosticImages().add(resultId);
-        medicalService.update(medical);
+        medicalService.get(medicalId); // check medical exist
+        result.setMedicalId(medicalId);
+        this.save(result);
         log.info("Save result diagnostic image success");
     }
 

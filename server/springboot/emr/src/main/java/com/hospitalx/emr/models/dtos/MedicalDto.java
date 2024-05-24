@@ -1,7 +1,6 @@
 package com.hospitalx.emr.models.dtos;
 
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -36,8 +35,6 @@ public class MedicalDto {
     @JsonProperty("ExamineOrgans")
     private String examineOrgans; // Khám các cơ quan ==> UPDATE
 
-    @JsonProperty("DiagnosticImages")
-    private List<String> diagnosticImages; // Danh sách chẩn đoán hình ảnh ==> UPDATE
     @JsonProperty("Summary")
     private String summary; // Tóm tắt kết quả chẩn đoán hình ảnh ==> UPDATE
     @JsonProperty("TreatmentMethod")

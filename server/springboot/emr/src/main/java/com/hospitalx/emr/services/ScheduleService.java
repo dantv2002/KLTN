@@ -134,7 +134,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
 
     public void adminDeleteSchedule(String idDoctor, String idSchedule) {
         log.info("Deleting schedule");
-        HealthcareStaffDto healthcareStaffDto = healthcareStaffService.get(idDoctor); // Check doctor exists
+        healthcareStaffService.get(idDoctor); // Check doctor exists
         ScheduleDto scheduleDto = this.get(idSchedule);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -153,14 +153,12 @@ public class ScheduleService implements IDAO<ScheduleDto> {
                     HttpStatus.BAD_REQUEST.value());
         }
         this.delete(idSchedule); // Delete schedule
-        healthcareStaffDto.getSchedules().remove(idSchedule);
-        healthcareStaffService.update(healthcareStaffDto); // Update doctor
         log.info("Deleted schedule");
     }
 
     public void adminUpdateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Updating schedule");
-        HealthcareStaffDto healthcareStaffDto = healthcareStaffService.get(idDoctor); // Check doctor exists
+        healthcareStaffService.get(idDoctor); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
@@ -168,25 +166,17 @@ public class ScheduleService implements IDAO<ScheduleDto> {
             }
         }
         this.checkSchedule(scheduleDtoList);
-        Boolean flag = false;
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDoctorId() == null) {
                 scheduleDto.setDoctorId(idDoctor);
             }
-            String idSchedule = this.save(scheduleDto).getId();
-            if (!healthcareStaffDto.getSchedules().contains(idSchedule)) {
-                healthcareStaffDto.getSchedules().add(idSchedule);
-                flag = true;
-            }
-        }
-        if (flag) {
-            healthcareStaffService.update(healthcareStaffDto); // Update doctor
+            this.save(scheduleDto);
         }
     }
 
     public void adminCreateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Creating schedule for doctor: {}", idDoctor);
-        HealthcareStaffDto healthcareStaffDto = healthcareStaffService.get(idDoctor); // Check doctor exists
+        healthcareStaffService.get(idDoctor); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
@@ -194,14 +184,10 @@ public class ScheduleService implements IDAO<ScheduleDto> {
             }
         }
         this.checkSchedule(scheduleDtoList);
-        if (healthcareStaffDto.getSchedules() == null) {
-            healthcareStaffDto.setSchedules(new ArrayList<String>());
-        }
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             scheduleDto.setDoctorId(idDoctor);
-            healthcareStaffDto.getSchedules().add(this.save(scheduleDto).getId()); // Save schedule and add to doctor
+            this.save(scheduleDto);
         }
-        healthcareStaffService.update(healthcareStaffDto); // Update doctor
     }
 
     @Override

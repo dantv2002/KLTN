@@ -145,12 +145,11 @@ public class MedicalService implements IDAO<MedicalDto> {
             log.error("Medical result is empty with ID: " + id);
             throw new CustomException("Kết quả điều trị không được để trống!", HttpStatus.BAD_REQUEST.value());
         }
-        if (medical.getDiagnosticImages() != null && !medical.getDiagnosticImages().isEmpty()) {
-            if (medical.getSummary() == null || medical.getSummary().isEmpty()) {
-                log.error("Medical summary is empty with ID: " + id);
-                throw new CustomException("Tóm tắt kết quả chẩn đoán hình ảnh không được để trống!",
-                        HttpStatus.BAD_REQUEST.value());
-            }
+
+        if (medical.getSummary() == null || medical.getSummary().isEmpty()) {
+            log.error("Medical summary is empty with ID: " + id);
+            throw new CustomException("Tóm tắt kết quả chẩn đoán hình ảnh không được để trống!",
+                    HttpStatus.BAD_REQUEST.value());
         }
         String accountId = authenticationFacade.getAuthentication().getName();
         HealthcareStaffDto doctor = healthcareStaffService.getByAccountId(accountId);
@@ -334,7 +333,8 @@ public class MedicalService implements IDAO<MedicalDto> {
     }
 
     private MedicalDto addDepartment(MedicalDto medical) {
-        if (medical.getDoctorIdTreatment() != null && !medical.getDoctorIdTreatment().equals("") && medical.getType() == MedicalType.OUTPATIENT) {
+        if (medical.getDoctorIdTreatment() != null && !medical.getDoctorIdTreatment().equals("")
+                && medical.getType() == MedicalType.OUTPATIENT) {
             HealthcareStaffDto doctor = healthcareStaffService.get(medical.getDoctorIdTreatment());
             String departmentId = doctor.getDepartmentId();
             medical.setDepartmentId(departmentId);

@@ -44,4 +44,7 @@ public class TicketDto {
     @JsonProperty("CreatedAt")
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date createdAt;
+
+    @JsonProperty("AccountId")
+    private String accountId; // Mã tài khoản
 }

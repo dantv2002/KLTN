@@ -3,7 +3,6 @@ package com.hospitalx.emr.services;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +17,6 @@ import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.common.TicketStatus;
 import com.hospitalx.emr.exception.CustomException;
-import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.dtos.RecordDto;
@@ -43,8 +41,6 @@ public class TicketService implements IDAO<TicketDto> {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private AccountService accountService;
-    @Autowired
     private AuthenticationFacade authenticationFacade;
     @Autowired
     private ModelMapper modelMapper;
@@ -65,6 +61,7 @@ public class TicketService implements IDAO<TicketDto> {
         HealthcareStaffDto doctorDto = healthcareStaffService.get(idDoctor);
         DepartmentDto departmentDto = departmentService.get(doctorDto.getDepartmentId());
         ScheduleDto scheduleDto = scheduleService.get(idSchedule);
+        String accountId = authenticationFacade.getAuthentication().getName();
         // Set value for ticket
         int examinationTime = 15; // Thời gian khám bệnh (phút)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -88,17 +85,11 @@ public class TicketService implements IDAO<TicketDto> {
         ticketDto.setHealthInsurance(recordDto.getHealthInsurance()); // Bảo hiểm y tế
         ticketDto.setAddress(recordDto.getAddress()); // Địa chỉ
         ticketDto.setCreatedAt(new Date());
+        ticketDto.setAccountId(accountId);
         // Save ticket
         TicketDto ticketBooking = save(ticketDto);
         // Send email
         emailService.sendEmailTicket(recordDto.getEmail(), ticketBooking);
-        // add ticket to account
-        AccountDto accountDto = accountService.get(authenticationFacade.getAuthentication().getName());
-        if (accountDto.getTickets() == null) {
-            accountDto.setTickets(new ArrayList<String>());
-        }
-        accountDto.getTickets().add(ticketBooking.getId());
-        accountService.update(accountDto);
         scheduleService.update(scheduleDto);
         log.info("Create ticket success with ID: " + ticketBooking.getId());
     }
@@ -112,9 +103,9 @@ public class TicketService implements IDAO<TicketDto> {
     @Override
     public Page<TicketDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all tickets");
-        AccountDto accountDto = accountService.get(authenticationFacade.getAuthentication().getName());
+        String accountId = authenticationFacade.getAuthentication().getName();
         keyword = keyword.isEmpty() ? keyword : "^" + keyword + "$";
-        return ticketRepository.findAllByIdAndStatus(accountDto.getTickets(), keyword, pageable)
+        return ticketRepository.findAllByIdAndStatus(accountId, keyword, pageable)
                 .map(ticket -> modelMapper.map(ticket, TicketDto.class));
     }
 

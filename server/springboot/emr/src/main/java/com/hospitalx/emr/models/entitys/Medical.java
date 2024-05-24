@@ -1,7 +1,6 @@
 package com.hospitalx.emr.models.entitys;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,7 +20,6 @@ public class Medical {
     private String medicalHistory; // Tiền sử bệnh
     private Biosignal biosignal; // Dấu hiệu sinh tồn(Sinh hiệu)
     private String examineOrgans; // Khám các cơ quan
-    private List<String> diagnosticImages; // Danh sách chẩn đoán hình ảnh
     private String summary; // Tóm tắt kết quả chẩn đoán hình ảnh
     private String treatmentMethod; // Phương pháp điều trị
     private String diagnosisDischarge = ""; // Chuẩn đoán ra viện

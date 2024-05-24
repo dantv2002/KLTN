@@ -44,7 +44,6 @@ public class AccountDto {
     private Boolean deleted;
     private Verify verify;
     private List<String> records;
-    private List<String> tickets;
     
     @JsonProperty("CreatedAt")
     @JsonFormat(pattern = "dd/MM/yyyy")
