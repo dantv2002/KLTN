@@ -109,10 +109,12 @@ const NurseManagementByAdmin = () => {
         });
         if (response.status === 200) {
           const departmentsData = response.data.Data.Departments;
-          const departmentsArray = departmentsData.map(department => ({
-            id: department.Id,
-            name: department.NameDepartment
-          }));
+          const departmentsArray = departmentsData
+            .filter(department => !department.deleted)
+            .map(department => ({
+              id: department.Id,
+              name: department.NameDepartment
+            }));
           setListDepartment(departmentsArray);    
         }
       } catch(error) {
