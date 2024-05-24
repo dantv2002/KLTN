@@ -33,10 +33,8 @@ public class Medical {
     private Date createdAt; // Ngày tạo
     private String mark = "NO"; // Đánh dấu
     // Ngoại trú
-    private String departmentId; // Khoa khám
     private Date date;// Thời gian đến khám
     private String initialDiagnosis; // Chẩn đoán ban đầu
-    // chẩn đoán khi ra viện
     // Nội trú
     private Date dateAdmission; // Thời gian vào viện
     private String departmentAdmission; // Khoa vào viện

@@ -124,12 +124,38 @@ public class ScheduleService implements IDAO<ScheduleDto> {
                 .collect(Collectors.toList());
     }
 
-    public int registerClinic(String scheduleId) {
+    public ScheduleDto registerClinic(String scheduleId) {
         log.info("Register clinic");
         ScheduleDto scheduleDto = this.get(scheduleId);
         scheduleDto.setNumber(scheduleDto.getNumber() + 1);
         this.update(scheduleDto);
-        return scheduleDto.getNumber();
+        return scheduleDto;
+    }
+
+    public void adminDeleteSchedule(String idDoctor, String idSchedule) {
+        log.info("Deleting schedule");
+        HealthcareStaffDto healthcareStaffDto = healthcareStaffService.get(idDoctor); // Check doctor exists
+        ScheduleDto scheduleDto = this.get(idSchedule);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 7);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date now = calendar.getTime();
+        if (scheduleDto.getDate().equals(now)) {
+            log.error("Schedule is invalid");
+            throw new CustomException("Không thể xóa lịch khám của ngày hiện tại", HttpStatus.BAD_REQUEST.value());
+        }
+        if (scheduleDto.getDate().after(now) && scheduleDto.getNumber() > 0) {
+            log.error("Schedule is invalid");
+            throw new CustomException("Không thể xóa lịch khám đã có bệnh nhân đăng ký",
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        this.delete(idSchedule); // Delete schedule
+        healthcareStaffDto.getSchedules().remove(idSchedule);
+        healthcareStaffService.update(healthcareStaffDto); // Update doctor
+        log.info("Deleted schedule");
     }
 
     public void adminUpdateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
@@ -210,8 +236,9 @@ public class ScheduleService implements IDAO<ScheduleDto> {
 
     @Override
     public void delete(String id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        log.info("Deleting schedule with id: " + id);
+        scheduleRepository.deleteById(id);
+        log.info("Deleted schedule with id: " + id);
     }
 
     //

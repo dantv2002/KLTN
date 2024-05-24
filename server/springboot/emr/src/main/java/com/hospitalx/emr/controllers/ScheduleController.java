@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -100,17 +101,29 @@ public class ScheduleController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/admin/schedule/{idDoctor}/{idSchedule}")
+    public ResponseEntity<BaseResponse> delete(@PathVariable("idDoctor") String idDoctor,
+            @PathVariable("idSchedule") String idSchedule) {
+        scheduleService.adminDeleteSchedule(idDoctor, idSchedule);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Xóa lịch khám thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(null);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     // Register clinic
     @PreAuthorize("hasRole('ROLE_RECEPTIONIST')")
     @GetMapping("/receptionist/register-clinic/{id}")
     public ResponseEntity<BaseResponse> registerClinic(@PathVariable("id") String id) {
-        int result = scheduleService.registerClinic(id);
+        ScheduleDto result = scheduleService.registerClinic(id);
         BaseResponse response = new BaseResponse();
         response.setMessage("Đăng ký phòng khám thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(new HashMap<String, Object>() {
             {
-                put("Number", result);
+                put("Schedule", result);
             }
         });
         return ResponseEntity.status(response.getStatus()).body(response);
