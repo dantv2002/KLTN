@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-scroll";
 import { AiOutlineClose, AiOutlineMenu, AiOutlineDown} from "react-icons/ai";
 import Login from "../../models/auth/Login";
@@ -7,13 +7,14 @@ import ResetPassword from "../../models/auth/ResetPassword";
 import ConfirmPassword from "../../models/auth/ConfirmPassword";
 import ChangePassword from "../../models/ChangePassword";
 import logo from "../../assets/img/logo2.png"
-import { createTicker, getAllRecordsPatient, getDoctorPatient, getSchedulePatient, logoutApi } from "../../Api";
+import { createTicker, getDepartment, getAllRecordsPatient, getDoctorPatient, getSchedulePatient, getScheduleOption, logoutApi } from "../../Api";
 import Cookies from "js-cookie"
 import axios from "axios";
-import { Modal, message, Button, Space, Select, Input, Table } from "antd";
+import { Modal, message, Button, Space, Select, Input, Table, DatePicker } from "antd";
 import {SearchOutlined} from "@ant-design/icons"
-import replacePlusWithSpace from "../../content/ReplacePlusWithSpace";
+import replacePlusWithSpace from "../../hook/ReplacePlusWithSpace";
 import { useNavigate } from 'react-router-dom';
+import moment from "moment";
 
 const Navbar = () => {
   const [menu, setMenu] = useState(false);
@@ -32,20 +33,28 @@ const Navbar = () => {
   const [title, setTitle] = useState("");
   const [department, setDepartment] = useState("");
   const [gender, setGender] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchTitle, setSearchTitle] = useState("");
+  const [searchDepartment, setSearchDepartment] = useState("");
+  const [searchGender, setSearchGender] = useState("");
+  const [time, setTime] = useState("");
   const [visibleDoctor, setVisibleDoctor] = useState(false);
   const [dataSchedules, setDataSchedules] = useState([]);
   const [visibleSchedule, setVisibleSchedule] = useState(false);
   const [dataRecords, setDataRecords] = useState([]);
   const [visibleRecord, setVisibleRecord] = useState(false);
-
-
+  const [listDepartment, setListDepartment] = useState([]);
+  const [pageDoctor, setPageDoctor] = useState("0");
+  const [totalItemsDoctor, setTotalItemsDoctor] = useState("0");
+  const [pageSchedule, setPageSchedule] = useState("0");
+  const [totalItemsSchedule, setTotalItemsSchedule] = useState("0");
 
   const columnsDoctors = [
     {
       title: 'STT',
       dataIndex: 'sequenceNumber',
       key: 'sequenceNumber',
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => index + 1 + pageDoctor * 10,
     },
     {
       title: 'Họ tên',
@@ -59,8 +68,8 @@ const Navbar = () => {
     },
     {
       title: 'Khoa',
-      dataIndex: 'DepartmentId',
-      key: 'DepartmentId',
+      dataIndex: 'DepartmentName',
+      key: 'DepartmentName',
     },
     {
       title: 'Tùy chọn',
@@ -77,6 +86,12 @@ const Navbar = () => {
   ];
 
   const columnsSchedules = [
+    {
+      title: 'Số thứ tự',
+      dataIndex: 'sequenceNumber',
+      key: 'sequenceNumber',
+      render: (_, __, index) => index + 1 + pageSchedule * 10,
+    },
     {
       title: 'Ngày khám',
       dataIndex: 'Date',
@@ -206,44 +221,131 @@ const Navbar = () => {
   }
 
   const handleReadDoctor = async () => {
-    try {
-      const searchGender = gender === undefined ? "" : gender;
-      let response = await axios.get(getDoctorPatient(keyword, title, department, searchGender), {
-        withCredentials: true
-      });
-      if (response.status === 200) {
-        setVisibleDoctor(true);
-        message.success(response.data.Message);
-        setDataDoctors(response.data.Data.HealthCareStaffs);
+    setVisibleDoctor(true);
+  };
+
+  const fetchDoctor = useCallback(async () => {
+    if (name) {
+      try {
+        const departmentSearch = searchDepartment || "";
+        const genderSearch = searchGender || "";
+        let response = await axios.get(getDoctorPatient(searchKeyword, searchTitle, departmentSearch, genderSearch, pageDoctor), {
+          withCredentials: true
+        });
+        if (response.status === 200) {
+          setTotalItemsDoctor(response.data.Data.TotalItems);
+          setDataDoctors(response.data.Data.HealthCareStaffs);
+        }
+      } catch(error) {
+        message.error(error.response.data.Message);
       }
-    } catch(error) {
-      message.error(error.response.data.Message);
     }
+  }, [name, searchKeyword, searchTitle, searchDepartment, searchGender, pageDoctor]);
+
+  const fetchDepartment = useCallback(async () => {
+    if (name) {
+      try {
+        let response = await axios.get(getDepartment("", ""), {
+          withCredentials: true
+        });
+        if (response.status === 200) {
+          const departmentsData = response.data.Data.Departments;
+          const departmentsArray = departmentsData.map(department => ({
+            id: department.Id,
+            name: department.NameDepartment
+          }));
+          setListDepartment(departmentsArray);    
+        }
+      } catch(error) {
+        message.error(error.response.data.Message);
+      }
+    }
+  },[name]);
+
+  useEffect(() => {
+      fetchDoctor();
+      fetchDepartment
+  }, [fetchDoctor, fetchDepartment]);
+
+
+  const handleChangPageDoctor = (page) => {
+    setPageDoctor(page-1);
+  }
+
+  const handleSearchDoctor = () => {
+    setSearchKeyword(keyword);
+    setSearchTitle(title);
+    setSearchDepartment(department);
+    setSearchGender(gender);
+    setPageDoctor("0");
   };
 
   const handleCancelDoctor = () => {
     setVisibleDoctor(false);
+    setKeyword("");
+    setTitle("");
+    setDepartment("");
+    setGender("");
+    setSearchKeyword("");
+    setSearchTitle("");
+    setSearchDepartment("");
+    setSearchGender("");
   }
 
   const handleReadSchedules = async(id) => {
     setIdDoctor(id);
+    setVisibleSchedule(true);
+  }
+
+  const fetchSchedule = useCallback(async () => {
     try{
-      let response = await axios.get(getSchedulePatient(id),{
+      let response = await axios.get(getSchedulePatient(idDoctor, pageSchedule),{
         withCredentials: true
       })
       if (response.status === 200){
-        setVisibleSchedule(true);
-        setDataSchedules(response.data.Data.Schedules)
-        message.success(response.data.Message)
+        setTotalItemsSchedule(response.data.Data.TotalItems);
+        setDataSchedules(response.data.Data.Schedules);
       }
     }catch(error){
       message.error(error.response.data.Message)
     }
+  }, [idDoctor, pageSchedule]);
+
+  useEffect(() => {
+    if (idDoctor) {
+      fetchSchedule();
+    }
+  }, [fetchSchedule, idDoctor]);
+
+  const handleChangPageSchedule = (page) => {
+    setPageSchedule(page-1);
   }
 
   const handleCancelSchedule = () => {
     setVisibleSchedule(false);
+    setTime("");
   }
+
+  const handleSearchSchedule = async () => {
+    try {
+        if (!time || !moment(time).isValid()) {
+            await fetchSchedule();
+        } else {
+          let searchTime = moment(time).format("DD-MM-YYYY");
+          console.log(searchTime);
+          let response = await axios.get(getScheduleOption(idDoctor, searchTime), {
+              withCredentials: true
+          });
+          if (response.status === 200) {
+              setTotalItemsSchedule("2");
+              setPageSchedule("0");
+              setDataSchedules(response.data.Data.Record);
+          }
+        }
+    } catch (error) {
+        message.error(error.response.data.Message);
+    }
+};
 
   const handleReadRecord = async(id) => {
     setIdSchedule(id);
@@ -272,9 +374,9 @@ const Navbar = () => {
       })
       if (response.status === 200){
         message.success(response.data.Message)
-        setVisibleRecord(false);
-        setVisibleSchedule(false);
-        setVisibleDoctor(false)
+        handleCancelRecord();
+        handleCancelSchedule();
+        handleCancelDoctor();
       }
     }catch(error){
       message.error(error.response.data.Message)
@@ -367,15 +469,14 @@ const Navbar = () => {
                     </a>
                   </li>
                   <li className="py-2 px-4 rounded-md hover:bg-blue-700">
-                    <Link
-                      to="profile"
-                      spy={true}
-                      smooth={true}
-                      duration={500}
-                      className="hover:text-hoverColor transition-all cursor-pointer block"
-                    >
+                    <a href="/schedules" className="hover:text-hoverColor transition-all cursor-pointer block">
                       Quản lý phiếu khám
-                    </Link>
+                    </a>
+                  </li>
+                  <li className="py-2 px-4 rounded-md hover:bg-blue-700">
+                    <a href="/medicals" className="hover:text-hoverColor transition-all cursor-pointer block">
+                      Quản lý bệnh án
+                    </a>
                   </li>
                   <li className="py-2 px-4 rounded-md hover:bg-blue-700">
                     <button
@@ -505,8 +606,11 @@ const Navbar = () => {
               <a href="/records" className="hover:text-hoverColor transition-all cursor-pointer block">
                 Quản lý hồ sơ
               </a>
-              <a href="/records" className="hover:text-hoverColor transition-all cursor-pointer block">
+              <a href="/schedules" className="hover:text-hoverColor transition-all cursor-pointer block">
                 Quản lý phiếu khám
+              </a>
+              <a href="/medicals" className="hover:text-hoverColor transition-all cursor-pointer block">
+                Quản lý bệnh án
               </a>
               <button
                 className="hover:text-hoverColor transition-all cursor-pointer block"
@@ -549,12 +653,21 @@ const Navbar = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <Input
+          <Select
             className="w-40 mt-3 mr-3"
-            placeholder="Tìm theo khoa"
+            placeholder="Chọn khoa"
             value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          />
+            onChange={(value) => setDepartment(value)}
+          >
+            {listDepartment.map((department) => (
+              <Select.Option 
+                key={department.id} 
+                value={department.id}
+              >
+                {department.name}
+              </Select.Option>
+            ))}
+          </Select>
           <Select
             className="w-40 mt-3 mr-3"
             placeholder="Tìm theo giới tính"
@@ -566,10 +679,16 @@ const Navbar = () => {
             <Select.Option value="Nữ">Nữ</Select.Option>
             <Select.Option value="Khác">Khác</Select.Option>
           </Select>
-          <Button onClick={() => handleReadDoctor()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+          <Button onClick={() => handleSearchDoctor()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
           <Table
             columns={columnsDoctors} 
             dataSource={dataDoctors}
+            pagination={{
+              total: totalItemsDoctor,
+              pageSize: 10,
+              current: pageDoctor + 1,
+              onChange: handleChangPageDoctor,
+            }}
           />
         </Modal>
         <Modal
@@ -581,9 +700,21 @@ const Navbar = () => {
           cancelButtonProps={{ className: "bg-red-600" }}
           width={800}
         >
+          <DatePicker
+            className="w-60 mt-3 mr-3"
+            placeholder="Chọn ngày xem lịch khám"
+            onChange={(date, dateString) => setTime(dateString)}
+          />
+          <Button onClick={() => handleSearchSchedule()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
           <Table 
             columns={columnsSchedules} 
             dataSource={dataSchedules}
+            pagination={{
+              total: totalItemsSchedule,
+              pageSize: 10,
+              current: pageSchedule + 1,
+              onChange: handleChangPageSchedule,
+            }}
           />
         </Modal>
         <Modal

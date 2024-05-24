@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { createStaff, getNurse, deleteStaff, updateStaff} from "../../Api";
+import { useState, useEffect, useCallback } from "react";
+import { createStaff, getNurse, deleteStaff, updateStaff, getDepartment} from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker } from "antd";
 import { useLocation } from "react-router-dom";
@@ -32,6 +32,11 @@ const NurseManagementByAdmin = () => {
     const [formUpdate] = Form.useForm();
     const [dataNurses, setDataNurses] = useState([]);
     const [keyword, setKeyword] = useState("");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [listDepartment, setListDepartment] = useState([]);
+    const [page, setPage] = useState("0");
+    const [totalItems, setTotalItems] = useState("0");
+
 
       // Enable/disable update
     const [editingFullName, setEditingFullName] = useState(false);
@@ -49,7 +54,7 @@ const NurseManagementByAdmin = () => {
           title: 'Số thứ tự',
           dataIndex: 'sequenceNumber',
           key: 'sequenceNumber',
-          render: (_, __, index) => index + 1,
+          render: (_, __, index) => index + 1 + page * 10,
         },
         {
           title: 'Họ tên',
@@ -63,8 +68,8 @@ const NurseManagementByAdmin = () => {
         },
         {
           title: 'Khoa',
-          dataIndex: 'DepartmentId',
-          key: 'DepartmentId',
+          dataIndex: 'DepartmentName',
+          key: 'DepartmentName',
         },
         {
           title: 'Tùy chọn',
@@ -75,7 +80,7 @@ const NurseManagementByAdmin = () => {
               <Button type="link" className="readupdate" onClick={() => handleReadUpdate(nurse)}>
                 Xem
               </Button>
-              <Button type="link" className="delete" onClick={() => handleDeleteNurse(nurse.Id)}>
+              <Button type="link" danger className="delete" onClick={() => handleDeleteNurse(nurse.Id)}>
                 Xóa
               </Button>
             </Space>
@@ -83,37 +88,50 @@ const NurseManagementByAdmin = () => {
         },
     ];
 
-    const fetchNurse = async () => {
+    const fetchNurse = useCallback(async () => {
         try {
-          let response = await axios.get(getNurse("", "", "", ""), {
+          let response = await axios.get(getNurse(searchKeyword, page), {
             withCredentials: true
           });
           if (response.status === 200) {
-            message.success(response.data.Message);
+            setTotalItems(response.data.Data.TotalItems);
             setDataNurses(response.data.Data.HealthCareStaffs);
           }
         } catch(error) {
           message.error(error.response.data.Message);
         }
-    };
+    },[searchKeyword, page]);
+
+    const fetchDepartment = async () => {
+      try {
+        let response = await axios.get(getDepartment("", ""), {
+          withCredentials: true
+        });
+        if (response.status === 200) {
+          const departmentsData = response.data.Data.Departments;
+          const departmentsArray = departmentsData.map(department => ({
+            id: department.Id,
+            name: department.NameDepartment
+          }));
+          setListDepartment(departmentsArray);    
+        }
+      } catch(error) {
+        message.error(error.response.data.Message);
+      }
+    }
 
     useEffect(() => {
         fetchNurse();
-    }, [location.pathname]);
+        fetchDepartment();
+    }, [location.pathname, fetchNurse]);
 
-    const handleSearch = async () => {
-        try {
-          let response = await axios.get(getNurse(keyword), {
-            withCredentials: true
-          });
-          if (response.status === 200) {
-  
-            message.success(response.data.Message);
-            setDataNurses(response.data.Data.HealthCareStaffs);
-          }
-        } catch(error) {
-          message.error(error.response.data.Message);
-        }
+    const handleChangPage = (page) => {
+      setPage(page-1);
+    }
+
+    const handleSearch = () => {
+      setSearchKeyword(keyword);
+      setPage("0");
     };
 
     const handleInsert = () => {
@@ -281,6 +299,12 @@ const NurseManagementByAdmin = () => {
             <Table 
                 columns={columnsNurses} 
                 dataSource={dataNurses}
+                pagination={{
+                  total: totalItems,
+                  pageSize: 10,
+                  current: page + 1,
+                  onChange: handleChangPage,
+                }}
             />
             <Modal 
                 title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Thêm thông tin điều dưỡng</h1>}
@@ -358,12 +382,20 @@ const NurseManagementByAdmin = () => {
                     </Select>
                 </Form.Item>
                 <Form.Item name="insertdepartment" label="Khoa" rules={[{ required: true, message: 'Khoa không được để trống!' }]}>
-                    <Input
-                      type="text"
-                      placeholder="Nhập khoa"
+                    <Select
+                      placeholder="Chọn khoa"
                       value={departmentInsert}
-                      onChange={(e) => setDepartmentInsert(e.target.value)}
-                    />
+                      onChange={(value) => setDepartmentInsert(value)}
+                    >
+                      {listDepartment.map((department) => (
+                        <Select.Option 
+                          key={department.id} 
+                          value={department.id}
+                        >
+                          {department.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
                 </Form.Item>
               </Form>
             </Modal>
@@ -463,14 +495,22 @@ const NurseManagementByAdmin = () => {
                     <EditOutlined onClick={handleEditLevel} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupdepartment" label="Khoa" rules={[{ required: true, message: 'Khoa không được để trống!' }]}>
-                    <Input
-                      type="text"
-                      placeholder="Nhập khoa"
+                    <Select
+                      placeholder="Chọn khoa"
                       value={departmentUpdate}
-                      onChange={(e) => setDepartmentUpdate(e.target.value)}
-                      disabled={!editingDepartment}
+                      onChange={(value) => setDepartmentUpdate(value)}
                       className="pl-10"
-                    />
+                      disabled={!editingDepartment}
+                    >
+                      {listDepartment.map((department) => (
+                        <Select.Option 
+                          key={department.id} 
+                          value={department.id}
+                        >
+                          {department.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
                     <EditOutlined onClick={handleEditDepartment} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
               </Form>

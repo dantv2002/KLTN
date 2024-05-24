@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { unregisteredAccount, createAccount} from "../../Api";
 import { message, Space, Button, Table, Input, Select, Modal, Form } from "antd";
@@ -12,6 +12,8 @@ const UnregisteredManagementByAdmin = () => {
   const [data, setData] = useState([])
   const [keyword, setKeyword] = useState("");
   const [type, setType] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchType, setSearchType] = useState("");
   const [id, setId] = useState("");
   const [fullname, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,38 +21,36 @@ const UnregisteredManagementByAdmin = () => {
   const [password2, setPassword2] = useState("");
   const [visibleInsert, setVisibleInsert] = useState(false);
   const [formInsert] = Form.useForm();
+  const [page, setPage] = useState("0");
+  const [totalItems, setTotalItems] = useState("0");
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      let response = await axios.get(unregisteredAccount("", ""), {
+      const typeSearch = searchType || "";
+      let response = await axios.get(unregisteredAccount(searchKeyword, typeSearch, page), {
         withCredentials: true
       });
       if (response.status === 200) {
-        message.success(response.data.Message);
+        setTotalItems(response.data.Data.TotalItems);
         setData(response.data.Data.HealthCareStaffs);
       }
     } catch(error) {
       message.error(error.response.data.Message);
     }
-  };
+  },[searchKeyword, searchType, page]);
   
   useEffect(() => {
     fetchData();
-  }, [location.pathname]);
+  }, [location.pathname, fetchData]);
 
-  const handleSearch = async () => {
-    try {
-      const searchType = type === undefined ? "" : type;
-      let response = await axios.get(unregisteredAccount(searchType, keyword), {
-        withCredentials: true
-      });
-      if (response.status === 200) {
-        message.success(response.data.Message);
-        setData(response.data.Data.HealthCareStaffs);
-      }
-    } catch(error) {
-      message.error(error.response.data.Message);
-    }
+  const handleChangPage = (page) => {
+    setPage(page-1);
+  }
+
+  const handleSearch = () => {
+    setSearchKeyword(keyword);
+    setSearchType(type);
+    setPage(0);
   };
 
 
@@ -93,7 +93,7 @@ const UnregisteredManagementByAdmin = () => {
       title: 'Số thứ tự',
       dataIndex: 'sequenceNumber',
       key: 'sequenceNumber',
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => index + 1 + page * 10,
     },
     {
       title: 'Họ tên',
@@ -152,6 +152,12 @@ const UnregisteredManagementByAdmin = () => {
       <Table 
           columns={columns} 
           dataSource={data}
+          pagination={{
+            total: totalItems,
+            pageSize: 10,
+            current: page + 1,
+            onChange: handleChangPage,
+          }}
       />
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Tạo tài khoản</h1>}
@@ -175,7 +181,7 @@ const UnregisteredManagementByAdmin = () => {
           <Form.Item name="fullname" label="Họ tên" rules={[{ required: true, message: 'Họ tên không được để trống!' }]}>
             <Input 
               type="text"
-              placeholder="Nhập email"
+              placeholder="Nhập họ tên"
               value={fullname}
               onChange={(e) => setFullName(e.target.value)}
             />

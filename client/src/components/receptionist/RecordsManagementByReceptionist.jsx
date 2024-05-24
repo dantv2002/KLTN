@@ -2,18 +2,20 @@ import axios from "axios";
 import moment from "moment"
 import { message, Button, Table, Form, Modal, Space, Input, DatePicker, Select } from "antd";
 import { SearchOutlined, PlusCircleOutlined, EditOutlined } from '@ant-design/icons';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createRecordReception, getDepartment, getListSchedule, getRecordReceptionist, registerNumberSchedule, updateRecordReception } from "../../Api";
 import { useLocation } from "react-router-dom";
 
-//In phieu kham chua lam, chua phan trang , chua loading
 const RecordsManagementByReceptionist = () => {
 
   const location = useLocation();
   const [data, setData] = useState([]);
-  const [gender, setGender] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [gender, setGender] = useState("");
   const [year, setYear] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchGender, setSearchGender] = useState("");
+  const [searchYear, setSearchYear] = useState("");
   const [insertEmail, setInsertEmail] = useState("")
   const [insertFullName, setInsertFullName] = useState("");
   const [insertBirthday, setInsertBirthDay] = useState("");
@@ -39,7 +41,12 @@ const RecordsManagementByReceptionist = () => {
   const [visibleRead, setVisibleRead] = useState(false);
   const [dataDepartment, setDataDepartment] = useState([]);
   const [visibleDepartment, setVisibleDepartment] = useState(false);
-  const [keywordDepartment, setKeywordDepartment] = useState("");
+  const [department, setDepartment] = useState("");
+  const [searchDepartment, setSearchDepartment] = useState("");
+  const [pageRecord, setPageRecord] = useState("0");
+  const [totalItemsRecord, setTotalItemsRecord] = useState("0");
+  const [pageDepartment, setPageDepartment] = useState("0");
+  const [totalItemsDepartment, setTotalItemsDepartment] = useState("0");
 
   // Enable/disable update
   const [editingEmail, setEditingEmail] = useState(false);
@@ -57,7 +64,7 @@ const RecordsManagementByReceptionist = () => {
       title: 'Số thứ tự',
       dataIndex: 'sequenceNumber',
       key: 'sequenceNumber',
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => index + 1 + pageRecord * 10,
     },
     {
       title: 'Họ tên',
@@ -93,6 +100,12 @@ const RecordsManagementByReceptionist = () => {
 
   const columnsDepartments = [
     {
+      title: 'Số thứ tự',
+      dataIndex: 'sequenceNumber',
+      key: 'sequenceNumber',
+      render: (_, __, index) => index + 1 + pageDepartment * 10,
+    },
+    {
       title: 'Tên khoa',
       dataIndex: 'NameDepartment',
       key: 'NameDepartment',
@@ -122,6 +135,12 @@ const RecordsManagementByReceptionist = () => {
   ];
 
   const columnsSchedules = [
+    {
+      title: 'Số thứ tự',
+      dataIndex: 'sequenceNumber',
+      key: 'sequenceNumber',
+      render: (_, __, index) => index + 1,
+    },
     {
       title: 'Ngày khám',
       dataIndex: 'Date',
@@ -156,39 +175,35 @@ const RecordsManagementByReceptionist = () => {
     },
   ];
 
-  const fetchRecord = async () => {
+  const fetchRecord = useCallback(async () => {
     try {
-      let response = await axios.get(getRecordReceptionist("", "", ""), {
+      const genderSearch = searchGender || "";
+      let response = await axios.get(getRecordReceptionist(searchKeyword, genderSearch, searchYear, pageRecord), {
         withCredentials: true
       });
       if (response.status === 200) {
-        message.success(response.data.Message);
+        setTotalItemsRecord(response.data.Data.TotalItems);
         setData(response.data.Data.Records);
       }
     } catch(error) {
       message.error(error.response.data.Message);
     }
-  };
+  },[searchKeyword, searchGender, searchYear, pageRecord]);
 
   useEffect(() => {
       fetchRecord();
-  }, [location.pathname]);
+  }, [location.pathname, fetchRecord]);
 
-  const handleSearch = async () => {
-    const searchGender = gender === undefined ? "" : gender;
-    try {
-      let response = await axios.get(getRecordReceptionist(searchGender, keyword, year), {
-        withCredentials: true
-      });
-      if (response.status === 200) {
-
-        message.success(response.data.Message);
-        setData(response.data.Data.Records);
-      }
-    } catch(error) {
-      message.error(error.response.data.Message);
-    }
+  const handleSearchRecord = () => {
+    setSearchKeyword(keyword);
+    setSearchGender(gender);
+    setSearchYear(year);
+    setPageRecord("0");
   };
+
+  const handleChangPageRecord = (page) => {
+    setPageRecord(page-1);
+  }
 
   const formLayout = {
     labelCol: { span: 6 },
@@ -322,6 +337,7 @@ const RecordsManagementByReceptionist = () => {
 
   const handleReadSchedules = async(id) => {
     try{
+      console.log(id);
       let response = await axios.get(getListSchedule(id),{
         withCredentials: true
       })
@@ -337,7 +353,9 @@ const RecordsManagementByReceptionist = () => {
 
   const handleCancelRead = () => {
     setVisibleRead(false);
-    setKeywordDepartment("");
+    setDepartment("");
+    setSearchDepartment("");
+    setPageDepartment("0");
   }
 
   const handleRegisterSchedule = async(id) => {
@@ -346,6 +364,9 @@ const RecordsManagementByReceptionist = () => {
         withCredentials: true,
       })
       if (response.status === 200){
+        setDepartment("");
+        setSearchDepartment("");
+        setPageDepartment("0");
         message.success(response.data.Message)
       }
     }catch(error){
@@ -355,21 +376,41 @@ const RecordsManagementByReceptionist = () => {
 
   const handleCancelDepartment = () => {
     setVisibleDepartment(false);
+    setDepartment("");
+    setSearchDepartment("");
+    setPageDepartment("0");
   }
 
-  const handleReadDepartment = async() => {
+  const fetchDepartment = useCallback(async() => {
     try{
-      let response = await axios.get(getDepartment(keywordDepartment),{
+      let response = await axios.get(getDepartment(searchDepartment, pageDepartment),{
         withCredentials: true
       })
       if (response.status === 200){
-        setVisibleDepartment(true);
-        setDataDepartment(response.data.Data.Departments)
-        message.success(response.data.Message)
+        setTotalItemsDepartment(response.data.Data.TotalItems);
+        setDataDepartment(response.data.Data.Departments);
+        message.success(response.data.Message);
       }
     }catch(error){
-      message.error(error.response.data.Message)
+      message.error(error.response.data.Message);
     }
+  },[searchDepartment, pageDepartment]);
+
+  useEffect(() => {
+    fetchDepartment();
+  }, [fetchDepartment]);
+
+  const handleSearchDeparment = () => {
+    setSearchDepartment(department);
+    setPageDepartment("0");
+  };
+
+  const handleReadDepartment = () => {
+    setVisibleDepartment(true);
+  }
+
+  const handleChangPageDepartment = (page) => {
+    setPageRecord(page-1);
   }
 
   return (
@@ -391,18 +432,24 @@ const RecordsManagementByReceptionist = () => {
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
       />
-      <Input
+      <DatePicker
         className="w-96 mt-3 mr-3"
         placeholder="Tìm theo năm sinh"
-        value={year}
-        onChange={(e) => setYear(e.target.value)}
+        picker="year"
+        onChange={(date, dateString) => setYear(dateString)}
       />
-      <Button onClick={() => handleSearch()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+      <Button onClick={() => handleSearchRecord()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
       <br/>
       <Button onClick={() => handleInsert()} className="bg-cyan-400 text-black mt-4 mb-4" htmlType="submit" icon={<PlusCircleOutlined />} >Thêm bệnh nhân mới</Button>
       <Table 
         columns={columnsRecords} 
         dataSource={data}
+        pagination={{
+          total: totalItemsRecord,
+          pageSize: 10,
+          current: pageRecord + 1,
+          onChange: handleChangPageRecord,
+        }}
       />
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Thêm hồ sơ</h1>}
@@ -596,18 +643,24 @@ const RecordsManagementByReceptionist = () => {
         cancelText="Thoát"
         okButtonProps={{ hidden: true }}
         cancelButtonProps={{ className: "bg-red-600" }}
-        className="w-full max-w-xl mx-auto mt-10"
+        width={600}
       >
         <Input
           className="w-80 mt-3 mr-3"
           placeholder="Tìm theo tên khoa"
-          value={keywordDepartment}
-          onChange={(e) => setKeywordDepartment(e.target.value)}
+          value={department}
+          onChange={(e) => setDepartment(e.target.value)}
         />
-        <Button onClick={() => handleReadDepartment()} className="bg-blue-700 text-white mt-3 mb-4" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+        <Button onClick={() => handleSearchDeparment()} className="bg-blue-700 text-white mt-3 mb-4" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
         <Table 
           columns={columnsDepartments} 
           dataSource={dataDepartment}
+          pagination={{
+            total: totalItemsDepartment,
+            pageSize: 10,
+            current: pageDepartment + 1,
+            onChange: handleChangPageDepartment,
+          }}
         />
       </Modal>
       <Modal

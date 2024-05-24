@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { getAccount, lockunlockAcount, renewPassword, deleteAccount } from "../../Api";
 import { message, Space, Button, Table, Input, Select, Modal, Form } from "antd";
@@ -12,44 +12,44 @@ const AccountManagementByAdmin = () => {
   const [dataAccount, setDataAccounts] = useState([])
   const [keyword, setKeyword] = useState("");
   const [type, setType] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchType, setSearchType] = useState("");
   const [idAccount, setIdAccount] = useState("");
   const [email, setEmail] = useState("");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
   const [visibleUpdate, setVisibleUpdate] = useState(false);
   const [formUpdate] = Form.useForm();
+  const [page, setPage] = useState("0");
+  const [totalItems, setTotalItems] = useState("0");
 
-  const fetchAccount = async () => {
+  const fetchAccount = useCallback(async () => {
     try {
-      let response = await axios.get(getAccount("", ""), {
+      const typeSearch = searchType || "";
+      let response = await axios.get(getAccount(searchKeyword, typeSearch, page), {
         withCredentials: true
       });
       if (response.status === 200) {
-        message.success(response.data.Message);
+        setTotalItems(response.data.Data.TotalItems);
         setDataAccounts(response.data.Data.Accounts);
       }
     } catch(error) {
       message.error(error.response.data.Message);
     }
-  };
-  
+  }, [searchKeyword, searchType, page]);
+
   useEffect(() => {
     fetchAccount();
-  }, [location.pathname]);
+  }, [location.pathname, fetchAccount]);
 
-  const handleSearch = async () => {
-    try {
-      const searchType = type === undefined ? "" : type;
-      let response = await axios.get(getAccount(keyword, searchType), {
-        withCredentials: true
-      });
-      if (response.status === 200) {
-        message.success(response.data.Message);
-        setDataAccounts(response.data.Data.Accounts);
-      }
-    } catch(error) {
-      message.error(error.response.data.Message);
-    }
+  const handleChangPage = (page) => {
+    setPage(page-1);
+  }
+
+  const handleSearch = () => {
+    setSearchKeyword(keyword);
+    setSearchType(type);
+    setPage(0);
   };
 
   const handleLock = async(id) => {
@@ -137,7 +137,7 @@ const AccountManagementByAdmin = () => {
       title: 'Số thứ tự',
       dataIndex: 'sequenceNumber',
       key: 'sequenceNumber',
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => index + 1 + page * 10,
     },
     {
       title: 'Họ tên',
@@ -172,7 +172,7 @@ const AccountManagementByAdmin = () => {
               Mở 
             </Button>
           )}
-          <Button type="link" className="renew" onClick={() => handleDelete(account.Id)}>
+          <Button type="link" danger className="renew" onClick={() => handleDelete(account.Id)}>
             Xóa
           </Button>
         </Space>
@@ -209,6 +209,12 @@ const AccountManagementByAdmin = () => {
       <Table 
           columns={columnsAccounts} 
           dataSource={dataAccount}
+          pagination={{
+            total: totalItems,
+            pageSize: 10,
+            current: page + 1,
+            onChange: handleChangPage,
+          }}
       />
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Đặt lại mật khẩu</h1>}

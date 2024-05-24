@@ -7,6 +7,10 @@ export default {
         hoverColor: "#FFC000",
         brightColor: "#dd8036",
         backgroundColor: "#36ae9a",
+        limegreen: '#32CD32',
+        blue2: '#0000FF',
+        chocolate: '#D2691E',
+        darkmagenta: '#8B008B',
       },
       fontFamily: {
         'poppins': ['Poppins', 'sans-serif'],

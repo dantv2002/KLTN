@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { createSchedule, getDoctor, getSchedule, updateSchedule } from "../../Api";
+import { useState, useEffect, useCallback } from "react";
+import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartment } from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker, InputNumber } from "antd";
 import { useLocation } from "react-router-dom";
@@ -15,6 +15,10 @@ const ScheduleManagementByAdmin = () => {
     const [title, setTitle] = useState("");
     const [department, setDepartment] = useState("");
     const [gender, setGender] = useState("");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchTitle, setSearchTitle] = useState("");
+    const [searchDepartment, setSearchDepartment] = useState("");
+    const [searchGender, setSearchGender] = useState("");
     const [visibleInsert, setVisibleInsert] = useState(false);
     const [formInsert] = Form.useForm();
     const [visibleRead, setVisibleRead] = useState(false);
@@ -22,19 +26,26 @@ const ScheduleManagementByAdmin = () => {
     const [idSchedule, setIdSchedule] = useState("");
     const [date, setDate] = useState("");
     const [time, setTime] = useState("");
+    const [localtion2, setLocation2] = useState("");
     const [number, setNumber] = useState(0);
+    const [callNumber, setCallNumber] = useState(0);
     const [clinic, setClinic] = useState("");
     const [visibleUpdate, setVisibleUpdate] = useState(false);
     const [formUpdate] = Form.useForm();
     const [newSchedules, setNewSchedules] = useState([]);
     const [shouldReloadFormRead, setShouldReloadFormRead] = useState(false);
+    const [listDepartment, setListDepartment] = useState([]);
+    const [pageDoctor, setPageDoctor] = useState("0");
+    const [totalItemsDoctor, setTotalItemsDoctor] = useState("0");
+    const [pageSchedule, setPageSchedule] = useState("0");
+    const [totalItemsSchedule, setTotalItemsSchedule] = useState("0");
 
     const columnsDoctors = [
         {
           title: 'Số thứ tự',
           dataIndex: 'sequenceNumber',
           key: 'sequenceNumber',
-          render: (_, __, index) => index + 1,
+          render: (_, __, index) => index + 1 + pageDoctor * 10,
         },
         {
           title: 'Họ tên',
@@ -48,8 +59,8 @@ const ScheduleManagementByAdmin = () => {
         },
         {
           title: 'Khoa',
-          dataIndex: 'DepartmentId',
-          key: 'DepartmentId',
+          dataIndex: 'DepartmentName',
+          key: 'DepartmentName',
         },
         {
           title: 'Tùy chọn',
@@ -70,6 +81,12 @@ const ScheduleManagementByAdmin = () => {
 
     const columnsSchedules = [
       {
+        title: 'Số thứ tự',
+        dataIndex: 'sequenceNumber',
+        key: 'sequenceNumber',
+        render: (_, __, index) => index + 1 + pageSchedule * 10,
+      },
+      {
         title: 'Ngày khám',
         dataIndex: 'Date',
         key: 'Date',
@@ -80,9 +97,19 @@ const ScheduleManagementByAdmin = () => {
         key: 'Time',
       },
       {
+        title: 'Vị trí',
+        dataIndex: 'Location',
+        key: 'Location',
+      },
+      {
         title: 'Số',
         dataIndex: 'Number',
         key: 'Number',
+      },
+      {
+        title: 'Đã gọi tới',
+        dataIndex: 'CallNumber',
+        key: 'CallNumber',
       },
       {
         title: 'Phòng',
@@ -103,37 +130,55 @@ const ScheduleManagementByAdmin = () => {
       },
     ];
 
-    useEffect(() => {
-      const fetchDoctor = async () => {
-        try {
-          let response = await axios.get(getDoctor("", "", "", ""), {
-            withCredentials: true
-          });
-          if (response.status === 200) {
-            message.success(response.data.Message);
-            setDataDoctors(response.data.Data.HealthCareStaffs);
-          }
-        } catch(error) {
-          message.error(error.response.data.Message);
-        }
-      };
-      fetchDoctor();
-    }, [location.pathname]);
-
-    const handleSearch = async () => {
+    const fetchDoctor = useCallback(async () => {
       try {
-        const searchGender = gender === undefined ? "" : gender;
-        let response = await axios.get(getDoctor(keyword, title, department, searchGender), {
+        const departmentSearch = searchDepartment || "";
+        const genderSearch = searchGender || "";
+        let response = await axios.get(getDoctor(searchKeyword, searchTitle, departmentSearch, genderSearch, pageDoctor), {
           withCredentials: true
         });
         if (response.status === 200) {
-
-          message.success(response.data.Message);
+          setTotalItemsDoctor(response.data.Data.TotalItems);
           setDataDoctors(response.data.Data.HealthCareStaffs);
         }
       } catch(error) {
         message.error(error.response.data.Message);
       }
+    }, [searchKeyword, searchTitle, searchDepartment, searchGender, pageDoctor]);
+
+    const fetchDepartment = async () => {
+      try {
+        let response = await axios.get(getDepartment("", ""), {
+          withCredentials: true
+        });
+        if (response.status === 200) {
+          const departmentsData = response.data.Data.Departments;
+          const departmentsArray = departmentsData.map(department => ({
+            id: department.Id,
+            name: department.NameDepartment
+          }));
+          setListDepartment(departmentsArray);    
+        }
+      } catch(error) {
+        message.error(error.response.data.Message);
+      }
+    }
+
+    useEffect(() => {
+      fetchDoctor();
+      fetchDepartment();
+    }, [location.pathname, fetchDoctor]);
+
+    const handleChangPageDoctor = (page) => {
+      setPageDoctor(page-1);
+    }
+
+    const handleSearch = () => {
+      setSearchKeyword(keyword);
+      setSearchTitle(title);
+      setSearchDepartment(department);
+      setSearchGender(gender);
+      setPageDoctor("0");
     };
 
     const formLayout = {
@@ -141,19 +186,38 @@ const ScheduleManagementByAdmin = () => {
       wrapperCol: { span: 16 },
     };
 
-    const handleReadSchedules = async(id) => {
-      try{
-        let response = await axios.get(getSchedule(id),{
-          withCredentials: true
-        })
-        if (response.status === 200){
-          setVisibleRead(true);
-          setDataSchedules(response.data.Data.Schedules)
-          message.success(response.data.Message)
+    const handleReadSchedules = (id) => {
+      setVisibleRead(true);
+      setIdDoctor(id);
+      console.log(id);
+      setShouldReloadFormRead(true);
+    }
+
+    const fetchSchedule = useCallback(async () => {
+      console.log(idDoctor);
+      console.log(pageSchedule);
+      if (shouldReloadFormRead) {
+        try{
+          let response = await axios.get(getSchedule(idDoctor, pageSchedule),{
+            withCredentials: true
+          })
+          if (response.status === 200){
+            setTotalItemsSchedule(response.data.Data.TotalItems);
+            setDataSchedules(response.data.Data.Schedules);
+          }
+        }catch(error){
+          message.error(error.response.data.Message)
         }
-      }catch(error){
-        message.error(error.response.data.Message)
+        setShouldReloadFormRead(false);
       }
+    }, [idDoctor, pageSchedule, shouldReloadFormRead]);
+
+    useEffect(() => {
+      fetchSchedule();
+    }, [fetchSchedule]);
+
+    const handleChangPageSchedule = (page) => {
+      setPageSchedule(page-1);
     }
 
     const handleInsert = (id) => {
@@ -168,20 +232,25 @@ const ScheduleManagementByAdmin = () => {
 
     const handleCancelRead = () => {
       setVisibleRead(false);
+      setPageSchedule("0");
     }
 
     const handleUpdate = (schedules) => {
       setIdSchedule(schedules.Id);
       setDate(moment(schedules.Date, "DD/MM/YYYY"));
       setTime(schedules.Time);
-      setNumber(parseInt(schedules.Number));
+      setLocation2(schedules.Location);
       setClinic(schedules.Clinic);
+      setNumber(parseInt(schedules.Number));
+      setCallNumber(parseInt(schedules.CallNumber));
       setIdDoctor(schedules.DoctorId);
       formUpdate.setFieldsValue({
         date: moment(schedules.Date, "DD/MM/YYYY"),
         time: schedules.Time,
-        number: parseInt(schedules.Number),
+        location: schedules.Location,
         clinic: schedules.Clinic,
+        number: parseInt(schedules.Number),
+        callnumber: parseInt(schedules.CallNumber),
       });
       setVisibleUpdate(true);     
     };
@@ -196,8 +265,10 @@ const ScheduleManagementByAdmin = () => {
           Id: idSchedule,
           Date: moment(date).format("DD/MM/YYYY"),
           Time: time,
-          Number: parseInt(number),
+          Location: localtion2,
           Clinic: clinic,
+          Number: parseInt(number),
+          CallNumber: parseInt(callNumber),
           DoctorId: idDoctor,
         }];
         
@@ -209,36 +280,15 @@ const ScheduleManagementByAdmin = () => {
           message.success(response.data.Message);
           setVisibleUpdate(false);
           setShouldReloadFormRead(true);
+          setPageSchedule("0");
         }
       } catch (error) {
         message.error(error.response.data.Message);
       }
     }
 
-    useEffect(() => {
-      if (shouldReloadFormRead) {
-        const fetchData = async () => {
-          try {
-            let response = await axios.get(getSchedule(idDoctor), {
-              withCredentials: true
-            });
-            if (response.status === 200) {
-              setVisibleRead(true);
-              setDataSchedules(response.data.Data.Schedules);
-            }
-          } catch (error) {
-            console.log(error.response.data.Message);
-          }
-        };
-        fetchData();
-        setShouldReloadFormRead(false);
-      }
-    }, [shouldReloadFormRead, idDoctor]);
-    
-    
-
     const addScheduleForm = () => {
-      setNewSchedules([...newSchedules, { date: "", time: "", clinic: "", datescreen: "" }]);
+      setNewSchedules([...newSchedules, { date: "", time: "", clinic: "", location: "", datescreen: "" }]);
     };
 
     const handleDateChange = (date, dateValue, index) => {
@@ -254,6 +304,12 @@ const ScheduleManagementByAdmin = () => {
       setNewSchedules(updatedSchedules);
     };
 
+    const handleLocationChange = (locationValue, index) => {
+      const updatedSchedules = [...newSchedules];
+      updatedSchedules[index].location = locationValue;
+      setNewSchedules(updatedSchedules);
+    };
+
     const handleClinicChange = (clinicValue, index) => {
       const updatedSchedules = [...newSchedules];
       updatedSchedules[index].clinic = clinicValue;
@@ -265,6 +321,7 @@ const ScheduleManagementByAdmin = () => {
         const schedulesData = newSchedules.map(schedule => ({
           Date: moment(schedule.date).format("DD/MM/YYYY"),
           Time: schedule.time,
+          Location: schedule.location,
           Clinic: schedule.clinic
         }));
         let response = await axios.post(createSchedule(idDoctor), schedulesData, {
@@ -294,12 +351,22 @@ const ScheduleManagementByAdmin = () => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <Input
+        <Select
           className="w-96 mt-3 mr-3"
           placeholder="Tìm theo khoa"
           value={department}
-          onChange={(e) => setDepartment(e.target.value)}
-        />
+          onChange={(value) => setDepartment(value)}
+          allowClear
+        >
+          {listDepartment.map((department) => (
+            <Select.Option 
+              key={department.id} 
+              value={department.id}
+            >
+              {department.name}
+            </Select.Option>
+          ))}
+        </Select>
         <Select
           className="w-96 mt-3 mr-3"
           placeholder="Tìm theo giới tính"
@@ -315,7 +382,12 @@ const ScheduleManagementByAdmin = () => {
         <Table 
             columns={columnsDoctors} 
             dataSource={dataDoctors}
-            pagination={false}
+            pagination={{
+              total: totalItemsDoctor,
+              pageSize: 10,
+              current: pageDoctor + 1,
+              onChange: handleChangPageDoctor,
+            }}
         />
         <Modal 
           title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Tạo lịch khám</h1>}
@@ -347,6 +419,14 @@ const ScheduleManagementByAdmin = () => {
                     <Select.Option value="MORNING">Buổi sáng</Select.Option>
                     <Select.Option value="AFTERNOON">Buổi chiều</Select.Option>
                   </Select>
+                </Form.Item>
+                <Form.Item label="Vị trí" rules={[{ required: true, message: 'Vị trí không được để trống!' }]}>
+                  <Input
+                    className="w-full"
+                    placeholder="Chọn ngày khám"
+                    value={schedule.location}
+                    onChange={(e) => handleLocationChange(e.target.value, index)}
+                  />
                 </Form.Item>
                 <Form.Item label="Phòng" rules={[{ required: true, message: 'Phòng không được để trống!' }]}>
                   <Select
@@ -380,11 +460,17 @@ const ScheduleManagementByAdmin = () => {
           cancelText="Thoát"
           okButtonProps={{ hidden: true }}
           cancelButtonProps={{ className: "bg-red-600" }}
-          className="w-full max-w-xl mx-auto mt-10"
+          width={800}
         >
           <Table 
             columns={columnsSchedules} 
             dataSource={dataSchedules}
+            pagination={{
+              total: totalItemsSchedule,
+              pageSize: 10,
+              current: pageSchedule + 1,
+              onChange: handleChangPageSchedule,
+            }}
           />
         </Modal>
         <Modal 
@@ -418,13 +504,13 @@ const ScheduleManagementByAdmin = () => {
                 <Select.Option value="AFTERNOON">Buổi chiều</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="number" label="Số thứ tự" rules={[{ required: true, message: 'Số thứ tự không được để trống!' }, { type: 'number', message: 'Vui lòng nhập một số!' }]}>
-              <InputNumber
+            <Form.Item name="location" label="Vị trí" rules={[{ required: true, message: 'Vị trí không được để trống!' }]}>
+              <Input
                 type="text"
                 className="w-full"
-                placeholder="Nhập số thứ tự"
-                value={number}
-                onChange={(value) => setNumber(value)}
+                placeholder="Nhập vị trí"
+                value={localtion2}
+                onChange={(e) => setLocation2(e.target.value)}
               />
             </Form.Item>
             <Form.Item name="clinic" label="Phòng" rules={[{ required: true, message: 'Phòng không được để trống!' }]}>
@@ -444,6 +530,24 @@ const ScheduleManagementByAdmin = () => {
                 <Select.Option value="9">Phòng 9</Select.Option>
                 <Select.Option value="10">Phòng 10</Select.Option>
               </Select>
+            </Form.Item>
+            <Form.Item name="number" label="Số thứ tự" rules={[{ required: true, message: 'Số thứ tự không được để trống!' }, { type: 'number', message: 'Vui lòng nhập một số!' }]}>
+              <InputNumber
+                type="text"
+                className="w-full"
+                placeholder="Nhập số thứ tự"
+                value={number}
+                onChange={(value) => setNumber(value)}
+              />
+            </Form.Item>
+            <Form.Item name="callnumber" label="Đã gọi tới" rules={[{ required: true, message: 'Số đã gọi không được để trống!' }, { type: 'number', message: 'Vui lòng nhập một số!' }]}>
+              <InputNumber
+                type="text"
+                className="w-full"
+                placeholder="Nhập số đã gọi"
+                value={callNumber}
+                onChange={(value) => setCallNumber(value)}
+              />
             </Form.Item>
           </Form>
         </Modal>
