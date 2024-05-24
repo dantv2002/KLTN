@@ -16,7 +16,7 @@ import { logoutApi } from '../../Api';
 import axios from 'axios';
 import ChangePassword from '../../models/ChangePassword';
 import Cookies from "js-cookie"
-import replacePlusWithSpace from '../../content/ReplacePlusWithSpace';
+import replacePlusWithSpace from '../../hook/ReplacePlusWithSpace';
 
 const DashboardNurse = () => {
     const [collapsed, setCollapsed] = useState(false);

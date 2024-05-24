@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgress } from "@mui/material";
-import replacePlusWithSpace from "../../content/ReplacePlusWithSpace";
+import replacePlusWithSpace from "../../hook/ReplacePlusWithSpace";
 
 const GoogleLogin = () => {
 

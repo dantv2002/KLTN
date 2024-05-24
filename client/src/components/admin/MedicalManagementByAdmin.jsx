@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { deleteAllEndMedical, deleteEndMedical, getEndMedical} from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select } from "antd";
@@ -11,13 +11,17 @@ const MedicalManagementByAdmin = () => {
   const [data, setData] = useState("");
   const [keyword, setKeyword] = useState("");
   const [type, setType] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchType, setSearchType] = useState("");
+  const [page, setPage] = useState("0");
+  const [totalItems, setTotalItems] = useState("0");
 
   const columnsMedicals = [
     {
       title: 'Số thứ tự',
       dataIndex: 'sequenceNumber',
       key: 'sequenceNumber',
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => index + 1 + page * 10,
     },
     {
       title: 'Ngày tạo',
@@ -40,7 +44,7 @@ const MedicalManagementByAdmin = () => {
       key: 'options',
       render: (_, medical) => (
         <Space size="middle">
-          <Button type="link" className="delete" onClick={() => handleDeleteMedicals(medical.Id)}>
+          <Button type="link" danger className="delete" onClick={() => handleDeleteMedicals(medical.Id)}>
             Xóa
           </Button>
         </Space>
@@ -48,37 +52,33 @@ const MedicalManagementByAdmin = () => {
     },
   ];
 
-  const fetchMedical = async () => {
+  const fetchMedical = useCallback(async () => {
     try {
-      let response = await axios.get(getEndMedical("", ""), {
+      const typeSearch = searchType || "";
+      let response = await axios.get(getEndMedical(searchKeyword, typeSearch, page), {
         withCredentials: true
       });
       if (response.status === 200) {
-        message.success(response.data.Message);
+        setTotalItems(response.data.Data.TotalItems);
         setData(response.data.Data.Medicals);
       }
     } catch(error) {
       message.error(error.response.data.Message);
     }
-  };
+  }, [searchKeyword, searchType, page]);
 
   useEffect(() => {
       fetchMedical();
-  }, [location.pathname]);
+  }, [location.pathname, fetchMedical]);
+
+  const handleChangPage = (page) => {
+    setPage(page-1);
+  }
 
   const handleSearch = async() => {
-    try {
-      let response = await axios.get(getEndMedical(keyword, type), {
-        withCredentials: true
-      });
-      if (response.status === 200) {
-
-        message.success(response.data.Message);
-        setData(response.data.Data.Medicals);
-      }
-    } catch(error) {
-      message.error(error.response.data.Message);
-    }
+    setSearchKeyword(keyword);
+    setSearchType(type);
+    setPage("0");
   };
 
   const handleDeleteMedicals = async(id) => {
@@ -133,6 +133,12 @@ const MedicalManagementByAdmin = () => {
         <Table 
             columns={columnsMedicals} 
             dataSource={data}
+            pagination={{
+              total: totalItems,
+              pageSize: 10,
+              current: page + 1,
+              onChange: handleChangPage,
+            }}
         />
     </div>
   )

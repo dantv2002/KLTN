@@ -3,7 +3,9 @@ import moment from "moment"
 import { message, Button, Table, Form, Modal, Space, Input, DatePicker, Select } from "antd";
 import { EditOutlined } from '@ant-design/icons';
 import { useState, useEffect } from "react";
-import { deleteRecord, getAllRecordsPatient, newRecordsPatient, updateRecordPatient } from "../../Api";
+import { deleteRecord, getAllRecordsPatient, newRecordsPatient, updateRecordPatient, getBiosignalPatient } from "../../Api";
+import {SearchOutlined} from "@ant-design/icons"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Records = () => {
 
@@ -25,6 +27,13 @@ const Records = () => {
   const [updateAddress, setUpdateAddress] = useState("");
   const [updateHealth, setUpdateHealth] = useState("");
   const [data, setData] = useState([]);
+  const [dateStart, setDateStart] = useState("");
+  const [dateEnd, setDateEnd] = useState("");
+  const [searchDateStart, setSearchDateStart] = useState("");
+  const [searchDateEnd, setSearchDataEnd] = useState("");
+  const [idRecord, setIdRecord] = useState("");
+  const [dataBiosignal, setDataBiosignal] = useState([]);
+  const [visibleRead, setVisibleRead] = useState(false);
   const [visibleInsert, setVisibleInsert] = useState(false);
   const [formInsert] = Form.useForm();
   const [visibleUpdate, setVisibleUpdate] = useState(false);
@@ -167,11 +176,61 @@ const Records = () => {
     }catch(error){
       sessionStorage.setItem("errorMessage", error.response.data.Message)
     }
-
   }
 
-  const handleReadBloodPressure = async() => {
-    
+  useEffect(() => {
+    const fetchPatientBiosignal = async() => {
+      if (searchDateStart && searchDateEnd) {
+        try {
+          let datestart = moment(searchDateStart).format("DD/MM/YYYY");
+          let dateend = moment(searchDateEnd).format("DD/MM/YYYY");
+          let response = await axios.post(getBiosignalPatient(idRecord), {
+            StartDate: datestart,
+            EndDate: dateend,
+          },{
+            withCredentials: true
+          })
+          if (response.status === 200) {
+            message.success(response.data.Message);
+            setDataBiosignal(response.data.Data.Statistical);
+          }
+        } catch(error) {
+          message.error(error.response.data.Message)
+        }
+      }
+    }
+    fetchPatientBiosignal();
+  },[idRecord, searchDateStart, searchDateEnd])
+
+  const dataFake = [
+    {
+      BloodPressure: 0,
+      HeartRate: 0,
+      Temperature: 0,
+      RespiratoryRate: 0,
+      Date: "0",
+      Weight: 0
+    }
+  ];
+
+
+  const handleReadBloodPressure = (id) => {
+    setIdRecord(id);
+    setDataBiosignal(dataFake);
+    setVisibleRead(true);
+  }
+
+  const handleSearchBloodPressure = () => {
+    setSearchDateStart(dateStart);
+    setSearchDataEnd(dateEnd);
+  }
+
+  const handleCancelRead = () => {
+    setDateStart("");
+    setDateEnd("");
+    setSearchDateStart("");
+    setSearchDataEnd("");
+    setVisibleRead(false);
   }
 
   const handleEditEmail = () => {
@@ -233,8 +292,8 @@ const Records = () => {
           <Button type="link" danger className="delete" onClick={() => handleDelete(records.Id)}>
             Xóa
           </Button>
-          <Button type="link" className="blood" onClick={() => handleReadBloodPressure(records)}>
-            Huyết áp
+          <Button type="link" className="blood" onClick={() => handleReadBloodPressure(records.Id)}>
+            Sinh hiệu
           </Button>
         </Space>
       ),
@@ -248,7 +307,7 @@ const Records = () => {
         Thêm hồ sơ
       </button>
       <Table 
-        columns={columns} 
+        columns={columns}
         dataSource={data}
         pagination={false}
       />
@@ -436,6 +495,50 @@ const Records = () => {
             <EditOutlined onClick={handleEditHealth} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem biểu đồ sinh hiệu</h1>}
+        visible={visibleRead}
+        onCancel={handleCancelRead}
+        cancelText="Thoát"
+        okButtonProps={{ hidden: true }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+        width={800}
+      >
+        <DatePicker
+          className="w-60 mt-3 mr-3"
+          placeholder="Chọn ngày bắt đầu"
+          value={dateStart ? moment(dateStart, 'YYYY-MM-DD') : null}
+          onChange={(date, dateString) => setDateStart(dateString)}
+        />
+        <DatePicker
+          className="w-60 mt-3 mr-3"
+          placeholder="Chọn ngày kết thúc"
+          value={dateEnd ? moment(dateEnd, 'YYYY-MM-DD') : null}
+          onChange={(date, dateString) => setDateEnd(dateString)}
+        />
+        <Button onClick={() => handleSearchBloodPressure()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tra cứu</Button>
+        <ResponsiveContainer className="mt-6" width="100%" height={400}>
+          <LineChart
+            width={500}
+            height={300}
+            data={dataBiosignal}
+            margin={{
+              top: 5, right: 30, left: 20, bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="Date" name="Ngày"/>
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="BloodPressure" name="Huyết áp" stroke="#8884d8" />
+            <Line type="monotone" dataKey="HeartRate" name="Nhịp tim" stroke="#82ca9d" />
+            <Line type="monotone" dataKey="Temperature" name="Nhiệt độ" stroke="#ffc658" />
+            <Line type="monotone" dataKey="RespiratoryRate" name="Nhịp hô hấp" stroke="#ff7300" />
+            <Line type="monotone" dataKey="Weight" name="Cân nặng" stroke="#387908" />
+          </LineChart>
+        </ResponsiveContainer>
       </Modal>
     </div>
   )

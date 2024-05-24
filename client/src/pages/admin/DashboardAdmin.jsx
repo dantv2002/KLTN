@@ -16,7 +16,7 @@ import { logoutApi } from '../../Api';
 import axios from 'axios';
 import ChangePassword from '../../models/ChangePassword';
 import Cookies from "js-cookie"
-import replacePlusWithSpace from '../../content/ReplacePlusWithSpace';
+import replacePlusWithSpace from '../../hook/ReplacePlusWithSpace';
 import { useLocation } from 'react-router-dom';
 
 const DashboardAdmin = () => {
@@ -60,7 +60,7 @@ const DashboardAdmin = () => {
                     <UserOutlined className="w-6 h-6 mr-4" /> Đổi mật khẩu
                 </span>
             ),
-            key: '8',
+            key: '9',
         },
         {
             label: (
@@ -68,7 +68,7 @@ const DashboardAdmin = () => {
                     <LogoutOutlined className="w-6 h-6 mr-4" /> Đăng xuất
                 </span>
             ),
-            key: '9',
+            key: '10',
         },
     ];
 
@@ -78,11 +78,11 @@ const DashboardAdmin = () => {
                 setheaderTitle('Thống kê');
                 setSelectedMenuKey('0');
                 break;
-            case '/admin/account1':
+            case '/admin/account':
                 setheaderTitle('Quản lý tài khoản');
                 setSelectedMenuKey('1');
                 break;
-            case '/admin/account2':
+            case '/admin/unregister':
                 setheaderTitle("Quản lý nhân viên chưa có tài khoản ")
                 setSelectedMenuKey('2');
                 break;
@@ -106,6 +106,10 @@ const DashboardAdmin = () => {
                 setheaderTitle('Quản lý lịch khám');
                 setSelectedMenuKey('7');
                 break;
+            case '/admin/department':
+                setheaderTitle('Quản lý khoa');
+                setSelectedMenuKey('8');
+                break;
             default:
                 break;
         }
@@ -118,11 +122,11 @@ const DashboardAdmin = () => {
                 setheaderTitle('Quản lý tài khoản')
                 break;
             case '1':
-                navigate('/admin/account1')
+                navigate('/admin/account')
                 setheaderTitle('Quản lý tài khoản')
                 break;
             case '2':
-                navigate('/admin/account2')
+                navigate('/admin/unregister')
                 setheaderTitle('Quản lý nhân viên chưa có tài khoản')
                 break;
             case '3':
@@ -145,7 +149,10 @@ const DashboardAdmin = () => {
                 navigate('/admin/schedule')
                 setheaderTitle('Quản lý lịch khám')
                 break;
-
+            case '8':
+                navigate('/admin/department')
+                setheaderTitle('Quản lý khoa')
+                break;
             default:
             break;
         }
@@ -203,6 +210,11 @@ const DashboardAdmin = () => {
                     key: '7',
                     icon: <CalendarOutlined className="w-6 h-6"/>,
                     label: 'Lịch khám',
+                },
+                {   
+                    key: '8',
+                    icon: <CalendarOutlined className="w-6 h-6"/>,
+                    label: 'Khoa',
                 },
                 ]}
             />

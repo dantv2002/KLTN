@@ -3,10 +3,9 @@ import { useLocation } from "react-router-dom";
 import Navbar from "../../components/home/Navbar"
 import { CircularProgress } from "@mui/material";
 import { message } from "antd";
-import Records from '../../components/patient/Records';
+import Medicals from "../../components/patient/Medicals";
 
-const RecordsManagement = () => {
-
+const MedicalManagement = () => {
     const [loading, setLoading] = useState(true)
     const location = useLocation();
 
@@ -36,9 +35,9 @@ const RecordsManagement = () => {
     :
         <div>
             <Navbar/>
-            <Records/>   
+            <Medicals/>   
         </div>
     )
 }
 
-export default RecordsManagement
+export default MedicalManagement
