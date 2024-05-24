@@ -36,7 +36,6 @@ public class Medical {
     private String departmentId; // Khoa khám
     private Date date;// Thời gian đến khám
     private String initialDiagnosis; // Chẩn đoán ban đầu
-    // chẩn đoán khi ra viện
     // Nội trú
     private Date dateAdmission; // Thời gian vào viện
     private String departmentAdmission; // Khoa vào viện
