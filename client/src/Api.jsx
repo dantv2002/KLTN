@@ -105,6 +105,12 @@ export const getBiosignalPatient = (id) => `${host}/api/patient/biosignal-statis
 //Department
 //Get department
 export const getDepartment = (keyword, page) => `${host}/api/receptionist/departments?keyword=${keyword}&page=${page}`
+//Create department by admin
+export const createDepartment = `${host}/api/admin/department/new`
+//Update department by admin
+export const updateDepartment = `${host}/api/admin/department`
+//Delete department by admin
+export const deleteDepartment = (id) => `${host}/api/admin/department/${id}`
 
 //Dashboard
 //Data Statistics by admin
