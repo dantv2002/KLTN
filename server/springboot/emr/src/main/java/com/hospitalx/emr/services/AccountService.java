@@ -46,7 +46,7 @@ public class AccountService implements IDAO<AccountDto> {
     public List<Account> getDashboard(Date startDate, Date endDate) {
         return accountRepository.findAllByCreatedAtBetween(startDate, endDate);
     }
-    
+
     public int totalAccount() {
         return accountRepository.totalAccount();
     }
@@ -137,7 +137,7 @@ public class AccountService implements IDAO<AccountDto> {
                     String code = getVerifyCode();
                     acc.setVerify(
                             new Verify(BCrypt.hashpw(code, BCrypt.gensalt(10)),
-                                    Instant.now().plusSeconds(5 * 60))); // 5 minutes
+                                    Date.from(Instant.now().plusSeconds(5 * 60)))); // 5 minutes
                     acc.setPasswordUpdate(BCrypt.hashpw(accountDto.getPassword(), BCrypt.gensalt(10)));
                     this.account = accountRepository.save(acc);
                     emailService.sendEmailVerify(acc.getEmail(), acc.getFullName(), code);
@@ -214,8 +214,8 @@ public class AccountService implements IDAO<AccountDto> {
         this.accountRepository.findById(id)
                 .ifPresentOrElse(acc -> {
                     if (acc.getVerify() != null && BCrypt.checkpw(code, acc.getVerify().getCode())
-                            && acc.getVerify().getExpireAt()
-                                    .isAfter(Instant.now())) {
+                            && (acc.getVerify().getExpireAt()
+                                    .after(new Date()) || acc.getVerify().getExpireAt().equals(new Date()))) {
                         if (type == 1) {
                             acc.setEmailVerified(true);
                         } else {
@@ -335,7 +335,7 @@ public class AccountService implements IDAO<AccountDto> {
         account.setPassword(BCrypt.hashpw(password, BCrypt.gensalt(10)));
         account.setVerify(
                 new Verify(BCrypt.hashpw(code, BCrypt.gensalt(10)),
-                        Instant.now().plusSeconds(5 * 60))); // 5 minutes
+                        Date.from(Instant.now().plusSeconds(5 * 60)))); // 5 minutes
         account.setCreatedAt(new Date());
         account = accountRepository.save(account);
         emailService.sendEmailVerify(account.getEmail(), account.getFullName(), code);
