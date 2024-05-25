@@ -98,11 +98,6 @@ public class MedicalService implements IDAO<MedicalDto> {
         return data;
     }
 
-    public void saveInpatient(MedicalDto medical) {
-        inpatientValidate(medical);
-        this.save(medical);
-    }
-
     public void deleteAll(List<String> ids) {
         log.info("Delete all medicals");
         ids.stream().forEach(id -> this.delete(id));
@@ -195,6 +190,9 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Override
     public MedicalDto save(MedicalDto t) {
         log.info("Save medical: " + t.toString());
+        if (t.getType().equals(MedicalType.INPATIENT)) {
+            inpatientValidate(t);
+        }
         t.setId(null);
         recordService.get(t.getRecordId());
         medicalValidate(t);

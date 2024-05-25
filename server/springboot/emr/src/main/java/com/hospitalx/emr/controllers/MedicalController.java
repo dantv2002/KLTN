@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.common.BaseResponse;
-import com.hospitalx.emr.common.MedicalType;
 import com.hospitalx.emr.models.dtos.MedicalDto;
 import com.hospitalx.emr.services.MedicalService;
 
@@ -38,11 +37,7 @@ public class MedicalController {
     @PreAuthorize("hasRole('ROLE_NURSE')")
     @PostMapping("/nurse/medical/new")
     public ResponseEntity<BaseResponse> create(@RequestBody @Valid MedicalDto medicalDto) {
-        if (medicalDto.getType().equals(MedicalType.INPATIENT)) {
-            medicalService.saveInpatient(medicalDto);
-        } else {
-            medicalService.save(medicalDto);
-        }
+        medicalService.save(medicalDto);
         BaseResponse response = new BaseResponse();
         response.setMessage(String.format("Tạo bệnh án %s thành công",
                 medicalDto.getType().toString().equals("INPATIENT") ? "nội trú" : "ngoại trú"));
