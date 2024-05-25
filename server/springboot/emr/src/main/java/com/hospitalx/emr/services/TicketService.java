@@ -9,6 +9,8 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -102,10 +104,17 @@ public class TicketService implements IDAO<TicketDto> {
     @Override
     public Page<TicketDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all tickets");
-        String accountId = authenticationFacade.getAuthentication().getName();
-        keyword = keyword.isEmpty() ? keyword : "^" + keyword + "$";
-        return ticketRepository.findAllByIdAndStatus(accountId, keyword, pageable)
-                .map(ticket -> modelMapper.map(ticket, TicketDto.class));
+        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        if (role.equals("ROLE_PATIENT")) {
+            String accountId = authenticationFacade.getAuthentication().getName();
+            type = type.isEmpty() ? type : "^" + type + "$";
+            return ticketRepository.findAllByIdAndStatus(accountId, type, pageable)
+                    .map(ticket -> modelMapper.map(ticket, TicketDto.class));
+        }
+        List<Ticket> tickets = ticketRepository.findAllByIdRegex(keyword, "waiting");
+        pageable = PageRequest.of(0, tickets.size() > 0 ? tickets.size() : 10);
+        Page<Ticket> ticketPage = new PageImpl<>(tickets, pageable, tickets.size());
+        return ticketPage.map(ticket -> modelMapper.map(ticket, TicketDto.class));
     }
 
     @Override
@@ -119,8 +128,11 @@ public class TicketService implements IDAO<TicketDto> {
 
     @Override
     public void update(TicketDto t) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        log.info("Update ticket with ID: " + t.getId());
+        t = this.get(t.getId());
+        t.setStatus(TicketStatus.COMPLETED);
+        ticketRepository.save(modelMapper.map(t, Ticket.class));
+        log.info("Update ticket success with ID: " + t.getId());
     }
 
     @Override

@@ -58,7 +58,7 @@ public class DepartmentService implements IDAO<DepartmentDto> {
             departments = departmentRepository.findByNameDepartment(keyword, pageable);
         } else {
             List<Department> departmentList = departmentRepository.findByAll();
-            pageable = PageRequest.of(0, departmentList.size());
+            pageable = PageRequest.of(0, departmentList.size() > 0 ? departmentList.size() : 10);
             departments = new PageImpl<>(departmentList, pageable, departmentList.size());
         }
         return departments.map(department -> modelMapper.map(department, DepartmentDto.class));

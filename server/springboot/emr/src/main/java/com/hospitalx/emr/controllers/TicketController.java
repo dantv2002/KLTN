@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,9 +42,10 @@ public class TicketController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_PATIENT')")
-    @GetMapping("/patient/tickets")
+    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_PATIENT')")
+    @GetMapping({ "/patient/tickets", "/nurse/tickets" })
     public ResponseEntity<BaseResponse> getAll(
+            @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "status", defaultValue = "", required = false) String status,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
@@ -52,7 +54,7 @@ public class TicketController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<TicketDto> tickets = ticketService.getAll(status, "", pageable);
+        Page<TicketDto> tickets = ticketService.getAll(keyword, status, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải danh sách phiếu khám thành công");
         response.setStatus(HttpStatus.OK.value());
@@ -80,6 +82,19 @@ public class TicketController {
                 put("Ticket", ticketDto);
             }
         });
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PreAuthorize("hasRole('ROLE_NURSE')")
+    @PutMapping("/nurse/ticket/{id}")
+    public ResponseEntity<BaseResponse> update(@PathVariable("id") String id) {
+        TicketDto ticketDto = new TicketDto();
+        ticketDto.setId(id);
+        ticketService.update(ticketDto);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Cập nhật phiếu khám thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }
