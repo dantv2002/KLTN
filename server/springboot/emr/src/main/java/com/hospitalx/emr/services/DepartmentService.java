@@ -54,7 +54,7 @@ public class DepartmentService implements IDAO<DepartmentDto> {
         log.info("Get all departments");
         String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
         Page<Department> departments = null;
-        if (role.equals("ROLE_ADMIN")) {
+        if (role.equals("ROLE_ADMIN") || role.equals("ROLE_RECEPTIONIST")) {
             departments = departmentRepository.findByNameDepartment(keyword, pageable);
         } else {
             List<Department> departmentList = departmentRepository.findByAll();
