@@ -1,5 +1,6 @@
 package com.hospitalx.emr.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -12,6 +13,9 @@ import com.hospitalx.emr.models.entitys.Department;
 public interface DepartmentRepository extends MongoRepository<Department, String> {
     @Query("{'nameDepartment': {$regex: ?0, $options: 'i'}, 'deleted': false}")
     Page<Department> findByNameDepartment(String nameDepartment, Pageable pageable);
+
+    @Query("{'deleted': false}")
+    List<Department> findByAll();
 
     @Query("{'_id': ?0, 'deleted': false}")
     Optional<Department> findById(String id);

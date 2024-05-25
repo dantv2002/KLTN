@@ -1,12 +1,17 @@
 package com.hospitalx.emr.services;
 
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.hospitalx.emr.common.AuthenticationFacade;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.entitys.Department;
@@ -19,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 public class DepartmentService implements IDAO<DepartmentDto> {
     @Autowired
     private DepartmentRepository departmentRepository;
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
     @Autowired
     private ModelMapper modelMapper;
     private Department departmentTemp;
@@ -45,7 +52,15 @@ public class DepartmentService implements IDAO<DepartmentDto> {
     @Override
     public Page<DepartmentDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all departments");
-        Page<Department> departments = departmentRepository.findByNameDepartment(keyword, pageable);
+        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        Page<Department> departments = null;
+        if (role.equals("ROLE_ADMIN")) {
+            departments = departmentRepository.findByNameDepartment(keyword, pageable);
+        } else {
+            List<Department> departmentList = departmentRepository.findByAll();
+            pageable = PageRequest.of(0, departmentList.size());
+            departments = new PageImpl<>(departmentList, pageable, departmentList.size());
+        }
         return departments.map(department -> modelMapper.map(department, DepartmentDto.class));
     }
 
