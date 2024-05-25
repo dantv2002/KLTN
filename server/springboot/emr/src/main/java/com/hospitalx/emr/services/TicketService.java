@@ -74,7 +74,6 @@ public class TicketService implements IDAO<TicketDto> {
         ticketDto.setArea(scheduleDto.getLocation()); // Khu vực khám
         ticketDto.setClinic(scheduleDto.getClinic()); // Phòng khám
         ticketDto.setDepartment(departmentDto.getNameDepartment()); // Khoa khám
-        ticketDto.setNameDoctor(doctorDto.getFullName()); // Tên bác sĩ khám
         ticketDto.setDate(new SimpleDateFormat("dd/MM/yyyy").format(scheduleDto.getDate())); // Ngày khám
         ticketDto.setTime(predictTime.format(formatter)); // Giờ khám dự kiến
         ticketDto.setStatus(TicketStatus.WAITING); // Trạng thái

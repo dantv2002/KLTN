@@ -20,8 +20,6 @@ public class TicketDto {
     private String clinic; // Phòng khám
     @JsonProperty("Department")
     private String department; // Khoa khám
-    @JsonProperty("NameDoctor")
-    private String nameDoctor; // Tên bác sĩ khám
     @JsonProperty("Date")
     private String date; // Ngày khám
     @JsonProperty("Time")
