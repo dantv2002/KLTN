@@ -55,10 +55,6 @@ public class DepartmentService implements IDAO<DepartmentDto> {
             log.error("Department not found");
             throw new CustomException("Khoa không tồn tại", HttpStatus.NOT_FOUND.value());
         });
-        if (department.getDeleted()) {
-            log.error("Department is deleted");
-            throw new CustomException("Khoa không tồn tại", HttpStatus.NOT_FOUND.value());
-        }
         return modelMapper.map(department, DepartmentDto.class);
     }
 

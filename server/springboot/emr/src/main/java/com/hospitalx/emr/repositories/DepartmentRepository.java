@@ -10,10 +10,10 @@ import org.springframework.data.mongodb.repository.Query;
 import com.hospitalx.emr.models.entitys.Department;
 
 public interface DepartmentRepository extends MongoRepository<Department, String> {
-    @Query("{'nameDepartment': {$regex: ?0, $options: 'i'}}")
+    @Query("{'nameDepartment': {$regex: ?0, $options: 'i'}, 'deleted': false}")
     Page<Department> findByNameDepartment(String nameDepartment, Pageable pageable);
 
-    @Query("{'_id': ?0}")
+    @Query("{'_id': ?0, 'deleted': false}")
     Optional<Department> findById(String id);
 
     @Query("{'nameDepartment': {$regex: ?0, $options: 'i'}}")
