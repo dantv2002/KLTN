@@ -1,7 +1,6 @@
 package com.hospitalx.emr.services;
 
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -77,8 +76,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
         departmentService.get(departmentId); // Check department exists
         List<HealthcareStaffDto> doctors = healthcareStaffService.getAllByDepartmentId(departmentId);
         List<ScheduleDto> schedules = new ArrayList<>();
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+0"));
-        Date date = Date.from(now.toInstant());
+        Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -201,8 +199,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     @Override
     public Page<ScheduleDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all schedules with doctorId: " + keyword);
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+0"));
-        return scheduleRepository.findByAllDoctorId(keyword, Date.from(now.toInstant()), pageable)
+        return scheduleRepository.findByAllDoctorId(keyword, new Date(), pageable)
                 .map(schedule -> modelMapper.map(schedule, ScheduleDto.class));
     }
 
@@ -245,8 +242,7 @@ public class ScheduleService implements IDAO<ScheduleDto> {
             throw new CustomException("Có lịch khám trùng nhau", HttpStatus.BAD_REQUEST.value());
         }
         // check in database
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT+0"));
-        List<Schedule> schedules = scheduleRepository.findAll(Date.from(now.toInstant()));
+        List<Schedule> schedules = scheduleRepository.findAll(new Date());
         Set<String> scheduleSet = schedules.stream()
                 .map(item -> {
                     String formattedDate = formatter.format(item.getDate());
