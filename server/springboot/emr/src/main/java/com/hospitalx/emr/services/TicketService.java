@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class TicketService implements IDAO<TicketDto> {
+public class TicketService {
     @Autowired
     private TicketRepository ticketRepository;
     @Autowired
@@ -93,13 +93,11 @@ public class TicketService implements IDAO<TicketDto> {
         log.info("Create ticket success with ID: " + ticketBooking.getId());
     }
 
-    @Override
     public TicketDto save(TicketDto t) {
         log.info("Save ticket: " + t);
         return modelMapper.map(ticketRepository.save(modelMapper.map(t, Ticket.class)), TicketDto.class);
     }
 
-    @Override
     public Page<TicketDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all tickets");
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
@@ -109,10 +107,10 @@ public class TicketService implements IDAO<TicketDto> {
             return ticketRepository.findAllByIdAndStatus(accountId, type, pageable)
                     .map(ticket -> modelMapper.map(ticket, TicketDto.class));
         }
-        return ticketRepository.findAllByIdRegex(keyword, "waiting", Pageable.unpaged()).map(ticket -> modelMapper.map(ticket, TicketDto.class));
+        return ticketRepository.findAllByIdRegex(keyword, "waiting", Pageable.unpaged())
+                .map(ticket -> modelMapper.map(ticket, TicketDto.class));
     }
 
-    @Override
     public TicketDto get(String id) {
         log.info("Get ticket by ID: " + id);
         return modelMapper.map(ticketRepository.findById(id).orElseThrow(() -> {
@@ -121,7 +119,6 @@ public class TicketService implements IDAO<TicketDto> {
         }), TicketDto.class);
     }
 
-    @Override
     public void update(TicketDto t) {
         log.info("Update ticket with ID: " + t.getId());
         t = this.get(t.getId());
@@ -130,7 +127,6 @@ public class TicketService implements IDAO<TicketDto> {
         log.info("Update ticket success with ID: " + t.getId());
     }
 
-    @Override
     public void delete(String id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delete'");

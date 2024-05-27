@@ -7,9 +7,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import com.hospitalx.emr.models.entitys.Medical;
 
+@Repository
 public interface MedicalRepository extends MongoRepository<Medical, String> {
     @Query(value = " { 'diagnosisDischarge': {$regex: ?0, $options: 'i'}, 'mark': {$regex: ?1, $options: 'i'}, 'recordId': {$regex: ?2}, 'doctorIdTreatment': {$regex: ?3} } ")
     Page<Medical> findAllByKeyword(String keyword, String mark, String recordId, String doctorId, Pageable pageable);

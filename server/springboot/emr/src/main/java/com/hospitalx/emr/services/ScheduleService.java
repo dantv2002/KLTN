@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class ScheduleService implements IDAO<ScheduleDto> {
+public class ScheduleService {
     @Autowired
     private ScheduleRepository scheduleRepository;
     @Autowired
@@ -188,7 +188,6 @@ public class ScheduleService implements IDAO<ScheduleDto> {
         }
     }
 
-    @Override
     public ScheduleDto save(ScheduleDto t) {
         log.info("Saving schedule: {}", t);
         Schedule schedule = scheduleRepository.save(modelMapper.map(t, Schedule.class));
@@ -196,28 +195,24 @@ public class ScheduleService implements IDAO<ScheduleDto> {
         return modelMapper.map(schedule, ScheduleDto.class);
     }
 
-    @Override
     public Page<ScheduleDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all schedules with doctorId: " + keyword);
         return scheduleRepository.findByAllDoctorId(keyword, new Date(), pageable)
                 .map(schedule -> modelMapper.map(schedule, ScheduleDto.class));
     }
 
-    @Override
     public ScheduleDto get(String id) {
         log.info("Get schedule with id: " + id);
         return modelMapper.map(scheduleRepository.findById(id).orElseThrow(
                 () -> new CustomException("Lịch khám không tồn tại", HttpStatus.NOT_FOUND.value())), ScheduleDto.class);
     }
 
-    @Override
     public void update(ScheduleDto t) {
         log.info("Updating schedule: {}", t);
         Schedule schedule = scheduleRepository.save(modelMapper.map(t, Schedule.class));
         log.info("Updated schedule: {}", schedule);
     }
 
-    @Override
     public void delete(String id) {
         log.info("Deleting schedule with id: " + id);
         scheduleRepository.deleteById(id);

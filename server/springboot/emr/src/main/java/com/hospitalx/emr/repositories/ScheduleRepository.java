@@ -7,10 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.models.entitys.Schedule;
 
+@Repository
 public interface ScheduleRepository extends MongoRepository<Schedule, String> {
     @Query("{ 'doctorId' : ?0, 'date' : { $gt : ?1 } }")
     Page<Schedule> findByAllDoctorId(String doctorId, Date currentDate, Pageable pageable); // Lấy tất cả lịch khám của

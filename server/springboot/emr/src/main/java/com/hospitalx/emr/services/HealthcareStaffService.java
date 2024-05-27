@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
+public class HealthcareStaffService {
     @Autowired
     private HealthcareStaffRepository healthcareStaffRepository;
     @Autowired
@@ -89,7 +89,7 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
         });
     }
 
-    @Override
+    
     public HealthcareStaffDto save(HealthcareStaffDto t) {
         // validate
         validateStaff(t);
@@ -105,7 +105,7 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
         return modelMapper.map(entity, HealthcareStaffDto.class);
     }
 
-    @Override
+    
     public Page<HealthcareStaffDto> getAll(String keyword, String type, Pageable pageable) {
         String[] parts = keyword.split("_", -1);
         parts[2] = parts[2].isEmpty() ? parts[2] : "^" + parts[2] + "$";
@@ -150,7 +150,7 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
         });
     }
 
-    @Override
+    
     public HealthcareStaffDto get(String id) {
         log.info("Get healthcare staff with ID: " + id);
         HealthcareStaff entity = healthcareStaffRepository.findById(id)
@@ -163,7 +163,7 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
         return modelMapper.map(entity, HealthcareStaffDto.class);
     }
 
-    @Override
+    
     public void update(HealthcareStaffDto t) {
         get(t.getId()); // check staff exists
         // validate
@@ -175,7 +175,7 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
         log.info("Update healthcare staff success with ID: " + entity.getId());
     }
 
-    @Override
+    
     public void delete(String id) {
         log.info("Delete healthcare staff with ID: " + id);
         HealthcareStaff entity = modelMapper.map(get(id), HealthcareStaff.class);

@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class RecordService implements IDAO<RecordDto> {
+public class RecordService {
 
     @Autowired
     private RecordRepository recordRepository;
@@ -58,7 +58,7 @@ public class RecordService implements IDAO<RecordDto> {
     }
 
     // Override methods
-    @Override
+
     public RecordDto save(RecordDto t) {
         checkExistRecord(t.getIdentityCard(), null);
         log.info("Save record: " + t.toString());
@@ -87,7 +87,6 @@ public class RecordService implements IDAO<RecordDto> {
         return modelMapper.map(record, RecordDto.class);
     }
 
-    @Override
     public Page<RecordDto> getAll(String keyword, String type, Pageable pageable) {
         String id = authManager.getAuthentication().getName();
         AccountDto accountDto = accountService.get(id);
@@ -116,7 +115,6 @@ public class RecordService implements IDAO<RecordDto> {
                 .map(record -> modelMapper.map(record, RecordDto.class));
     }
 
-    @Override
     public RecordDto get(String id) {
         log.info("Get record with ID: " + id);
         String accountId = authManager.getAuthentication().getName();
@@ -132,7 +130,6 @@ public class RecordService implements IDAO<RecordDto> {
         return modelMapper.map(record, RecordDto.class);
     }
 
-    @Override
     public void update(RecordDto t) {
         checkExistRecord(t.getIdentityCard(), t.getId());
         log.info("Update record: " + t.toString());
@@ -164,7 +161,6 @@ public class RecordService implements IDAO<RecordDto> {
         }
     }
 
-    @Override
     public void delete(String id) {
         log.info("Delete record with ID: " + id);
         String accountId = authManager.getAuthentication().getName();

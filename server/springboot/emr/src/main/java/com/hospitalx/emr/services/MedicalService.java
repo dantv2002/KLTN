@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class MedicalService implements IDAO<MedicalDto> {
+public class MedicalService{
     @Autowired
     private MedicalRepository medicalRepository;
     @Autowired
@@ -191,7 +191,7 @@ public class MedicalService implements IDAO<MedicalDto> {
         log.info("Mark medical success with ID: " + id + " as " + mark);
     }
 
-    @Override
+    
     public MedicalDto save(MedicalDto t) {
         log.info("Save medical: " + t.toString());
         if (t.getType().equals(MedicalType.INPATIENT)) {
@@ -207,7 +207,7 @@ public class MedicalService implements IDAO<MedicalDto> {
         return modelMapper.map(medical, MedicalDto.class);
     }
 
-    @Override
+    
     public Page<MedicalDto> getAll(String keyword, String type, Pageable pageable) {
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         String doctorId = "";
@@ -227,7 +227,7 @@ public class MedicalService implements IDAO<MedicalDto> {
                 .map(medical -> this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class)));
     }
 
-    @Override
+    
     public MedicalDto get(String id) {
         log.info("Get medical by ID: " + id);
         Medical medical = medicalRepository.findById(id).orElseThrow(() -> {
@@ -237,7 +237,7 @@ public class MedicalService implements IDAO<MedicalDto> {
         return this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class));
     }
 
-    @Override
+    
     public void update(MedicalDto t) {
         log.info("Update medical with ID: " + t.getId());
         MedicalDto medical = this.get(t.getId());
@@ -259,7 +259,7 @@ public class MedicalService implements IDAO<MedicalDto> {
         log.info("Update medical success with ID: " + t.getId());
     }
 
-    @Override
+    
     public void delete(String id) {
         log.info("Delete medical with ID: " + id);
         MedicalDto medical = this.get(id);

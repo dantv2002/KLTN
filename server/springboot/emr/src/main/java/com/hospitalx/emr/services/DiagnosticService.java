@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class DiagnosticService implements IDAO<DiagnosticImageDto> {
+public class DiagnosticService {
     @Autowired
     private DiagnosticImageRepository diagnosticImageRepository;
     @Autowired
@@ -72,7 +72,6 @@ public class DiagnosticService implements IDAO<DiagnosticImageDto> {
         return restTemplate.postForObject(url, request, Object.class);
     }
 
-    @Override
     public DiagnosticImageDto save(DiagnosticImageDto t) {
         log.info("Save diagnostic image");
         String doctorId = authManager.getAuthentication().getName();
@@ -81,26 +80,22 @@ public class DiagnosticService implements IDAO<DiagnosticImageDto> {
                 DiagnosticImageDto.class);
     }
 
-    @Override
     public Page<DiagnosticImageDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all diagnostic image");
         return diagnosticImageRepository.findByMedicalId(keyword, pageable)
                 .map(diagnosticImage -> modelMapper.map(diagnosticImage, DiagnosticImageDto.class));
     }
 
-    @Override
     public DiagnosticImageDto get(String id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'get'");
     }
 
-    @Override
     public void update(DiagnosticImageDto t) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
-    @Override
     public void delete(String id) {
         log.info("Delete diagnostic image with ID: " + id);
         diagnosticImageRepository.deleteById(id);

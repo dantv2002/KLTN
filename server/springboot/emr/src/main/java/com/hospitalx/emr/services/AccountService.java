@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class AccountService implements IDAO<AccountDto> {
+public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
@@ -264,7 +264,7 @@ public class AccountService implements IDAO<AccountDto> {
     }
 
     // Override methods
-    @Override
+
     public AccountDto save(AccountDto t) {
         log.info("Save account: " + t.toString());
         Account account = modelMapper.map(t, Account.class);
@@ -273,7 +273,6 @@ public class AccountService implements IDAO<AccountDto> {
         return modelMapper.map(accountRepository.save(account), AccountDto.class);
     }
 
-    @Override
     public Page<AccountDto> getAll(String keyword, String type, Pageable pageable) {
         if (type != null && !type.isEmpty() && !type.equals("patient") && !type.equals("doctor")
                 && !type.equals("nurse")
@@ -289,7 +288,6 @@ public class AccountService implements IDAO<AccountDto> {
                 });
     }
 
-    @Override
     public AccountDto get(String id) {
         log.info("Get account: " + id);
         Account account = accountRepository.findById(id)
@@ -298,7 +296,6 @@ public class AccountService implements IDAO<AccountDto> {
         return modelMapper.map(account, AccountDto.class);
     }
 
-    @Override
     public void update(AccountDto t) {
         log.info("Update account: " + t.toString());
         accountRepository.findById(t.getId())
@@ -307,7 +304,6 @@ public class AccountService implements IDAO<AccountDto> {
         log.info("Update account success: " + t.getEmail());
     }
 
-    @Override
     public void delete(String id) {
         log.info("Delete account: " + id);
         Account account = accountRepository.findById(id)

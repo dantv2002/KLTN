@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class DepartmentService implements IDAO<DepartmentDto> {
+public class DepartmentService{
     @Autowired
     private DepartmentRepository departmentRepository;
     @Autowired
@@ -38,7 +38,6 @@ public class DepartmentService implements IDAO<DepartmentDto> {
         this.save(departmentDto);
     }
 
-    @Override
     public DepartmentDto save(DepartmentDto t) {
         log.info("Create new department with name: {}", t.getNameDepartment());
         Department department = modelMapper.map(t, Department.class);
@@ -46,7 +45,6 @@ public class DepartmentService implements IDAO<DepartmentDto> {
         return modelMapper.map(department, DepartmentDto.class);
     }
 
-    @Override
     public Page<DepartmentDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all departments");
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
@@ -59,7 +57,6 @@ public class DepartmentService implements IDAO<DepartmentDto> {
         return departments.map(department -> modelMapper.map(department, DepartmentDto.class));
     }
 
-    @Override
     public DepartmentDto get(String id) {
         Department department = departmentRepository.findById(id).orElseThrow(() -> {
             log.error("Department not found");
@@ -68,7 +65,6 @@ public class DepartmentService implements IDAO<DepartmentDto> {
         return modelMapper.map(department, DepartmentDto.class);
     }
 
-    @Override
     public void update(DepartmentDto t) {
         log.info("Update department with id: {}", t.getId());
         this.checkDepartmentExist(t.getId(), t.getNameDepartment());
@@ -76,7 +72,6 @@ public class DepartmentService implements IDAO<DepartmentDto> {
         departmentRepository.save(department);
     }
 
-    @Override
     public void delete(String id) {
         log.info("Delete department with id: {}", id);
         DepartmentDto departmentDto = this.get(id);
