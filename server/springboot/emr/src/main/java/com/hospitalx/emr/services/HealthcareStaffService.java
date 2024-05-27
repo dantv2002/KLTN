@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.NurseLevel;
 import com.hospitalx.emr.common.StaffType;
 import com.hospitalx.emr.exception.CustomException;
@@ -29,7 +29,7 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authManager;
 
     public HealthcareStaffDto getByAccountId(String accountId) {
         log.info("Get healthcare staff by account ID: " + accountId);
@@ -109,7 +109,7 @@ public class HealthcareStaffService implements IDAO<HealthcareStaffDto> {
     public Page<HealthcareStaffDto> getAll(String keyword, String type, Pageable pageable) {
         String[] parts = keyword.split("_", -1);
         parts[2] = parts[2].isEmpty() ? parts[2] : "^" + parts[2] + "$";
-        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         if (role.equals(("ROLE_PATIENT"))) {
             Page<HealthcareStaff> entities = healthcareStaffRepository.findByDoctorForPatient(StaffType.DOCTOR,
                     parts[0], parts[1], parts[2],

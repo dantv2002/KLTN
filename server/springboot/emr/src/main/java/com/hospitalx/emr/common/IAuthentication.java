@@ -2,6 +2,6 @@ package com.hospitalx.emr.common;
 
 import org.springframework.security.core.Authentication;
 
-public interface IAuthenticationFacade {
+public interface IAuthentication {
     Authentication getAuthentication();
 }

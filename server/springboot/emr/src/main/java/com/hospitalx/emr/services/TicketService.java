@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.common.TicketStatus;
 import com.hospitalx.emr.exception.CustomException;
@@ -43,7 +43,7 @@ public class TicketService implements IDAO<TicketDto> {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authManager;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -63,7 +63,7 @@ public class TicketService implements IDAO<TicketDto> {
         HealthcareStaffDto doctorDto = healthcareStaffService.get(idDoctor);
         DepartmentDto departmentDto = departmentService.get(doctorDto.getDepartmentId());
         ScheduleDto scheduleDto = scheduleService.get(idSchedule);
-        String accountId = authenticationFacade.getAuthentication().getName();
+        String accountId = authManager.getAuthentication().getName();
         // Set value for ticket
         int examinationTime = 15; // Thời gian khám bệnh (phút)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -104,9 +104,9 @@ public class TicketService implements IDAO<TicketDto> {
     @Override
     public Page<TicketDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all tickets");
-        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         if (role.equals("ROLE_PATIENT")) {
-            String accountId = authenticationFacade.getAuthentication().getName();
+            String accountId = authManager.getAuthentication().getName();
             type = type.isEmpty() ? type : "^" + type + "$";
             return ticketRepository.findAllByIdAndStatus(accountId, type, pageable)
                     .map(ticket -> modelMapper.map(ticket, TicketDto.class));

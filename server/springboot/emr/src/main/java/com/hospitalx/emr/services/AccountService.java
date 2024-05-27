@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.hospitalx.emr.common.AuthProvider;
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
@@ -39,7 +39,7 @@ public class AccountService implements IDAO<AccountDto> {
     @Autowired
     private HealthcareStaffService healthcareStaffService;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authManager;
 
     private Account account = null;
 
@@ -113,7 +113,7 @@ public class AccountService implements IDAO<AccountDto> {
             throw new CustomException("Mật khẩu và xác nhận lại mật khẩu không giống nhau",
                     HttpStatus.BAD_REQUEST.value());
         }
-        String id = authenticationFacade.getAuthentication().getName();
+        String id = authManager.getAuthentication().getName();
         AccountDto account = this.get(id);
         log.info("Update password: " + account.getEmail());
         if (BCrypt.checkpw(updatePasswordDto.getOldPassword(), account.getPassword())) {

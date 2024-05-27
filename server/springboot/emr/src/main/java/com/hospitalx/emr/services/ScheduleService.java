@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
@@ -40,13 +40,13 @@ public class ScheduleService implements IDAO<ScheduleDto> {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authManager;
     private Date startDate = null;
     private Date endDate = null;
 
     public int callNext(String numberClinic, String location) {
         log.info("Call next number of clinic: {}", numberClinic);
-        String accountId = authenticationFacade.getAuthentication().getName();
+        String accountId = authManager.getAuthentication().getName();
         HealthcareStaffDto nurse = healthcareStaffService.getByAccountId(accountId);
         List<ScheduleDto> scheduleDtos = this.getSchedule(nurse.getDepartmentId());
         if (scheduleDtos == null || scheduleDtos.isEmpty()) {

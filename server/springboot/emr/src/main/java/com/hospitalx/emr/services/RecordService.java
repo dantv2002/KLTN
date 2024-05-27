@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.RecordDto;
@@ -32,7 +32,7 @@ public class RecordService implements IDAO<RecordDto> {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authManager;
 
     //
     public List<Record> getDashboard(Date startDate, Date endDate) {
@@ -50,12 +50,12 @@ public class RecordService implements IDAO<RecordDto> {
         log.info("Save record: " + t.toString());
         Record recordSave = modelMapper.map(t, Record.class);
         recordSave.setCreatedAt(new Date());
-        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         if (!role.equals("ROLE_PATIENT")) {
             Record record = recordRepository.save(recordSave);
             return modelMapper.map(record, RecordDto.class);
         }
-        String id = authenticationFacade.getAuthentication().getName();
+        String id = authManager.getAuthentication().getName();
         AccountDto account = accountService.get(id);
         if (account.getRecords() != null && account.getRecords().size() == 10) {
             log.error("Record limit exceeded!");
@@ -75,7 +75,7 @@ public class RecordService implements IDAO<RecordDto> {
 
     @Override
     public Page<RecordDto> getAll(String keyword, String type, Pageable pageable) {
-        String id = authenticationFacade.getAuthentication().getName();
+        String id = authManager.getAuthentication().getName();
         AccountDto accountDto = accountService.get(id);
         log.info("Get all records for account: " + accountDto.getId());
         if (!accountDto.getRole().equals("PATIENT")) {
@@ -105,7 +105,7 @@ public class RecordService implements IDAO<RecordDto> {
     @Override
     public RecordDto get(String id) {
         log.info("Get record with ID: " + id);
-        String accountId = authenticationFacade.getAuthentication().getName();
+        String accountId = authManager.getAuthentication().getName();
         AccountDto account = accountService.get(accountId);
         if (account.getRole().equals("PATIENT") && (account.getRecords() == null || account.getRecords().isEmpty()
                 || !account.getRecords().contains(id))) {
@@ -122,7 +122,7 @@ public class RecordService implements IDAO<RecordDto> {
     public void update(RecordDto t) {
         checkExistRecord(t.getIdentityCard(), t.getId());
         log.info("Update record: " + t.toString());
-        String id = authenticationFacade.getAuthentication().getName();
+        String id = authManager.getAuthentication().getName();
         AccountDto account = accountService.get(id);
         if (account.getRole().equals(("PATIENT"))) {
             if (account.getRecords() == null || account.getRecords().isEmpty()
@@ -153,7 +153,7 @@ public class RecordService implements IDAO<RecordDto> {
     @Override
     public void delete(String id) {
         log.info("Delete record with ID: " + id);
-        String accountId = authenticationFacade.getAuthentication().getName();
+        String accountId = authManager.getAuthentication().getName();
         AccountDto account = accountService.get(accountId);
         if (account.getRecords() == null || account.getRecords().isEmpty() || !account.getRecords().contains(id)) {
             log.error("Record not found for account: " + account.getId());

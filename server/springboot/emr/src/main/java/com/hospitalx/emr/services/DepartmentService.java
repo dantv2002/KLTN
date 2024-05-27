@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.entitys.Department;
@@ -25,7 +25,7 @@ public class DepartmentService implements IDAO<DepartmentDto> {
     @Autowired
     private DepartmentRepository departmentRepository;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authManager;
     @Autowired
     private ModelMapper modelMapper;
     private Department departmentTemp;
@@ -52,7 +52,7 @@ public class DepartmentService implements IDAO<DepartmentDto> {
     @Override
     public Page<DepartmentDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all departments");
-        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         Page<Department> departments = null;
         if (role.equals("ROLE_ADMIN") || role.equals("ROLE_RECEPTIONIST")) {
             departments = departmentRepository.findByNameDepartment(keyword, pageable);

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.BaseResponse;
 import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.UpdatePasswordDto;
@@ -38,7 +38,7 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authenticationFacade;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/admin/account/new/{id}")

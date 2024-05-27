@@ -12,7 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.models.dtos.DiagnosticImageDto;
 import com.hospitalx.emr.models.entitys.DiagnosticImage;
 import com.hospitalx.emr.repositories.DiagnosticImageRepository;
@@ -25,7 +25,7 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
     @Autowired
     private DiagnosticImageRepository diagnosticImageRepository;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authManager;
     @Autowired
     private MedicalService medicalService;
     @Autowired
@@ -59,7 +59,7 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
     @Override
     public DiagnosticImageDto save(DiagnosticImageDto t) {
         log.info("Save diagnostic image");
-        String doctorId = authenticationFacade.getAuthentication().getName();
+        String doctorId = authManager.getAuthentication().getName();
         t.setDoctorIdPerform(doctorId);
         return modelMapper.map(diagnosticImageRepository.save(modelMapper.map(t, DiagnosticImage.class)),
                 DiagnosticImageDto.class);

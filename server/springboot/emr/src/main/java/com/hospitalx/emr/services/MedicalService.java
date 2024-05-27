@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.AuthenticationFacade;
+import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.MedicalResult;
 import com.hospitalx.emr.common.MedicalType;
 import com.hospitalx.emr.exception.CustomException;
@@ -37,7 +37,7 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private AuthenticationFacade authenticationFacade;
+    private AuthManager authManager;
     @Autowired
     private HealthcareStaffService healthcareStaffService;
     @Autowired
@@ -68,7 +68,7 @@ public class MedicalService implements IDAO<MedicalDto> {
     public List<Map<String, Object>> biosignalStatistical(String recordId, Map<String, String> request) {
         log.info("Get biosignal statistical");
         // Check record exist
-        String accountId = authenticationFacade.getAuthentication().getName();
+        String accountId = authManager.getAuthentication().getName();
         AccountDto account = accountService.get(accountId);
         if (!account.getRecords().contains(recordId)) {
             log.error("Record not found with ID: " + recordId);
@@ -146,7 +146,7 @@ public class MedicalService implements IDAO<MedicalDto> {
             throw new CustomException("Tóm tắt kết quả chẩn đoán hình ảnh không được để trống!",
                     HttpStatus.BAD_REQUEST.value());
         }
-        String accountId = authenticationFacade.getAuthentication().getName();
+        String accountId = authManager.getAuthentication().getName();
         HealthcareStaffDto doctor = healthcareStaffService.getByAccountId(accountId);
         medical.setDoctorIdTreatment(doctor.getId());
         medicalValidate(medical);
@@ -205,12 +205,12 @@ public class MedicalService implements IDAO<MedicalDto> {
 
     @Override
     public Page<MedicalDto> getAll(String keyword, String type, Pageable pageable) {
-        String role = authenticationFacade.getAuthentication().getAuthorities().toArray()[0].toString();
+        String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         String doctorId = "";
         String[] parts = keyword.split("_", -1);
         parts[1] = parts[1].isEmpty() ? parts[1] : "^" + parts[1] + "$";
         if (parts[2].equalsIgnoreCase("false") && role.equals("ROLE_DOCTOR")) {
-            String id = authenticationFacade.getAuthentication().getName();
+            String id = authManager.getAuthentication().getName();
             HealthcareStaffDto doctor = healthcareStaffService.getByAccountId(id);
             doctorId = "^" + doctor.getId() + "$";
         }
