@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hospitalx.emr.common.BaseResponse;
 import com.hospitalx.emr.models.dtos.DiagnosticImageDto;
-import com.hospitalx.emr.services.DiagnosticImageService;
 import com.hospitalx.emr.services.DiagnosticService;
 
 import jakarta.validation.Valid;
@@ -21,8 +20,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api")
 public class DiagnosticController {
-    @Autowired
-    private DiagnosticImageService diagnosticImageService;
     @Autowired
     private DiagnosticService diagnosticService;
 
@@ -32,7 +29,7 @@ public class DiagnosticController {
         String urlImage = request.get("Image");
         BaseResponse response = new BaseResponse();
 
-        Object result = diagnosticImageService.diagnosisImage(urlImage);
+        Object result = diagnosticService.diagnosisImage(urlImage);
         //
         response.setMessage("Chạy hỗ trợ chẩn đoán hình ảnh thành công");
         response.setStatus(HttpStatus.OK.value());
@@ -43,7 +40,7 @@ public class DiagnosticController {
     @PreAuthorize("hasRole('ROLE_DOCTOR')")
     @PostMapping("/doctor/diagnostic-image/save")
     public ResponseEntity<BaseResponse> save(@RequestBody @Valid DiagnosticImageDto body) {
-        diagnosticImageService.save(body);
+        diagnosticService.save(body);
         BaseResponse response = new BaseResponse();
         response.setMessage("Đã lưu kết quả chẩn đoán hình ảnh thành công");
         response.setStatus(HttpStatus.OK.value());

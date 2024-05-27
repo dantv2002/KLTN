@@ -40,4 +40,7 @@ public interface MedicalRepository extends MongoRepository<Medical, String> {
 
     @Query(value = "{ 'locked': true, 'dueDate': {$lt: ?0} }", count = true)
     int totalMedicalExpired(Date date);
+
+    @Query(value = "{ 'recordId': ?0 }", count = true)
+    int countByRecordId(String recordId);
 }

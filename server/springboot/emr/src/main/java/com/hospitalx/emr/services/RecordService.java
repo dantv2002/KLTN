@@ -34,6 +34,20 @@ public class RecordService implements IDAO<RecordDto> {
     @Autowired
     private AuthManager authManager;
 
+    public void lock(String id) {
+        log.info("Lock record with ID: " + id);
+        Record record = recordRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value()));
+
+        if (record.getLocked()) {
+            log.info("Record is locked!");
+            return;
+        }
+        record.setLocked(true);
+        recordRepository.save(record);
+        log.info("Lock record success with ID: " + id);
+    }
+
     //
     public List<Record> getDashboard(Date startDate, Date endDate) {
         return recordRepository.findAllByDateBetween(startDate, endDate);
@@ -155,6 +169,17 @@ public class RecordService implements IDAO<RecordDto> {
         log.info("Delete record with ID: " + id);
         String accountId = authManager.getAuthentication().getName();
         AccountDto account = accountService.get(accountId);
+        if (!account.getRole().equals("PATIENT")) {
+            Record record = recordRepository.findById(id)
+                    .orElseThrow(() -> new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value()));
+            if (record.getDeleted()) {
+                recordRepository.delete(record);
+            } else {
+                record.setLocked(false);
+                recordRepository.save(record);
+            }
+            return;
+        }
         if (account.getRecords() == null || account.getRecords().isEmpty() || !account.getRecords().contains(id)) {
             log.error("Record not found for account: " + account.getId());
             throw new CustomException("Không tìm thấy hồ sơ", HttpStatus.NOT_FOUND.value());

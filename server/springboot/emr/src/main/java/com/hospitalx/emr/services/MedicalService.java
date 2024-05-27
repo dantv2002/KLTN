@@ -43,7 +43,7 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private DiagnosticImageService diagnosticImageService;
+    private DiagnosticService diagnosticService;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -177,6 +177,8 @@ public class MedicalService implements IDAO<MedicalDto> {
         medical.setSaveDate(new Date());
         medical.setDueDate(duDate);
         medicalRepository.save(modelMapper.map(medical, Medical.class));
+        recordService.lock(medical.getRecordId());
+        diagnosticService.lock(medical.getId());
         log.info("Lock medical success with ID: " + id);
     }
 
@@ -259,6 +261,7 @@ public class MedicalService implements IDAO<MedicalDto> {
 
     @Override
     public void delete(String id) {
+        log.info("Delete medical with ID: " + id);
         MedicalDto medical = this.get(id);
         if (!medical.getLocked()) {
             log.error("Medical is not locked with ID: " + id);
@@ -271,6 +274,18 @@ public class MedicalService implements IDAO<MedicalDto> {
         }
         log.info("Delete medical with ID: " + id);
         medicalRepository.deleteById(id);
+        //
+        int count = medicalRepository.countByRecordId(medical.getRecordId());
+        if (count == 1) {
+            recordService.delete(medical.getRecordId());
+        } else if (count == 0) {
+            log.error("Record not found with ID: " + medical.getRecordId());
+            throw new CustomException("Hồ sơ không tồn tại!", HttpStatus.NOT_FOUND.value());
+        }
+        //
+        diagnosticService.getAll(medical.getId(), "", Pageable.unpaged()).stream().forEach(diaImageDto -> {
+            diagnosticService.delete(diaImageDto.getId());
+        });
         log.info("Delete medical success with ID: " + id);
     }
 
@@ -339,7 +354,7 @@ public class MedicalService implements IDAO<MedicalDto> {
             String departmentId = doctor.getDepartmentId();
             medical.setDepartmentId(departmentId);
         }
-        diagnosticImageService.getAll(medical.getId(), "", Pageable.unpaged()).stream().forEach(diaImageDto -> {
+        diagnosticService.getAll(medical.getId(), "", Pageable.unpaged()).stream().forEach(diaImageDto -> {
             medical.getDiagnosisImage().add(diaImageDto);
         });
         return medical;
