@@ -27,17 +27,7 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
     @Autowired
     private AuthManager authManager;
     @Autowired
-    private MedicalService medicalService;
-    @Autowired
     private ModelMapper modelMapper;
-
-    public void saveResult(String medicalId, DiagnosticImageDto result) {
-        log.info("Save result diagnostic image");
-        medicalService.get(medicalId); // check medical exist
-        result.setMedicalId(medicalId);
-        this.save(result);
-        log.info("Save result diagnostic image success");
-    }
 
     public Object diagnosisImage(String urlImage) {
         log.info("Run classification image medical");
@@ -67,8 +57,9 @@ public class DiagnosticImageService implements IDAO<DiagnosticImageDto> {
 
     @Override
     public Page<DiagnosticImageDto> getAll(String keyword, String type, Pageable pageable) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+        log.info("Get all diagnostic image");
+        return diagnosticImageRepository.findByMedicalId(keyword, pageable)
+                .map(diagnosticImage -> modelMapper.map(diagnosticImage, DiagnosticImageDto.class));
     }
 
     @Override

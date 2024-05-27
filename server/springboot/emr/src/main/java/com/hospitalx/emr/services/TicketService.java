@@ -9,8 +9,6 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -111,10 +109,7 @@ public class TicketService implements IDAO<TicketDto> {
             return ticketRepository.findAllByIdAndStatus(accountId, type, pageable)
                     .map(ticket -> modelMapper.map(ticket, TicketDto.class));
         }
-        List<Ticket> tickets = ticketRepository.findAllByIdRegex(keyword, "waiting");
-        pageable = PageRequest.of(0, tickets.size() > 0 ? tickets.size() : 10);
-        Page<Ticket> ticketPage = new PageImpl<>(tickets, pageable, tickets.size());
-        return ticketPage.map(ticket -> modelMapper.map(ticket, TicketDto.class));
+        return ticketRepository.findAllByIdRegex(keyword, "waiting", Pageable.unpaged()).map(ticket -> modelMapper.map(ticket, TicketDto.class));
     }
 
     @Override

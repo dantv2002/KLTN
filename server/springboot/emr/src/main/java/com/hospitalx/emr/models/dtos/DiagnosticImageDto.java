@@ -28,6 +28,7 @@ public class DiagnosticImageDto {
     @JsonProperty("Locked")
     private Boolean locked = false;
 
+    @NotEmpty(message = "Vui lòng chọn bệnh án")
     @JsonProperty("MedicalId")
     private String medicalId; // Id bệnh án
 }

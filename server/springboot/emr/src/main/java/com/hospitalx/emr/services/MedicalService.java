@@ -43,6 +43,8 @@ public class MedicalService implements IDAO<MedicalDto> {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
+    private DiagnosticImageService diagnosticImageService;
+    @Autowired
     private ModelMapper modelMapper;
 
     public List<Medical> getDashboard(Date startDate, Date endDate) {
@@ -217,10 +219,10 @@ public class MedicalService implements IDAO<MedicalDto> {
         log.info("Get all medicals");
         if (role.equals("ROLE_PATIENT"))
             return medicalRepository.findAllByKeyword(parts[0], parts[1], pageable)
-                    .map(medical -> this.addDepartment(modelMapper.map(medical, MedicalDto.class)));
+                    .map(medical -> this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class)));
 
         return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, pageable)
-                .map(medical -> this.addDepartment(modelMapper.map(medical, MedicalDto.class)));
+                .map(medical -> this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class)));
     }
 
     @Override
@@ -230,7 +232,7 @@ public class MedicalService implements IDAO<MedicalDto> {
             log.error("Medical not found with ID: " + id);
             return new CustomException("Không tìm thấy bệnh án!", HttpStatus.NOT_FOUND.value());
         });
-        return this.addDepartment(modelMapper.map(medical, MedicalDto.class));
+        return this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class));
     }
 
     @Override
@@ -330,13 +332,16 @@ public class MedicalService implements IDAO<MedicalDto> {
         }
     }
 
-    private MedicalDto addDepartment(MedicalDto medical) {
+    private MedicalDto addDepartmentWithDiaImage(MedicalDto medical) {
         if (medical.getDoctorIdTreatment() != null && !medical.getDoctorIdTreatment().equals("")
                 && medical.getType() == MedicalType.OUTPATIENT) {
             HealthcareStaffDto doctor = healthcareStaffService.get(medical.getDoctorIdTreatment());
             String departmentId = doctor.getDepartmentId();
             medical.setDepartmentId(departmentId);
         }
+        diagnosticImageService.getAll(medical.getId(), "", Pageable.unpaged()).stream().forEach(diaImageDto -> {
+            medical.getDiagnosisImage().add(diaImageDto);
+        });
         return medical;
     }
 }
