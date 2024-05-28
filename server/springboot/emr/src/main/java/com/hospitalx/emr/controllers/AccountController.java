@@ -44,7 +44,7 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private AuthManager authenticationFacade;
+    private AuthManager authManager;
 
     @Autowired
     private AppConfig appConfig;
@@ -141,7 +141,7 @@ public class AccountController {
     // API logout
     @GetMapping("/logout")
     public ResponseEntity<BaseResponse> logout(HttpServletResponse response) {
-        String id = authenticationFacade.getAuthentication().getName();
+        String id = authManager.getAuthentication().getName();
         this.setCookie(response, "Token", null, 0, true);
         this.setCookie(response, "FullName", null, 0, false);
         this.setCookie(response, "Email", null, 0, false);
