@@ -95,9 +95,9 @@ public class MedicalController {
     @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR')")
     @GetMapping({ "/nurse-doctor/mark-medical/{id}" })
     public ResponseEntity<BaseResponse> mark(@PathVariable("id") String id) {
-        medicalService.markMedical(id);
+        String message = medicalService.markMedical(id) == true ? "Đánh dấu sao" : "Bỏ đánh dấu sao";
         BaseResponse response = new BaseResponse();
-        response.setMessage("Đánh dấu sao bệnh án thành công");
+        response.setMessage(message + " bệnh án thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);

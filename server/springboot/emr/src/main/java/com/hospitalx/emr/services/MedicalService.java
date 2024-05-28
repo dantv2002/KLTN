@@ -182,13 +182,14 @@ public class MedicalService{
         log.info("Lock medical success with ID: " + id);
     }
 
-    public void markMedical(String id) {
+    public Boolean markMedical(String id) {
         log.info("Change mark medical with ID: " + id);
         MedicalDto medical = this.get(id);
         String mark = medical.getMark().equalsIgnoreCase("YES") ? "NO" : "YES";
         medical.setMark(mark);
         medicalRepository.save(modelMapper.map(medical, Medical.class));
         log.info("Mark medical success with ID: " + id + " as " + mark);
+        return mark.equalsIgnoreCase("YES");
     }
 
     
