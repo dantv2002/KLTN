@@ -4,11 +4,11 @@ import os
 import gdown
 import platform
 
-class deseaseModels:
+class imagesModels:
     _instance = None
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(deseaseModels, cls).__new__(cls)
+            cls._instance = super(imagesModels, cls).__new__(cls)
             cls._instance.init_singleton()
         return cls._instance
 

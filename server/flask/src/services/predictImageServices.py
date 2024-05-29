@@ -5,7 +5,7 @@ import tensorflow as tf
 
 IMAGE_HEIGHT_INPUT, IMAGE_WIDTH_INPUT = 224, 224
 
-class predictService:
+class predictImageServices:
     def __init__(self, url, model):
         """
         Create a new predict service.

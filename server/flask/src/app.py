@@ -8,23 +8,28 @@ sys.path.insert(0, project_root)
 
 from flask import Flask, request
 
-from src.services.predictService import predictService
-from src.models.deseaseModels import deseaseModels
+from src.services.predictImageServices import predictImageServices
+from src.services.predictSymptomServices import predictSymptomServices
+from src.models.imagesModels import imagesModels
+from src.models.symptomModels import symptomModels
 
 app = Flask(__name__)
 
-global singleton_instance
-singleton_instance = deseaseModels()
+global singleton_instance_deseaseModels
+singleton_instance_deseaseModels = imagesModels()
+
+global singleton_instance_symptomModels
+singleton_instance_symptomModels = symptomModels()
 
 @app.route("/image/predict", methods=["POST"])
-def predict():
+def predictImages():
     try:
-        global singleton_instance
+        global singleton_instance_deseaseModels
         imageURL = request.get_json()["imageURL"]
-        print(imageURL)
+        # print(imageURL)
         # Run model
         # testURL = "https://firebasestorage.googleapis.com/v0/b/practicefirebase-f0570.appspot.com/o/images%2F01.jpeg?alt=media&token=e3fe96f2-18be-4f05-befc-98a8dcf1c354"
-        predictSv = predictService(imageURL, singleton_instance)
+        predictSv = predictImageServices(imageURL, singleton_instance_deseaseModels)
         result = predictSv.predict()
         # Return result
         rs = json.dumps(result)
@@ -32,6 +37,19 @@ def predict():
     except:
         return "Server error", 500
 
+@app.route("/symptoms/predict", methods=["POST"])
+def predictSymptoms():
+    try:
+        global singleton_instance_symptomModels
+        symptoms = request.get_json()["symptoms"]
+        print(symptoms)
+        predictSv = predictSymptomServices([], singleton_instance_symptomModels)
+        result = predictSv.predict()
+        # Return result
+        rs = json.dumps(result)
+        return rs, 200
+    except:
+        return "Server error", 500
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
