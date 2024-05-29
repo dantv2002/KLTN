@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartment } from "../../Api";
+import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartmentAdmin } from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker, InputNumber } from "antd";
 import { useLocation } from "react-router-dom";
@@ -148,13 +148,12 @@ const ScheduleManagementByAdmin = () => {
 
     const fetchDepartment = async () => {
       try {
-        let response = await axios.get(getDepartment("", ""), {
+        let response = await axios.get(getDepartmentAdmin("", ""), {
           withCredentials: true
         });
         if (response.status === 200) {
           const departmentsData = response.data.Data.Departments;
           const departmentsArray = departmentsData
-            .filter(department => !department.deleted)
             .map(department => ({
               id: department.Id,
               name: department.NameDepartment

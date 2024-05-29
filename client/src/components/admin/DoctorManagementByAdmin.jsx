@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { createStaff, getDoctor, deleteStaff, updateStaff, getDepartment} from "../../Api";
+import { createStaff, getDoctor, deleteStaff, updateStaff, getDepartmentAdmin} from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker } from "antd";
 import { useLocation } from "react-router-dom";
@@ -111,13 +111,12 @@ const DoctorManagementByAdmin = () => {
 
     const fetchDepartment = async () => {
       try {
-        let response = await axios.get(getDepartment("", ""), {
+        let response = await axios.get(getDepartmentAdmin("", ""), {
           withCredentials: true
         });
         if (response.status === 200) {
           const departmentsData = response.data.Data.Departments;
           const departmentsArray = departmentsData
-            .filter(department => !department.deleted)
             .map(department => ({
               id: department.Id,
               name: department.NameDepartment

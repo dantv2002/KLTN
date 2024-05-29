@@ -8,7 +8,7 @@ import { SearchOutlined, CloseSquareOutlined } from "@ant-design/icons"
 const MedicalManagementByAdmin = () => {
 
   const location = useLocation();
-  const [data, setData] = useState("");
+  const [data, setData] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [type, setType] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");

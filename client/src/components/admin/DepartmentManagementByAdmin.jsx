@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { message, Space, Button, Table, Input, Modal, Select, Form } from "antd";
 import axios from "axios";
-import { createDepartment, deleteDepartment, getDepartment, updateDepartment } from "../../Api";
+import { createDepartment, deleteDepartment, getDepartmentAdmin, updateDepartment } from "../../Api";
 import { PlusOutlined, SearchOutlined, EditOutlined } from "@ant-design/icons"
 
 
@@ -68,7 +68,7 @@ const DepartmentManagementByAdmin = () => {
 
   const fetchDepartment = useCallback(async () => {
     try {
-      let response = await axios.get(getDepartment(searchKeyword, page), {
+      let response = await axios.get(getDepartmentAdmin(searchKeyword, page), {
         withCredentials: true
       });
       if (response.status === 200) {

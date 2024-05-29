@@ -32,6 +32,8 @@ export const getRecordReceptionist = (keyword, gender, year, page) => `${host}/a
 export const createRecordReception = `${host}/api/receptionist/record/new`
 //Update record by receptionist
 export const updateRecordReception = `${host}/api/receptionist/record`
+//Get record by nurse, doctor
+export const getRecordNurDoc = (gender, keyword, year, page) => `${host}/api/nurse-doctor/records?gender=${gender}&keyword=${keyword}&year=${year}&page=${page}`
 
 
 //Account
@@ -82,6 +84,12 @@ export const registerNumberSchedule = (id) => `${host}/api/receptionist/register
 export const getSchedulePatient = (id, page) => `${host}/api/patient/schedules/${id}?page=${page}`
 //Get schedule option by patient
 export const getScheduleOption = (id, time) => `${host}/api/patient/schedule/get-time/${id}/${time}`
+//Call next by nurse
+export const callNext = (clinic, location) => `${host}/api/nurse/call-next?numberClinic=${clinic}&location=${location}`
+//Get ticket by nurse
+export const getTicketByNurse = (keyword, page) => `${host}/api/nurse/tickets?keyword=${keyword}&page=${page}`
+//Update status by nurse
+export const updateTicket = (id) => `${host}/api/nurse/ticket/${id}`
 
 //Ticker
 //Create ticker by patient
@@ -101,10 +109,26 @@ export const deleteAllEndMedical = `${host}/api/admin/medicals`
 export const getMedicalPatient = (id, keyword, page) => `${host}/api/patient/medicals?record=${id}&keyword=${keyword}&page=${page}`
 //Get biosignal by patient
 export const getBiosignalPatient = (id) => `${host}/api/patient/biosignal-statistical/${id}`
+//Get medical by nurse-doctor
+export const getMedicalNurDoc = (keyword, mark, record, page) => `${host}/api/nurse-doctor/medicals?keyword=${keyword}&mark=${mark}&record=${record}&page=${page}&showAll=true`
+//Create medical by nurse
+export const createMedical = `${host}/api/nurse/medical/new`
+//Update medical by doctor, nurse
+export const updateMedical = `${host}/api/nurse-doctor/medical`
+// Mark by doctor, nurse
+export const getMark = (id) => `${host}/api/nurse-doctor/mark-medical/${id}`
+//Locked medical by doctor
+export const lockedMedical = (id) => `${host}/api/doctor/lock-medical/${id}`
 
 //Department
-//Get department
-export const getDepartment = (keyword, page) => `${host}/api/receptionist/departments?keyword=${keyword}&page=${page}`
+//Get department by patient
+export const getDepartmentPatient = `${host}/api/patient/departments`
+//Get department by nurse doctor
+export const getDepartmentNurDoc = `${host}/api/nurse-doctor/departments`
+//Get department by receptionist
+export const getDepartmentReceptionist = (keyword, page) => `${host}/api/receptionist/departments?keyword=${keyword}&page=${page}`
+//Get department by admin
+export const getDepartmentAdmin = (keyword, page) => `${host}/api/admin/departments?keyword=${keyword}&page=${page}`
 //Create department by admin
 export const createDepartment = `${host}/api/admin/department/new`
 //Update department by admin
@@ -115,3 +139,11 @@ export const deleteDepartment = (id) => `${host}/api/admin/department/${id}`
 //Dashboard
 //Data Statistics by admin
 export const getDataStatistics = `${host}/api/admin/dashboard`
+
+//Diagnostic
+//Diagnostic by doctor
+export const diagnosticByDoctor = `${host}/api/doctor/diagnostic-image/run`
+//Save diagnostic by doctor
+export const saveDiagnostic = `${host}/api/doctor/diagnostic-image/save`
+//Chat 
+export const chatApi = `${host}/api/patient/medical-consultation`

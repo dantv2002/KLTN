@@ -7,7 +7,7 @@ import ResetPassword from "../../models/auth/ResetPassword";
 import ConfirmPassword from "../../models/auth/ConfirmPassword";
 import ChangePassword from "../../models/ChangePassword";
 import logo from "../../assets/img/logo2.png"
-import { createTicker, getDepartment, getAllRecordsPatient, getDoctorPatient, getSchedulePatient, getScheduleOption, logoutApi } from "../../Api";
+import { createTicker, getDepartmentPatient, getAllRecordsPatient, getDoctorPatient, getSchedulePatient, getScheduleOption, logoutApi } from "../../Api";
 import Cookies from "js-cookie"
 import axios from "axios";
 import { Modal, message, Button, Space, Select, Input, Table, DatePicker } from "antd";
@@ -222,6 +222,7 @@ const Navbar = () => {
 
   const handleReadDoctor = async () => {
     setVisibleDoctor(true);
+    fetchDepartment();
   };
 
   const fetchDoctor = useCallback(async () => {
@@ -242,16 +243,15 @@ const Navbar = () => {
     }
   }, [name, searchKeyword, searchTitle, searchDepartment, searchGender, pageDoctor]);
 
-  const fetchDepartment = useCallback(async () => {
+  const fetchDepartment = async () => {
     if (name) {
       try {
-        let response = await axios.get(getDepartment("", ""), {
+        let response = await axios.get(getDepartmentPatient, {
           withCredentials: true
         });
         if (response.status === 200) {
           const departmentsData = response.data.Data.Departments;
           const departmentsArray = departmentsData
-            .filter(department => !department.deleted)
             .map(department => ({
               id: department.Id,
               name: department.NameDepartment
@@ -262,12 +262,11 @@ const Navbar = () => {
         message.error(error.response.data.Message);
       }
     }
-  },[name]);
+  }
 
   useEffect(() => {
       fetchDoctor();
-      fetchDepartment
-  }, [fetchDoctor, fetchDepartment]);
+  }, [fetchDoctor]);
 
 
   const handleChangPageDoctor = (page) => {

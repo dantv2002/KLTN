@@ -4,9 +4,7 @@ import Home from "./pages/Home";
 import RecordsManagement from "./pages/patient/RecordsManagement";
 import GoogleLogin from "./models/auth/GoogleLogin";
 import DashboardNurse from "./pages/nurse/DashboardNurse";
-import RecordsManagementByNurse from './components/nurse/RecordsManagementByNurse';
 import DashboardDoctor from "./pages/doctor/DashboardDoctor";
-import RecordsManagementByDoctor from "./components/doctor/RecordsManagementByDoctor";
 import DashboardReceptionist from "./pages/receptionist/DashboardReceptionist";
 import RecordsManagementByReceptionist from "./components/receptionist/RecordsManagementByReceptionist";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
@@ -19,12 +17,15 @@ import ReceptionistManagementByAdmin from "./components/admin/ReceptionistManage
 import MedicalManagementByAdmin from "./components/admin/MedicalManagementByAdmin";
 import DataStatisticsManagementByAdmin from "./components/admin/DataStatisticsManagementByAdmin";
 import PageNotFound from "./pages/PageNotFound";
-import { useTitle } from "./hook/UseTitle";
+import { useTitle } from "./context/UseTitle";
 import ScheduleManagement from "./pages/patient/ScheduleManagement";
 import MedicalManagement from "./pages/patient/MedicalManagement";
 import DepartmentManagementByAdmin from "./components/admin/DepartmentManagementByAdmin";
-
-
+import MedicalManagementByNurse from "./components/nurse/MedicalManagementByNurse";
+import ReceptionManagementByNurse from "./components/nurse/ReceptionManagementByNurse";
+import MedicalManagementByDoctor from "./components/doctor/MedicalManagementByDoctor";
+import DiagnosisManagementByDoctor from "./components/doctor/DiagnosisManagementByDoctor";
+import ScreenReceptionByNurse from "./components/nurse/ScreenReceptionByNurse";
 
 const App = () => {
 
@@ -38,8 +39,11 @@ const App = () => {
       '/records': 'Hồ sơ bệnh nhân',
       '/schedules': 'Lịch khám',
       '/medicals': 'Hồ sơ bệnh án',
-      '/nurse/records': 'Điều dưỡng - Quản lý hồ sơ bệnh nhân',
-      '/doctor/records': 'Bác sĩ - Quản lý hồ sơ bệnh nhân',
+      '/call': 'Gọi bệnh nhân',
+      '/nurse/medical': 'Điều dưỡng - Quản lý hồ sơ bệnh án',
+      '/nurse/reception': 'Điều dưỡng - Tiếp nhận bệnh nhân',
+      '/doctor/medical': 'Bác sĩ - Quản lý hồ sơ bệnh án',
+      '/doctor/diagnosis': 'Bác sĩ - Chẩn đoán',
       '/receptionist/records': 'Nhân viên tiếp nhận - Quản lý hồ sơ bệnh nhân',
       '/admin/statistic': 'Admin - Thống kê',
       '/admin/account': 'Admin - Quản lý tài khoản đã đăng ký',
@@ -59,15 +63,18 @@ const App = () => {
   return (
     <Routes>
       <Route path='/' element={<Home/>}/>
+      <Route path='/call' element={<ScreenReceptionByNurse/>}/>
       <Route path='/oauth2/redirect' element={<GoogleLogin/>}/>
       <Route path='/records' element={<RecordsManagement/>}/>
       <Route path='/schedules' element={<ScheduleManagement/>}/>
       <Route path='/medicals' element={<MedicalManagement/>}/>
       <Route element={<DashboardNurse/>}>
-        <Route path='/nurse/records' element={<RecordsManagementByNurse/>}/>
+        <Route path='/nurse/medical' element={<MedicalManagementByNurse/>}/>
+        <Route path='/nurse/reception' element={<ReceptionManagementByNurse/>}/>
       </Route>
       <Route element={<DashboardDoctor/>}>
-        <Route path='/doctor/records' element={<RecordsManagementByDoctor/>}/>
+        <Route path='/doctor/medical' element={<MedicalManagementByDoctor/>}/>
+        <Route path='/doctor/diagnosis' element={<DiagnosisManagementByDoctor/>}/>
       </Route>
       <Route element={<DashboardReceptionist/>}>
         <Route path='/receptionist/records' element={<RecordsManagementByReceptionist/>}/>

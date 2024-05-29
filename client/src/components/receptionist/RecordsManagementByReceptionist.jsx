@@ -3,7 +3,7 @@ import moment from "moment"
 import { message, Button, Table, Form, Modal, Space, Input, DatePicker, Select } from "antd";
 import { SearchOutlined, PlusCircleOutlined, EditOutlined } from '@ant-design/icons';
 import { useState, useEffect, useCallback } from "react";
-import { createRecordReception, getDepartment, getListSchedule, getRecordReceptionist, registerNumberSchedule, updateRecordReception } from "../../Api";
+import { createRecordReception, getDepartmentReceptionist, getListSchedule, getRecordReceptionist, registerNumberSchedule, updateRecordReception } from "../../Api";
 import { useLocation } from "react-router-dom";
 
 const RecordsManagementByReceptionist = () => {
@@ -383,7 +383,7 @@ const RecordsManagementByReceptionist = () => {
 
   const fetchDepartment = useCallback(async() => {
     try{
-      let response = await axios.get(getDepartment(searchDepartment, pageDepartment),{
+      let response = await axios.get(getDepartmentReceptionist(searchDepartment, pageDepartment),{
         withCredentials: true
       })
       if (response.status === 200){

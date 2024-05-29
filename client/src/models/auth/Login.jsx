@@ -35,11 +35,11 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
         if (role === "PATIENT") {
           window.location.reload();
         } else if (role === "NURSE") {
-          navigate("/nurse/records");
+          navigate("/nurse/medical");
         } else if (role === "RECEPTIONIST") {
           navigate("/receptionist/records");
         } else if (role === "DOCTOR") {
-          navigate("/doctor/records");
+          navigate("/doctor/medical");
         } else if (role === "ADMIN") {
           navigate("/admin/statistic");
         }       

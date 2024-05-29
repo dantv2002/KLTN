@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     UserAddOutlined,
     UserOutlined,
-    CopyOutlined,
     LogoutOutlined,
     DownOutlined,
     FileOutlined,
@@ -17,8 +16,12 @@ import axios from 'axios';
 import ChangePassword from '../../models/ChangePassword';
 import Cookies from "js-cookie"
 import replacePlusWithSpace from '../../hook/ReplacePlusWithSpace';
+import { useLocation } from 'react-router-dom';
 
 const DashboardNurse = () => {
+    
+    const location = useLocation();
+    const [selectedMenuKey, setSelectedMenuKey] = useState("0");
     const [collapsed, setCollapsed] = useState(false);
     const [headerTitle, setheaderTitle] = useState("Quản lý hồ sơ bệnh nhân");
     const [showFormChangePassword, setShowFormChangePassword] = useState(false);
@@ -56,7 +59,7 @@ const DashboardNurse = () => {
                     <UserOutlined className="w-6 h-6 mr-4" /> Đổi mật khẩu
                 </span>
             ),
-            key: '4',
+            key: '2',
         },
         {
             label: (
@@ -64,27 +67,35 @@ const DashboardNurse = () => {
                     <LogoutOutlined className="w-6 h-6 mr-4" /> Đăng xuất
                 </span>
             ),
-            key: '5',
+            key: '3',
         },
     ];
+
+    useEffect(() => {
+        switch (location.pathname) {
+            case '/nurse/medical':
+                setheaderTitle('Quản lý bệnh án');
+                setSelectedMenuKey('0');
+                break;
+            case '/nurse/reception':
+                setheaderTitle('Tiếp nhận bệnh nhân');
+                setSelectedMenuKey('1');
+                break;
+            default:
+                break;
+        }
+    }, [location.pathname]);
+
     const handleMenuSelect = (item) => {
         switch (item.key) {
-
             case '0':
-                navigate('/nurse/records')
-                setheaderTitle('Quản lý hồ sơ bệnh nhân')
-                break;
-
-            case '1':
                 navigate('/nurse/medical')
                 setheaderTitle('Quản lý hồ sơ bệnh án')
                 break;
-
-            case '2':
-                navigate('/nurse/patient')
+            case '1':
+                navigate('/nurse/reception')
                 setheaderTitle('Tiếp nhận bệnh nhân')
                 break;
-
             default:
             break;
         }
@@ -99,21 +110,16 @@ const DashboardNurse = () => {
             <Menu
                 theme="dark"
                 mode="inline"
-                defaultSelectedKeys={['0']}
+                selectedKeys={[selectedMenuKey]}
                 onSelect={handleMenuSelect}
                 items={[
                 {
                     key: '0',
-                    icon: <CopyOutlined className="w-6 h-6"/>,
-                    label: 'Hồ sơ bệnh nhân',
-                },
-                {
-                    key: '1',
                     icon: <FileOutlined className="w-6 h-6"/>,
                     label: 'Hồ sơ bệnh án',
                 },
                 {   
-                    key: '2',
+                    key: '1',
                     icon: <UserAddOutlined className="w-6 h-6"/>,
                     label: 'Tiếp nhận',
                 },
