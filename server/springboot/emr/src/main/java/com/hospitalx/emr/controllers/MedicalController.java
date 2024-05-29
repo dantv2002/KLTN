@@ -160,7 +160,7 @@ public class MedicalController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<MedicalDto> medicals = medicalService.getAllDelete(keyword, type, pageable);
+        Page<MedicalDto> medicals = medicalService.getAllExpired(keyword, type, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải danh sách bệnh án đến hạn thanh lý thành công");
         response.setStatus(HttpStatus.OK.value());

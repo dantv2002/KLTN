@@ -106,7 +106,7 @@ public class MedicalService{
         log.info("Delete all medicals success");
     }
 
-    public Page<MedicalDto> getAllDelete(String keyword, String type, Pageable pageable) {
+    public Page<MedicalDto> getAllExpired(String keyword, String type, Pageable pageable) {
         log.info("Get all medicals delete");
         if (!type.equalsIgnoreCase(MedicalResult.DEATH.toString())
                 && !type.equalsIgnoreCase(MedicalResult.ACCIDENT.toString())) {

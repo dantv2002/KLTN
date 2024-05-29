@@ -125,7 +125,7 @@ public class HealthcareStaffController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<HealthcareStaffDto> data = healthcareStaffService.getAllForAccount(keyword, type, pageable);
+        Page<HealthcareStaffDto> data = healthcareStaffService.getAllNotAccount(keyword, type, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải danh sách nhân viên y tế thành công");
         response.setStatus(HttpStatus.OK.value());

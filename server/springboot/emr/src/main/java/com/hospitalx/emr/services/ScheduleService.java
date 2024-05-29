@@ -130,7 +130,7 @@ public class ScheduleService {
         return scheduleDto;
     }
 
-    public void adminDeleteSchedule(String idDoctor, String idSchedule) {
+    public void deleteSchedule(String idDoctor, String idSchedule) {
         log.info("Deleting schedule");
         healthcareStaffService.get(idDoctor); // Check doctor exists
         ScheduleDto scheduleDto = this.get(idSchedule);
@@ -154,7 +154,7 @@ public class ScheduleService {
         log.info("Deleted schedule");
     }
 
-    public void adminUpdateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
+    public void updateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Updating schedule");
         healthcareStaffService.get(idDoctor); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
@@ -172,7 +172,7 @@ public class ScheduleService {
         }
     }
 
-    public void adminCreateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
+    public void createSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Creating schedule for doctor: {}", idDoctor);
         healthcareStaffService.get(idDoctor); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {

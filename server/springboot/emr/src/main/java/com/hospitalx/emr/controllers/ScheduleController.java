@@ -39,7 +39,7 @@ public class ScheduleController {
     @PostMapping("/admin/schedule/new/{id}")
     public ResponseEntity<BaseResponse> create(@PathVariable("id") String id,
             @RequestBody List<@Valid ScheduleDto> scheduleDtoList) {
-        scheduleService.adminCreateSchedule(id, scheduleDtoList);
+        scheduleService.createSchedule(id, scheduleDtoList);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tạo lịch khám thành công");
         response.setStatus(HttpStatus.OK.value());
@@ -93,7 +93,7 @@ public class ScheduleController {
     @PutMapping("/admin/schedules/{id}")
     public ResponseEntity<BaseResponse> update(@PathVariable("id") String id,
             @RequestBody List<@Valid ScheduleDto> scheduleDtoList) {
-        scheduleService.adminUpdateSchedule(id, scheduleDtoList);
+        scheduleService.updateSchedule(id, scheduleDtoList);
         BaseResponse response = new BaseResponse();
         response.setMessage("Cập nhật lịch khám thành công");
         response.setStatus(HttpStatus.OK.value());
@@ -105,7 +105,7 @@ public class ScheduleController {
     @DeleteMapping("/admin/schedule/{idDoctor}/{idSchedule}")
     public ResponseEntity<BaseResponse> delete(@PathVariable("idDoctor") String idDoctor,
             @PathVariable("idSchedule") String idSchedule) {
-        scheduleService.adminDeleteSchedule(idDoctor, idSchedule);
+        scheduleService.deleteSchedule(idDoctor, idSchedule);
         BaseResponse response = new BaseResponse();
         response.setMessage("Xóa lịch khám thành công");
         response.setStatus(HttpStatus.OK.value());

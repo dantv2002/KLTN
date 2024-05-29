@@ -51,7 +51,7 @@ public class AccountService {
         return accountRepository.totalAccount();
     }
 
-    public void adminDeleteAccount(String id) {
+    public void deleteAccount(String id) {
         log.info("Admin delete account: " + id);
         AccountDto accountDto = this.get(id);
         accountDto.setDeleted(true);
@@ -59,7 +59,7 @@ public class AccountService {
         log.info("Admin delete account success: " + id);
     }
 
-    public void adminResetPassword(AccountDto accountDto) {
+    public void updatePassword(AccountDto accountDto) {
         log.info("Admin reset password of account: " + accountDto.getId());
         if (!accountDto.getPassword().equals(accountDto.getConfirmPassword())) {
             log.error("Password and confirm password not match");
@@ -85,7 +85,7 @@ public class AccountService {
         log.info("Set active account success: " + id + " - Active: " + active);
     }
 
-    public void adminCreateAccount(AccountDto accountDto, String id_healthcare_staff) {
+    public void createAccount(AccountDto accountDto, String id_healthcare_staff) {
         HealthcareStaffDto healthcareStaffDto = healthcareStaffService.checkExistsAccount(id_healthcare_staff);
         Account account = accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
                 .orElse(null);
@@ -108,7 +108,7 @@ public class AccountService {
         log.info("Create account success: " + accountDto.getEmail());
     }
 
-    public void updatePassword(UpdatePasswordDto updatePasswordDto) {
+    public void changePassword(UpdatePasswordDto updatePasswordDto) {
         if (!updatePasswordDto.getNewPassword().equals(updatePasswordDto.getConfirmNewPassword())) {
             throw new CustomException("Mật khẩu và xác nhận lại mật khẩu không giống nhau",
                     HttpStatus.BAD_REQUEST.value());

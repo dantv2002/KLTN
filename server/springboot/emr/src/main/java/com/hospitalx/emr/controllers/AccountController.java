@@ -57,7 +57,7 @@ public class AccountController {
     @PostMapping("/admin/account/new/{id}")
     public ResponseEntity<BaseResponse> create(@RequestBody @Valid AccountDto accountDto,
             @PathVariable("id") String id) {
-        accountService.adminCreateAccount(accountDto, id);
+        accountService.createAccount(accountDto, id);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tạo tài khoản thành công");
         response.setStatus(HttpStatus.OK.value());
@@ -108,7 +108,7 @@ public class AccountController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/admin/account/reset-password")
     public ResponseEntity<BaseResponse> resetPassword(@RequestBody @Valid AccountDto accountDto) {
-        accountService.adminResetPassword(accountDto);
+        accountService.updatePassword(accountDto);
         BaseResponse response = new BaseResponse();
         response.setMessage("Cấp lại mật khẩu thành công");
         response.setStatus(HttpStatus.OK.value());
@@ -119,7 +119,7 @@ public class AccountController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/admin/account/{id}")
     public ResponseEntity<BaseResponse> delete(@PathVariable("id") String id) {
-        accountService.adminDeleteAccount(id);
+        accountService.deleteAccount(id);
         BaseResponse response = new BaseResponse();
         response.setMessage("Xóa tài khoản thành công");
         response.setStatus(HttpStatus.OK.value());
@@ -129,8 +129,8 @@ public class AccountController {
 
     // API update password
     @PutMapping("/update-password")
-    public ResponseEntity<BaseResponse> updatePassword(@RequestBody @Valid UpdatePasswordDto updatePasswordDto) {
-        accountService.updatePassword(updatePasswordDto);
+    public ResponseEntity<BaseResponse> changePassword(@RequestBody @Valid UpdatePasswordDto updatePasswordDto) {
+        accountService.changePassword(updatePasswordDto);
         BaseResponse response = new BaseResponse();
         response.setMessage("Đổi mật khẩu thành công");
         response.setStatus(HttpStatus.OK.value());

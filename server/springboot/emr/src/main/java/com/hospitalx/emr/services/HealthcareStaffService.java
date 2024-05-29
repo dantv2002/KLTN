@@ -60,7 +60,7 @@ public class HealthcareStaffService {
     }
 
     // Get all healthcare staffs for creating new account
-    public Page<HealthcareStaffDto> getAllForAccount(String keyword, String type, Pageable pageable) {
+    public Page<HealthcareStaffDto> getAllNotAccount(String keyword, String type, Pageable pageable) {
         type = type.toLowerCase();
         if (type != null && !type.isEmpty() && !type.equals("doctor") && !type.equals("nurse")
                 && !type.equals("receptionist")) {
