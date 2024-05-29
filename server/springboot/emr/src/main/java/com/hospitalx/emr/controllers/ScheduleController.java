@@ -131,7 +131,7 @@ public class ScheduleController {
 
     @PreAuthorize("hasRole('ROLE_RECEPTIONIST')")
     @GetMapping("/receptionist/schedules/{id}")
-    public ResponseEntity<BaseResponse> getSchedule(@PathVariable("id") String id) {
+    public ResponseEntity<BaseResponse> getScheduleDepartment(@PathVariable("id") String id) {
         List<ScheduleDto> scheduleDto = scheduleService.getSchedule(id);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải thông tin lịch khám thành công");
@@ -146,9 +146,10 @@ public class ScheduleController {
 
     // Call next patient
     @PreAuthorize("hasRole('ROLE_NURSE')")
-    @GetMapping("/nurse/call-next/{numberClinic}/{location}")
-    public ResponseEntity<BaseResponse> getNumberWaiting(@PathVariable("numberClinic") String numberClinic,
-            @PathVariable("location") String location) {
+    @GetMapping("/nurse/call-next")
+    public ResponseEntity<BaseResponse> getNumberWaiting(
+            @RequestParam(name = "numberClinic", required = true) String numberClinic,
+            @RequestParam(name = "location", required = true) String location) {
         int result = scheduleService.callNext(numberClinic, location);
         BaseResponse response = new BaseResponse();
         response.setMessage("Gọi bệnh nhân tiếp theo thành công");

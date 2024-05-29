@@ -115,7 +115,7 @@ public class HealthcareStaffController {
     // API support api create account for healthcare staff
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/healthcare-staffs/account")
-    public ResponseEntity<BaseResponse> getAll(
+    public ResponseEntity<BaseResponse> getAllNotAccount(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "type", defaultValue = "", required = false) String type,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,

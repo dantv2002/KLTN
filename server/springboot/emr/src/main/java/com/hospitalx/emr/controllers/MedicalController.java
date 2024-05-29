@@ -138,7 +138,7 @@ public class MedicalController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/admin/medicals")
-    public ResponseEntity<BaseResponse> delete(@RequestBody Map<String, List<String>> request) {
+    public ResponseEntity<BaseResponse> deleteAll(@RequestBody Map<String, List<String>> request) {
         List<String> ids = request.get("Id");
         medicalService.deleteAll(ids);
         BaseResponse response = new BaseResponse();
@@ -150,7 +150,7 @@ public class MedicalController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/medicals")
-    public ResponseEntity<BaseResponse> getAll(
+    public ResponseEntity<BaseResponse> getAllExpired(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "type", defaultValue = "", required = false) String type,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,

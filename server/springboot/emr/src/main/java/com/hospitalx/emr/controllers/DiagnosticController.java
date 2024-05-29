@@ -39,7 +39,7 @@ public class DiagnosticController {
 
     @PreAuthorize("hasRole('ROLE_DOCTOR')")
     @PostMapping("/doctor/diagnostic-image/save")
-    public ResponseEntity<BaseResponse> save(@RequestBody @Valid DiagnosticImageDto body) {
+    public ResponseEntity<BaseResponse> create(@RequestBody @Valid DiagnosticImageDto body) {
         diagnosticService.save(body);
         BaseResponse response = new BaseResponse();
         response.setMessage("Đã lưu kết quả chẩn đoán hình ảnh thành công");
