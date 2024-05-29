@@ -127,7 +127,6 @@ const DashboardDoctor = () => {
             />
             </Sider>
             <Layout>
-            {showFormChangePassword && <ChangePassword closeFormChangePassword={closeFormChangePassword}/>}
             <Header
                 style={{
                     padding: 0,
@@ -179,6 +178,7 @@ const DashboardDoctor = () => {
                 <Outlet/>
             </Content>
             </Layout>
+            {showFormChangePassword && <ChangePassword closeFormChangePassword={closeFormChangePassword}/>}
         </Layout>
     );
 }

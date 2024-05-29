@@ -26,6 +26,11 @@ import ReceptionManagementByNurse from "./components/nurse/ReceptionManagementBy
 import MedicalManagementByDoctor from "./components/doctor/MedicalManagementByDoctor";
 import DiagnosisManagementByDoctor from "./components/doctor/DiagnosisManagementByDoctor";
 import ScreenReceptionByNurse from "./components/nurse/ScreenReceptionByNurse";
+import ProtectedRoutePatient from "./routes/ProtectedRoutePatient";
+import ProtectedRouteNurse from "./routes/ProtectedRouteNurse";
+import ProtectedRouteReceptionist from "./routes/ProtectedRouteReceptionist";
+import ProtectedRouteDoctor from "./routes/ProtectedRouteDoctor";
+import ProtectedRouteAdmin from "./routes/ProtectedRouteAdmin";
 
 const App = () => {
 
@@ -63,33 +68,127 @@ const App = () => {
   return (
     <Routes>
       <Route path='/' element={<Home/>}/>
-      <Route path='/call' element={<ScreenReceptionByNurse/>}/>
       <Route path='/oauth2/redirect' element={<GoogleLogin/>}/>
-      <Route path='/records' element={<RecordsManagement/>}/>
-      <Route path='/schedules' element={<ScheduleManagement/>}/>
-      <Route path='/medicals' element={<MedicalManagement/>}/>
-      <Route element={<DashboardNurse/>}>
-        <Route path='/nurse/medical' element={<MedicalManagementByNurse/>}/>
-        <Route path='/nurse/reception' element={<ReceptionManagementByNurse/>}/>
+
+      <Route path='/records' element={
+        <ProtectedRoutePatient>
+          <RecordsManagement/>
+        </ProtectedRoutePatient>
+      }/>
+      <Route path='/schedules' element={
+        <ProtectedRoutePatient>
+          <ScheduleManagement/>
+        </ProtectedRoutePatient>
+      }/>
+      <Route path='/medicals' element={
+        <ProtectedRoutePatient>
+          <MedicalManagement/>
+        </ProtectedRoutePatient>
+      }/>
+
+      <Route element={
+        <ProtectedRouteNurse>
+          <DashboardNurse/>
+        </ProtectedRouteNurse>
+      }>
+        <Route path='/nurse/medical' element={
+          <ProtectedRouteNurse>
+            <MedicalManagementByNurse/>
+          </ProtectedRouteNurse>
+        }/>
+        <Route path='/nurse/reception' element={
+          <ProtectedRouteNurse>
+            <ReceptionManagementByNurse/>
+          </ProtectedRouteNurse>
+        }/>
       </Route>
-      <Route element={<DashboardDoctor/>}>
-        <Route path='/doctor/medical' element={<MedicalManagementByDoctor/>}/>
-        <Route path='/doctor/diagnosis' element={<DiagnosisManagementByDoctor/>}/>
+      <Route path='/call' element={
+        <ProtectedRouteNurse>
+          <ScreenReceptionByNurse/>
+        </ProtectedRouteNurse>
+      }/>
+
+      <Route element={
+        <ProtectedRouteDoctor>
+          <DashboardDoctor/>
+        </ProtectedRouteDoctor>
+      }>
+        <Route path='/doctor/medical' element={
+          <ProtectedRouteDoctor>
+            <MedicalManagementByDoctor/>
+          </ProtectedRouteDoctor>
+        }/>
+        <Route path='/doctor/diagnosis' element={
+          <ProtectedRouteDoctor>
+            <DiagnosisManagementByDoctor/>
+          </ProtectedRouteDoctor>
+        }/>
       </Route>
-      <Route element={<DashboardReceptionist/>}>
-        <Route path='/receptionist/records' element={<RecordsManagementByReceptionist/>}/>
+
+      <Route element={
+        <ProtectedRouteReceptionist>
+          <DashboardReceptionist/>
+        </ProtectedRouteReceptionist>
+      }>
+        <Route path='/receptionist/records' element={
+          <ProtectedRouteReceptionist>
+            <RecordsManagementByReceptionist/>
+          </ProtectedRouteReceptionist>
+        }/>
       </Route>
-      <Route element={<DashboardAdmin/>}>
-        <Route path='/admin/statistic' element={<DataStatisticsManagementByAdmin/>}/>
-        <Route path='/admin/account' element={<AccountManagementByAdmin/>}/>
-        <Route path='/admin/unregister' element={<UnregisteredManagementByAdmin/>}/>
-        <Route path='/admin/doctor' element={<DoctorManagementByAdmin/>}/>
-        <Route path='/admin/nurse' element={<NurseManagementByAdmin/>}/>
-        <Route path='/admin/receptionist' element={<ReceptionistManagementByAdmin/>}/>
-        <Route path='/admin/medical' element={<MedicalManagementByAdmin/>}/>
-        <Route path='/admin/schedule' element={<ScheduleManagementByAdmin/>}/>
-        <Route path='/admin/department' element={<DepartmentManagementByAdmin/>}/>
+
+      <Route element={
+        <ProtectedRouteAdmin>
+          <DashboardAdmin/>
+        </ProtectedRouteAdmin>
+      }>
+        <Route path='/admin/statistic' element={
+          <ProtectedRouteAdmin>
+            <DataStatisticsManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
+        <Route path='/admin/account' element={
+          <ProtectedRouteAdmin>
+            <AccountManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
+        <Route path='/admin/unregister' element={
+          <ProtectedRouteAdmin>
+            <UnregisteredManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
+        <Route path='/admin/doctor' element={
+          <ProtectedRouteAdmin>
+            <DoctorManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
+        <Route path='/admin/nurse' element={
+          <ProtectedRouteAdmin>
+            <NurseManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
+        <Route path='/admin/receptionist' element={
+          <ProtectedRouteAdmin>
+            <ReceptionistManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
+        <Route path='/admin/medical' element={
+          <ProtectedRouteAdmin>
+            <MedicalManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
+        <Route path='/admin/schedule' element={
+          <ProtectedRouteAdmin>
+            <ScheduleManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
+        <Route path='/admin/department' element={
+          <ProtectedRouteAdmin>
+            <DepartmentManagementByAdmin/>
+          </ProtectedRouteAdmin>
+        }/>
       </Route>
+
       <Route path="*" element={<PageNotFound/>} />
     </Routes>
   );

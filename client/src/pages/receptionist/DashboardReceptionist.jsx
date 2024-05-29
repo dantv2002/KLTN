@@ -99,7 +99,6 @@ const DashboardReceptionist = () => {
             />
             </Sider>
             <Layout>
-            {showFormChangePassword && <ChangePassword closeFormChangePassword={closeFormChangePassword}/>}
             <Header
                 style={{
                     padding: 0,
@@ -151,6 +150,7 @@ const DashboardReceptionist = () => {
                 <Outlet/>
             </Content>
             </Layout>
+            {showFormChangePassword && <ChangePassword closeFormChangePassword={closeFormChangePassword}/>}
         </Layout>
     );
 }
