@@ -22,15 +22,24 @@ class symptomModels:
         else:
             # when run by local
             path = os.path.join(os.getcwd(), "datas/")
+        
+        # Get labels
         self.labels = {}
-        with open(path + 'images/names.csv', newline='') as f:
+        with open(path + 'symptoms/names.csv', newline='') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                self.labels[int(row['index'])] = row['name']
+                self.labels[int(row['index'])] = row['Names_EN']
                 # print(self.labels[int(row['index'])])
                 # print(row['index'])
         # print(self.labels)
-                
+        # Get features
+        self.features = {}
+        with open(path + 'symptoms/features.csv', newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                self.features[int(row['index'])] = row['feature_EN']    
+                   
+        # Get model 
         file_id = '1wEAWVy8N2JVxmdnWYoOFkeDWmsHWpDcL'
         url = f'https://drive.google.com/uc?id={file_id}'
         file_name = 'models/model_symptoms_weights.h5'

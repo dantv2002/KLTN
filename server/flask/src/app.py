@@ -39,17 +39,18 @@ def predictImages():
 
 @app.route("/symptoms/predict", methods=["POST"])
 def predictSymptoms():
-    try:
+    # try:
         global singleton_instance_symptomModels
         symptoms = request.get_json()["symptoms"]
-        print(symptoms)
-        predictSv = predictSymptomServices([], singleton_instance_symptomModels)
+        # print(symptoms)
+        predictSv = predictSymptomServices(symptoms, singleton_instance_symptomModels)
         result = predictSv.predict()
         # Return result
-        rs = json.dumps(result)
-        return rs, 200
-    except:
-        return "Server error", 500
+        if result is None:
+            return json.dumps({ "messages": "Please check your symptom! It is not in symptom list."}), 400
+        return json.dumps(result), 200
+    # except:
+    #     return "Server error", 500
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')

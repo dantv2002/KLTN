@@ -46,7 +46,7 @@ def strip_to_symptoms_list(text):
     return symptoms_list
 
 dfSymptom['All Symptoms'] = dfSymptom['All Symptoms'].apply(strip_to_symptoms_list)
-# %%
+# %% Generate columns respectively with the symptoms
 ar = []
 for x in dfSymptom['All Symptoms']:
     for ele in x:
