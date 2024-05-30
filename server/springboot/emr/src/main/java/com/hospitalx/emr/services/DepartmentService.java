@@ -1,5 +1,7 @@
 package com.hospitalx.emr.services;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class DepartmentService{
+public class DepartmentService {
     @Autowired
     private DepartmentRepository departmentRepository;
     @Autowired
@@ -51,6 +53,11 @@ public class DepartmentService{
         Page<Department> departments = null;
         if (role.equals("ROLE_ADMIN") || role.equals("ROLE_RECEPTIONIST")) {
             departments = departmentRepository.findByNameDepartment(keyword, pageable);
+        } else if (role.equals("ROLE_PATIENT")) {
+            List<String> nameDepartments = new ArrayList<>();
+            nameDepartments.add("Khoa chẩn đoán hình ảnh");
+            nameDepartments.add("Khoa khám bệnh cấp cứu");
+            departments = departmentRepository.findByAll(nameDepartments, Pageable.unpaged());
         } else {
             departments = departmentRepository.findByAll(Pageable.unpaged());
         }

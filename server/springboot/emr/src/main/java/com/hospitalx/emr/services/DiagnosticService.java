@@ -1,6 +1,7 @@
 package com.hospitalx.emr.services;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.modelmapper.ModelMapper;
@@ -28,8 +29,8 @@ public class DiagnosticService {
     private AuthManager authManager;
     @Autowired
     private ModelMapper modelMapper;
-    private String url = "http://localhost:5000/text/predict"; // url nomal
-    // private String url = "http://PythonAPI:5000/text/predict"; // url docker
+    private String url = "http://localhost:5000"; // url nomal
+    // private String url = "http://PythonAPI:5000"; // url docker
 
     public void lock(String medicalId) {
         log.info("Lock diagnostic image with medicalId: " + medicalId);
@@ -42,19 +43,19 @@ public class DiagnosticService {
         log.info("Lock diagnostic image success with medicalId: " + medicalId);
     }
 
-    public Object medicalConsultation(String text) {
+    public Object medicalConsultation(List<String> symptoms) {
         log.info("Run medical consultation");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
-        Map<String, String> body = new HashMap<>() {
+        Map<String, List<String>> body = new HashMap<>() {
             {
-                put("text", text);
+                put("symptoms", symptoms);
             }
         };
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+        HttpEntity<Map<String, List<String>>> request = new HttpEntity<>(body, headers);
         log.info("Request: " + request.toString());
-        return restTemplate.postForObject(url, request, Object.class);
+        return restTemplate.postForObject(url + "/symptoms/predict", request, Object.class);
     }
 
     public Object diagnosisImage(String urlImage) {
@@ -69,7 +70,8 @@ public class DiagnosticService {
         };
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
         log.info("Request: " + request.toString());
-        return restTemplate.postForObject(url, request, Object.class);
+        
+        return restTemplate.postForObject(url + "/image/predict", request, Object.class);
     }
 
     public DiagnosticImageDto save(DiagnosticImageDto t) {

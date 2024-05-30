@@ -2,3 +2,7 @@
 .vscode
 .logs
 .idea
+
+docker-compose.yml
+Dockerfile
+.dockerignore

@@ -1,5 +1,6 @@
 package com.hospitalx.emr.controllers;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,9 @@ public class DiagnosticController {
 
     @PreAuthorize("hasRole('ROLE_PATIENT')")
     @PostMapping("/patient/medical-consultation")
-    public ResponseEntity<BaseResponse> medicalConsultation(@RequestBody Map<String, String> request) {
-        String text = request.get("Text");
-        Object result = diagnosticService.medicalConsultation(text);
+    public ResponseEntity<BaseResponse> medicalConsultation(@RequestBody Map<String, List<String>> request) {
+        List<String> symptoms = request.get("Symptoms");
+        Object result = diagnosticService.medicalConsultation(symptoms);
         BaseResponse response = new BaseResponse();
         response.setMessage("Chạy tư vấn khám bệnh thành công");
         response.setStatus(HttpStatus.OK.value());
