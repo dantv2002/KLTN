@@ -1,132 +1,132 @@
-index,feature_EN,feature_VI
-0,abdominal pain,đau bụng
-1,abnormal menstruation,kinh nguyệt bất thường
-2,acidity,axit dạ dày
-3,acute liver failure,suy gan cấp
-4,altered sensorium,ý thức thay đổi
-5,anxiety,lo lắng
-6,back pain,đau lưng
-7,belly pain,đau bụng
-8,blackheads,mụn đầu đen
-9,bladder discomfort,khó chịu bàng quang
-10,blister,phồng rộp
-11,blood in sputum,có máu trong đờm
-12,bloody stool,phân có máu
-13,blurred and distorted vision,mờ và biến dạng tầm nhìn
-14,breathlessness,khó thở
-15,brittle nails,móng giòn
-16,bruising,bầm tím
-17,burning micturition,nóng rát khi tiểu
-18,chest pain,đau ngực
-19,chills,ớn lạnh
-20,cold hands and feets,tay và chân lạnh
-21,coma,hôn mê
-22,congestion,nghẹt mũi
-23,constipation,táo bón
-24,continuous feel of urine,cảm giác tiểu liên tục
-25,continuous sneezing,hắt hơi liên tục
-26,cough,ho
-27,cramps,chuột rút
-28,dark urine,nước tiểu sẫm màu
-29,dehydration,mất nước
-30,depression,trầm cảm
-31,diarrhoea,tiêu chảy
-32,dischromic patches,mảng da đổi màu
-33,distention of abdomen,bụng phình to
-34,dizziness,chóng mặt
-35,drying and tingling lips,môi khô và ngứa ran
-36,enlarged thyroid,tuyến giáp to
-37,excessive hunger,đói quá mức
-38,extra marital contacts,quan hệ ngoài hôn nhân
-39,family history,tiền sử gia đình
-40,fast heart rate,tim đập nhanh
-41,fatigue,mệt mỏi
-42,fluid overload,quá tải dịch
-43,foul smell of urine,nước tiểu có mùi hôi
-44,headache,đau đầu
-45,high fever,sốt cao
-46,hip joint pain,đau khớp hông
-47,history of alcohol consumption,tiền sử uống rượu
-48,increased appetite,tăng cảm giác thèm ăn
-49,indigestion,khó tiêu
-50,inflammatory nails,móng bị viêm
-51,internal itching,ngứa bên trong
-52,irregular sugar level,đường huyết không đều
-53,irritability,dễ cáu gắt
-54,irritation in anus,kích ứng hậu môn
-55,itching,ngứa
-56,joint pain,đau khớp
-57,knee pain,đau đầu gối
-58,lack of concentration,thiếu tập trung
-59,lethargy,uể oải
-60,loss of appetite,chán ăn
-61,loss of balance,mất cân bằng
-62,loss of smell,mất khứu giác
-63,malaise,mệt mỏi
-64,mild fever,sốt nhẹ
-65,mood swings,thay đổi tâm trạng
-66,movement stiffness,cứng cơ
-67,mucoid sputum,đờm nhầy
-68,muscle pain,đau cơ
-69,muscle wasting,teo cơ
-70,muscle weakness,yếu cơ
-71,nausea,buồn nôn
-72,neck pain,đau cổ
-73,nodal skin eruptions,nốt sần trên da
-74,obesity,béo phì
-75,pain behind the eyes,đau sau mắt
-76,pain during bowel movements,đau khi đại tiện
-77,pain in anal region,đau vùng hậu môn
-78,painful walking,đau khi đi bộ
-79,palpitations,hồi hộp
-80,passage of gases,xì hơi
-81,patches in throat,mảng trắng ở cổ họng
-82,phlegm,đờm
-83,polyuria,tiểu nhiều
-84,prominent veins on calf,tĩnh mạch nổi rõ ở bắp chân
-85,puffy face and eyes,mặt và mắt sưng húp
-86,pus filled pimples,mụn mủ
-87,receiving blood transfusion,nhận truyền máu
-88,receiving unsterile injections,nhận tiêm không vô trùng
-89,red sore around nose,vết loét đỏ quanh mũi
-90,red spots over body,đốm đỏ trên cơ thể
-91,redness of eyes,đỏ mắt
-92,restlessness,bồn chồn
-93,runny nose,chảy nước mũi
-94,rusty sputum,đờm rỉ sét
-95,scurring,sẹo
-96,shivering,run rẩy
-97,silver like dusting,bong da như vảy bạc
-98,sinus pressure,áp lực xoang
-99,skin peeling,bong tróc da
-100,skin rash,phát ban da
-101,slurred speech,nói lắp
-102,small dents in nails,móng có vết lõm nhỏ
-103,spinning movements,chuyển động xoay tròn
-104,spotting urination,đốm tiểu
-105,stiff neck,cứng cổ
-106,stomach bleeding,chảy máu dạ dày
-107,stomach pain,đau dạ dày
-108,sunken eyes,mắt trũng sâu
-109,sweating,đổ mồ hôi
-110,swelled lymph nodes,hạch bạch huyết sưng
-111,swelling joints,khớp sưng
-112,swelling of stomach,bụng sưng
-113,swollen blood vessels,mạch máu sưng
-114,swollen extremities,tứ chi sưng
-115,swollen legs,chân sưng
-116,throat irritation,kích ứng cổ họng
-117,toxic look (typhos),nhìn độc (thương hàn)
-118,ulcers on tongue,loét lưỡi
-119,unsteadiness,không vững
-120,visual disturbances,rối loạn thị giác
-121,vomiting,nôn mửa
-122,watering from eyes,chảy nước mắt
-123,weakness in limbs,yếu tay chân
-124,weakness of one body side,yếu một bên cơ thể
-125,weight gain,tăng cân
-126,weight loss,giảm cân
-127,yellow crust ooze,chảy dịch vàng có vảy
-128,yellow urine,nước tiểu vàng
-129,yellowing of eyes,vàng mắt
-130,yellowish skin,da vàng
+index,feature_EN,feature_VI,category
+0,abdominal pain,đau bụng,Hệ tiêu hóa
+1,abnormal menstruation,kinh nguyệt bất thường,Hệ sinh sản
+2,acidity,axit dạ dày,Hệ tiêu hóa
+3,acute liver failure,suy gan cấp,Hệ tiêu hóa
+4,altered sensorium,ý thức thay đổi,Thần kinh
+5,anxiety,lo lắng,Thần kinh
+6,back pain,đau lưng,Cơ - Xương - Khớp
+7,belly pain,đau bụng,Hệ tiêu hóa
+8,blackheads,mụn đầu đen,Da liễu
+9,bladder discomfort,khó chịu bàng quang,Hệ tiêu hóa
+10,blister,phồng rộp,Da liễu
+11,blood in sputum,có máu trong đờm,Hệ hô hấp
+12,bloody stool,phân có máu,Hệ tiêu hóa
+13,blurred and distorted vision,mờ và biến dạng tầm nhìn,Mắt
+14,breathlessness,khó thở,Hệ hô hấp
+15,brittle nails,móng giòn,Da liễu
+16,bruising,bầm tím,Da liễu
+17,burning micturition,nóng rát khi tiểu,Hệ tiêu hóa
+18,chest pain,đau ngực,Hệ hô hấp
+19,chills,ớn lạnh,Toàn thân
+20,cold hands and feets,tay và chân lạnh,Toàn thân
+21,coma,hôn mê,Thần kinh
+22,congestion,nghẹt mũi,Hệ hô hấp
+23,constipation,táo bón,Hệ tiêu hóa
+24,continuous feel of urine,cảm giác tiểu liên tục,Hệ tiêu hóa
+25,continuous sneezing,hắt hơi liên tục,Hệ hô hấp
+26,cough,ho,Hệ hô hấp
+27,cramps,chuột rút,Toàn thân
+28,dark urine,nước tiểu sẫm màu,Hệ tiêu hóa
+29,dehydration,mất nước,Toàn thân
+30,depression,trầm cảm,Tâm lý
+31,diarrhoea,tiêu chảy,Hệ tiêu hóa
+32,dischromic patches,mảng da đổi màu,Da liễu
+33,distention of abdomen,bụng phình to,Hệ tiêu hóa
+34,dizziness,chóng mặt,Thần kinh
+35,drying and tingling lips,môi khô và ngứa ran,Da liễu
+36,enlarged thyroid,tuyến giáp to,Toàn thân
+37,excessive hunger,đói quá mức,Hệ tiêu hóa
+38,extra marital contacts,quan hệ ngoài hôn nhân,Toàn thân
+39,family history,tiền sử gia đình,Toàn thân
+40,fast heart rate,tim đập nhanh,Tim mạch
+41,fatigue,mệt mỏi,Toàn thân
+42,fluid overload,quá tải dịch,Toàn thân
+43,foul smell of urine,nước tiểu có mùi hôi,Hệ tiêu hóa
+44,headache,đau đầu,Thần kinh
+45,high fever,sốt cao,Toàn thân
+46,hip joint pain,đau khớp hông,Cơ - Xương - Khớp
+47,history of alcohol consumption,tiền sử uống rượu,Toàn thân
+48,increased appetite,tăng cảm giác thèm ăn,Hệ tiêu hóa
+49,indigestion,khó tiêu,Hệ tiêu hóa
+50,inflammatory nails,móng bị viêm,Da liễu
+51,internal itching,ngứa bên trong,Da liễu
+52,irregular sugar level,đường huyết không đều,Toàn thân
+53,irritability,dễ cáu gắt,Thần kinh
+54,irritation in anus,kích ứng hậu môn,Hệ tiêu hóa
+55,itching,ngứa,Da liễu
+56,joint pain,đau khớp,Cơ - Xương - Khớp
+57,knee pain,đau đầu gối,Cơ - Xương - Khớp
+58,lack of concentration,thiếu tập trung,Thần kinh
+59,lethargy,uể oải,Thần kinh
+60,loss of appetite,chán ăn,Hệ tiêu hóa
+61,loss of balance,mất cân bằng,Thần kinh
+62,loss of smell,mất khứu giác,Hệ hô hấp
+63,malaise,mệt mỏi,Thần kinh
+64,mild fever,sốt nhẹ,Toàn thân
+65,mood swings,thay đổi tâm trạng,Tâm lý
+66,movement stiffness,cứng cơ,Cơ - Xương - Khớp
+67,mucoid sputum,đờm nhầy,Hệ hô hấp
+68,muscle pain,đau cơ,Cơ - Xương - Khớp
+69,muscle wasting,teo cơ,Cơ - Xương - Khớp
+70,muscle weakness,yếu cơ,Cơ - Xương - Khớp
+71,nausea,buồn nôn,Hệ tiêu hóa
+72,neck pain,đau cổ,Cơ - Xương - Khớp
+73,nodal skin eruptions,nốt sần trên da,Da liễu
+74,obesity,béo phì,Toàn thân
+75,pain behind the eyes,đau sau mắt,Cơ - Xương - Khớp
+76,pain during bowel movements,đau khi đại tiện,Hệ tiêu hóa
+77,pain in anal region,đau vùng hậu môn,Hệ tiêu hóa
+78,painful walking,đau khi đi bộ,Cơ - Xương - Khớp
+79,palpitations,hồi hộp,Tim mạch
+80,passage of gases,xì hơi,Hệ tiêu hóa
+81,patches in throat,mảng trắng ở cổ họng,Hệ hô hấp
+82,phlegm,đờm,Hệ hô hấp
+83,polyuria,tiểu nhiều,Hệ tiêu hóa
+84,prominent veins on calf,tĩnh mạch nổi rõ ở bắp chân,Tim mạch
+85,puffy face and eyes,mặt và mắt sưng húp,Toàn thân
+86,pus filled pimples,mụn mủ,Da liễu
+87,receiving blood transfusion,nhận truyền máu,Toàn thân
+88,receiving unsterile injections,nhận tiêm không vô trùng,Toàn thân
+89,red sore around nose,vết loét đỏ quanh mũi,Da liễu
+90,red spots over body,đốm đỏ trên cơ thể,Da liễu
+91,redness of eyes,đỏ mắt,Mắt
+92,restlessness,bồn chồn,Thần kinh
+93,runny nose,chảy nước mũi,Hệ hô hấp
+94,rusty sputum,đờm rỉ sét,Hệ hô hấp
+95,scurring,sẹo,Da liễu
+96,shivering,run rẩy,Toàn thân
+97,silver like dusting,bong da như vảy bạc,Da liễu
+98,sinus pressure,áp lực xoang,Hệ hô hấp
+99,skin peeling,bong tróc da,Da liễu
+100,skin rash,phát ban da,Da liễu
+101,slurred speech,nói lắp,Thần kinh
+102,small dents in nails,móng có vết lõm nhỏ,Da liễu
+103,spinning movements,chuyển động xoay tròn,Thần kinh
+104,spotting urination,đốm tiểu,Hệ tiêu hóa
+105,stiff neck,cứng cổ,Cơ - Xương - Khớp
+106,stomach bleeding,chảy máu dạ dày,Hệ tiêu hóa
+107,stomach pain,đau dạ dày,Hệ tiêu hóa
+108,sunken eyes,mắt trũng sâu,Toàn thân
+109,sweating,đổ mồ hôi,Toàn thân
+110,swelled lymph nodes,hạch bạch huyết sưng,Toàn thân
+111,swelling joints,khớp sưng,Cơ - Xương - Khớp
+112,swelling of stomach,bụng sưng,Toàn thân
+113,swollen blood vessels,mạch máu sưng,Tim mạch
+114,swollen extremities,tứ chi sưng,Toàn thân
+115,swollen legs,chân sưng,Toàn thân
+116,throat irritation,kích ứng cổ họng,Hệ hô hấp
+117,toxic look (typhos),nhìn độc (thương hàn),Toàn thân
+118,ulcers on tongue,loét lưỡi,Da liễu
+119,unsteadiness,không vững,Thần kinh
+120,visual disturbances,rối loạn thị giác,Mắt
+121,vomiting,nôn mửa,Hệ tiêu hóa
+122,watering from eyes,chảy nước mắt,Mắt
+123,weakness in limbs,yếu tay chân,Cơ - Xương - Khớp
+124,weakness of one body side,yếu một bên cơ thể,Cơ - Xương - Khớp
+125,weight gain,tăng cân,Toàn thân
+126,weight loss,giảm cân,Toàn thân
+127,yellow crust ooze,chảy dịch vàng có vảy,Da liễu
+128,yellow urine,nước tiểu vàng,Hệ tiêu hóa
+129,yellowing of eyes,vàng mắt,Da liễu
+130,yellowish skin,da vàng,Da liễu
