@@ -70,7 +70,7 @@ public class DiagnosticService {
         };
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
         log.info("Request: " + request.toString());
-        
+
         return restTemplate.postForObject(url + "/image/predict", request, Object.class);
     }
 
@@ -86,16 +86,6 @@ public class DiagnosticService {
         log.info("Get all diagnostic image");
         return diagnosticImageRepository.findByMedicalId(keyword, pageable)
                 .map(diagnosticImage -> modelMapper.map(diagnosticImage, DiagnosticImageDto.class));
-    }
-
-    public DiagnosticImageDto get(String id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'get'");
-    }
-
-    public void update(DiagnosticImageDto t) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
     public void delete(String id) {

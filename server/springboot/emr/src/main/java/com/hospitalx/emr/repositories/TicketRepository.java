@@ -22,6 +22,6 @@ public interface TicketRepository extends MongoRepository<Ticket, String> {
     @Query(value = "{}", count = true)
     int totalTicket();
 
-    @Query(value = "{ namePatient: { $regex: ?0, $options: 'i' }, status: { $regex: ?1, $options: 'i' } }")
-    Page<Ticket> findAllByIdRegex(String id, String status, Pageable pageable);
+    @Query(value = "{ namePatient: { $regex: ?0, $options: 'i' }, status: { $regex: ?1, $options: 'i' }, date: ?2 }")
+    Page<Ticket> findAllByIdRegex(String id, String status, String date, Pageable pageable);
 }

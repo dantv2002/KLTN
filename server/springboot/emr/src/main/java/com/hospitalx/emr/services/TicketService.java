@@ -107,7 +107,10 @@ public class TicketService {
             return ticketRepository.findAllByIdAndStatus(accountId, type, pageable)
                     .map(ticket -> modelMapper.map(ticket, TicketDto.class));
         }
-        return ticketRepository.findAllByIdRegex(keyword, "waiting", Pageable.unpaged())
+
+        return ticketRepository
+                .findAllByIdRegex(keyword, "waiting", new SimpleDateFormat("dd/MM/yyyy").format(new Date()),
+                        Pageable.unpaged())
                 .map(ticket -> modelMapper.map(ticket, TicketDto.class));
     }
 
@@ -126,10 +129,4 @@ public class TicketService {
         ticketRepository.save(modelMapper.map(t, Ticket.class));
         log.info("Update ticket success with ID: " + t.getId());
     }
-
-    public void delete(String id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
-    }
-
 }
