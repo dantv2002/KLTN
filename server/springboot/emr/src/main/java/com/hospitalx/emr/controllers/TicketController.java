@@ -1,6 +1,7 @@
 package com.hospitalx.emr.controllers;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,8 +88,9 @@ public class TicketController {
     }
 
     @PreAuthorize("hasRole('ROLE_NURSE')")
-    @PutMapping("/nurse/ticket/{id}")
-    public ResponseEntity<BaseResponse> update(@PathVariable("id") String id) {
+    @PutMapping("/nurse/ticket")
+    public ResponseEntity<BaseResponse> update(@RequestBody Map<String, String> request) {
+        String id = request.get("Id");
         TicketDto ticketDto = new TicketDto();
         ticketDto.setId(id);
         ticketService.update(ticketDto);
