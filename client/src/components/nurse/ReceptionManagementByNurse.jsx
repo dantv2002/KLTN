@@ -2,6 +2,7 @@ import axios from "axios"
 import { useState, useEffect, useCallback } from "react"
 import { message, Input, Button, Space, Table, Modal } from "antd"
 import { UserAddOutlined, SearchOutlined } from "@ant-design/icons"
+import { HiMiniSpeakerWave } from "react-icons/hi2";
 import { callNext, getTicketByNurse, updateTicket } from "../../Api"
 
 const ReceptionManagementByNurse = () => {
@@ -20,6 +21,7 @@ const ReceptionManagementByNurse = () => {
   const [clinicConfirm, setClinicConfirm] = useState("");
   const [locationConfirm, setLocationConfirm] = useState("");
   const [departmentConfirm, setDepartmentConfirm] = useState("");
+  const [callNumber, setCallNumber] = useState(0);
 
   const handleCallPatient = async() => {
     try {
@@ -29,8 +31,8 @@ const ReceptionManagementByNurse = () => {
       if (response.status === 200){
         message.success(response.data.Message);
         console.log(response.data.Data.Number);
-        const nextNumber = response.data.Data.Number;
-        localStorage.setItem("nextNumber", nextNumber);
+        setCallNumber(response.data.Data.Number)
+        localStorage.setItem("nextNumber", response.data.Data.Number);
         localStorage.setItem("dataUpdated", "true");
       }
     }catch(error){
@@ -90,6 +92,74 @@ const ReceptionManagementByNurse = () => {
       }
     }catch(error){
       message.error(error.response.data.Message);
+    }
+  }
+
+  const speakVN = async (text) => {
+    const apiKey = 'AIzaSyCxE5hnFq4PyUadpmniiY1mPjN4I9lrBbU';
+    const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
+
+    const data = {
+      input: { text },
+      voice: { 
+        languageCode: 'vi-VN',
+        name: 'vi-VN-Neural2-A', 
+        ssmlGender: 'FEMALE' },
+      audioConfig: { audioEncoding: 'MP3' }
+    };
+
+    try {
+      const response = await axios.post(url, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const audioContent = response.data.audioContent;
+      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      audio.play();
+    } catch (error) {
+      console.error('Lỗi khi đọc văn bản:', error);
+    }
+  };
+
+  const speakEN = async (text) => {
+    const apiKey = 'AIzaSyCxE5hnFq4PyUadpmniiY1mPjN4I9lrBbU';
+    const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
+
+    const data = {
+      input: { text },
+      voice: { 
+        languageCode: 'en-US',
+        name: 'en-US-Standard-F', 
+        ssmlGender: 'FEMALE' },
+      audioConfig: { audioEncoding: 'MP3' }
+    };
+
+    try {
+      const response = await axios.post(url, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const audioContent = response.data.audioContent;
+      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      audio.play();
+    } catch (error) {
+      console.error('Lỗi khi đọc văn bản:', error);
+    }
+  };
+
+  const handleTextToSpeechVN = () => {
+    if (callNumber !== 0) {
+      speakVN(`Xin mời bệnh nhân có số thứ tự tiếp theo là ${callNumber} vào khám bệnh`);
+    }
+  }
+
+  const handleTextToSpeechEN = () => {
+    if (callNumber !== 0) {
+      speakEN(`Please invite the patient whose next number is ${callNumber} to come in for examination`);
     }
   }
 
@@ -156,6 +226,8 @@ const ReceptionManagementByNurse = () => {
       />
       <br/>
       <Button onClick={() => handleCallPatient()} className="bg-green-500 text-white mt-3" htmlType="submit" icon={<UserAddOutlined/>} >Gọi bệnh nhân</Button>
+      <Button onClick={() => handleTextToSpeechVN()} className="bg-cyan-400 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát tiếng việt</Button>
+      <Button onClick={() => handleTextToSpeechEN()} className="bg-cyan-700 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát tiếng anh</Button>
       <hr className="my-8 border-gray-300"/>
       <Input
         className="w-96 mt-3 mr-3"

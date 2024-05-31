@@ -170,9 +170,14 @@ const Medicals = () => {
       key: 'DiagnosisDischarge',
     },
     {
-      title: 'Loại bệnh',
+      title: 'Loại bệnh án',
       dataIndex: 'Type',
       key: 'Type',
+      render: (text) => {
+        if (text === 'OUTPATIENT') return 'Ngoại trú';
+        if (text === 'INPATIENT') return 'Nội trú';
+        return text;
+      }
     },
     {
       title: 'Tùy chọn',

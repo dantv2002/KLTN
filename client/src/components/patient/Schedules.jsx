@@ -6,7 +6,7 @@ import { SearchOutlined } from "@ant-design/icons"
 
 const Schedules = () => {
 
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(null);
   const [searchStatus, setSearchStatus] = useState("");
   const [data, setData] = useState([]);
   const [page, setPage] = useState("0");
@@ -312,9 +312,9 @@ const Schedules = () => {
       key: 'DateOfBirth',
     },
     {
-      title: 'Tên bác sĩ',
-      dataIndex: 'NameDoctor',
-      key: 'NameDoctor',
+      title: 'Thời gian',
+      dataIndex: 'Time',
+      key: 'Time',
     },
     {
       title: 'Ngày khám',
@@ -340,6 +340,11 @@ const Schedules = () => {
       title: 'Trạng thái',
       dataIndex: 'Status',
       key: 'Status',
+      render: (text) => {
+        if (text === 'WAITING') return 'Đang chờ';
+        if (text === 'COMPLETED') return 'Đã khám';
+        return text;
+      }
     },
     {
       title: 'Tùy chọn',
@@ -347,7 +352,7 @@ const Schedules = () => {
       key: 'options',
       render: (_,ticket) => (
         <Space size="middle">
-          <Button type="link" className="read" onClick={() => openConfirmationReceipt(ticket)}>
+          <Button type="link" className="read" disabled={ticket.Status === 'COMPLETED'} onClick={() => openConfirmationReceipt(ticket)}>
             Xem
           </Button>
         </Space>

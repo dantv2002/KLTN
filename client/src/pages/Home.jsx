@@ -7,7 +7,7 @@ import Services from "../components/home/Services";
 import Doctors from "../components/home/Doctors";
 import Blogs from "../components/home/Blogs";
 import Footer from "../components/home/Footer";
-import MiniChat from '../models/chat/Minichat';
+import MiniChat from '../models/chat/MiniChat';
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { CircularProgress } from "@mui/material";
 import { message } from 'antd';
