@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-scroll";
+import { Link, scroller } from "react-scroll";
 import { AiOutlineClose, AiOutlineMenu, AiOutlineDown} from "react-icons/ai";
 import Login from "../../models/auth/Login";
 import Register from "../../models/auth/Register";
 import ResetPassword from "../../models/auth/ResetPassword";
 import ConfirmPassword from "../../models/auth/ConfirmPassword";
 import ChangePassword from "../../models/ChangePassword";
-import logo from "../../assets/img/logo2.png"
+import logo from "../../assets/img/logo3.png"
 import { createTicker, getDepartmentPatient, getAllRecordsPatient, getDoctorPatient, getSchedulePatient, getScheduleOption, logoutApi } from "../../Api";
 import Cookies from "js-cookie"
 import axios from "axios";
 import { Modal, message, Button, Space, Select, Input, Table, DatePicker } from "antd";
 import {SearchOutlined} from "@ant-design/icons"
 import replacePlusWithSpace from "../../hook/ReplacePlusWithSpace";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import moment from "moment";
 
 const Navbar = () => {
@@ -31,8 +31,8 @@ const Navbar = () => {
   const [dataDoctors, setDataDoctors] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [title, setTitle] = useState("");
-  const [department, setDepartment] = useState("");
-  const [gender, setGender] = useState("");
+  const [department, setDepartment] = useState(null);
+  const [gender, setGender] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchTitle, setSearchTitle] = useState("");
   const [searchDepartment, setSearchDepartment] = useState("");
@@ -48,6 +48,30 @@ const Navbar = () => {
   const [totalItemsDoctor, setTotalItemsDoctor] = useState("0");
   const [pageSchedule, setPageSchedule] = useState("0");
   const [totalItemsSchedule, setTotalItemsSchedule] = useState("0");
+
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  const handleNavigation = (event, to) => {
+    if (!isHomePage) {
+      event.preventDefault();
+      navigate(`/?scrollTo=${to}`);
+      
+    }
+  };
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const scrollTo = urlParams.get('scrollTo');
+    if (scrollTo) {
+      scroller.scrollTo(scrollTo, {
+        duration: 800,
+        delay: 0,
+        smooth: 'easeInOutQuart',
+      });
+    }
+    window.history.replaceState({}, '', '/');
+  }, []);
 
   const columnsDoctors = [
     {
@@ -388,19 +412,23 @@ const Navbar = () => {
       <div className=" fixed w-full z-10 text-white">
         <div>
           <div className=" flex flex-row justify-between p-5 md:px-32 px-5 bg-blue-700 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]">
-            <div className=" flex flex-row items-center cursor-pointer">
-              <Link to="home" spy={true} smooth={true} duration={500}>
-                <img className="w-[10vw] h-auto min-w-[120px] max-w-[200px]" src={logo} alt="logo" />
-              </Link>
+            <div className="flex flex-row items-center cursor-pointer" onClick={() => window.location.href = '/'}>
+              <div className="flex items-center">
+                <img className="h-auto min-w-[10px] max-w-[40px]" src={logo} alt="logo" />
+                <div className="ml-2 flex flex-col">
+                  <span className="text-[13px] font-rubik font-semibold text-black">Bệnh viện X</span>
+                  <span className="text-[10px] font-medium font-rubik text-black">Trung tâm sức khỏe</span>
+                </div>
+              </div>
             </div>
-
-            <nav className=" hidden lg:flex flex-row items-center text-lg font-medium gap-8">
+            <nav className="hidden lg:flex flex-row items-center text-lg font-bold gap-8 font-rubik">
               <Link
                 to="home"
                 spy={true}
                 smooth={true}
                 duration={500}
-                className=" hover:text-hoverColor transition-all cursor-pointer"
+                className="hover:text-hoverColor transition-all cursor-pointer"
+                onClick={(event) => handleNavigation(event, 'home')}
               >
                 Trang chủ
               </Link>
@@ -409,7 +437,8 @@ const Navbar = () => {
                 spy={true}
                 smooth={true}
                 duration={500}
-                className=" hover:text-hoverColor transition-all cursor-pointer"
+                className="hover:text-hoverColor transition-all cursor-pointer"
+                onClick={(event) => handleNavigation(event, 'about')}
               >
                 Giới thiệu
               </Link>
@@ -418,7 +447,8 @@ const Navbar = () => {
                 spy={true}
                 smooth={true}
                 duration={500}
-                className=" hover:text-hoverColor transition-all cursor-pointer"
+                className="hover:text-hoverColor transition-all cursor-pointer"
+                onClick={(event) => handleNavigation(event, 'services')}
               >
                 Dịch vụ
               </Link>
@@ -427,7 +457,8 @@ const Navbar = () => {
                 spy={true}
                 smooth={true}
                 duration={500}
-                className=" hover:text-hoverColor transition-all cursor-pointer"
+                className="hover:text-hoverColor transition-all cursor-pointer"
+                onClick={(event) => handleNavigation(event, 'doctors')}
               >
                 Đội ngũ
               </Link>
@@ -436,7 +467,8 @@ const Navbar = () => {
                 spy={true}
                 smooth={true}
                 duration={500}
-                className=" hover:text-hoverColor transition-all cursor-pointer"
+                className="hover:text-hoverColor transition-all cursor-pointer"
+                onClick={(event) => handleNavigation(event, 'blog')}
               >
                 Bài viết
               </Link>
@@ -445,12 +477,12 @@ const Navbar = () => {
                 spy={true}
                 smooth={true}
                 duration={500}
-                className=" hover:text-hoverColor transition-all cursor-pointer"
+                className="hover:text-hoverColor transition-all cursor-pointer"
+                onClick={(event) => handleNavigation(event, 'contact')}
               >
                 Liên hệ
               </Link>
             </nav>
-
             <div className=" hidden lg:flex items-center relative">
             {!name ? (
               <button

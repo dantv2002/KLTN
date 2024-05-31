@@ -4,36 +4,43 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaArrowLeft } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa";
+import doctor1 from "../../assets/img/doc1.jpg"
+import doctor2 from "../../assets/img/doc2.jpg"
+import doctor3 from "../../assets/img/doc3.jpg"
+import doctor4 from "../../assets/img/doc4.jpg"
+import doctor5 from "../../assets/img/doc5.jpg"
+import doctor6 from "../../assets/img/doc6.jpg"
+
 
 const Doctors = () => {
   const data = [
     {
-      img: "/src/assets/img/doc1.jpg",
+      img: doctor1,
       name: "Dr. Serena Mitchell",
       specialties: "Khoa não",
     },
     {
-      img: "/src/assets/img/doc2.jpg",
+      img: doctor2,
       name: "Dr. Julian Bennett",
       specialties: "Nhân viên tiếp nhận",
     },
     {
-      img: "/src/assets/img/doc3.jpg",
+      img: doctor3,
       name: "Dr. Camila Rodriguez",
       specialties: "Đa khoa",
     },
     {
-      img: "/src/assets/img/doc4.jpg",
+      img: doctor4,
       name: "Dr. Victor Nguyen",
       specialties: "Điều dưỡng",
     },
     {
-      img: "/src/assets/img/doc5.jpg",
+      img: doctor5,
       name: "Dr. Ethan Carter",
       specialties: "Khoa thần kinh",
     },
     {
-      img: "/src/assets/img/doc6.jpg",
+      img: doctor6,
       name: "Dr. Olivia Martinez",
       specialties: "Khoa tim mạch",
     },

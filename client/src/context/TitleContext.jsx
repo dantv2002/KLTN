@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 export const TitleContext = createContext();
 
 export const TitleProvider = ({ children }) => {
-  const [title, setTitle] = useState('My App');
+  const [title, setTitle] = useState('Đang load trang');
 
   useEffect(() => {
     document.title = title;

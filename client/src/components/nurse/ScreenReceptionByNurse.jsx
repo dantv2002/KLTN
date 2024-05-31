@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import logo from '../../assets/img/logo1.png'
+import logo from '../../assets/img/logo1.png';
 
 const ScreenReceptionByNurse = () => {
-
   const [nextNumber, setNextNumber] = useState(0);
 
   useEffect(() => {
@@ -14,6 +13,7 @@ const ScreenReceptionByNurse = () => {
         localStorage.removeItem("dataUpdated");
       }
     };
+
     window.addEventListener("storage", handleStorageChange);
     return () => {
       window.removeEventListener("storage", handleStorageChange);
@@ -30,7 +30,9 @@ const ScreenReceptionByNurse = () => {
       </div>
       <div>
         {nextNumber !== 0 ? (
-          <p className="text-2xl font-rubik text-center">Mời bệnh nhân có số thứ tự tiếp theo là <span className="font-bold">{nextNumber}</span> vào khám bệnh</p>
+          <p className="text-2xl font-rubik text-center">
+            Mời bệnh nhân có số thứ tự tiếp theo là <span className="font-bold">{nextNumber}</span> vào khám bệnh
+          </p>
         ) : (
           <p className="text-2xl font-rubik text-center">Bệnh nhân chờ trong giây lát để được gọi khám bệnh</p>
         )}
