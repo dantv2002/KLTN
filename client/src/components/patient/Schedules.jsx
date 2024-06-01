@@ -1,8 +1,10 @@
 import axios from "axios";
 import { getTicket } from "../../Api";
 import { useState, useEffect, useCallback } from "react";
-import { message, Button, Space, Select, Table } from "antd";
+import { message, Button, Space, Select, Table, Input, TimePicker } from "antd";
 import { SearchOutlined } from "@ant-design/icons"
+import Loading from "../../hook/Loading";
+import moment from "moment";
 
 const Schedules = () => {
 
@@ -11,10 +13,11 @@ const Schedules = () => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState("0");
   const [totalItems, setTotalItems] = useState("0");
-
+  const [loading, setLoading] = useState(false);
 
   const fetchTicket = useCallback(async() => {
     try {
+      setLoading(true);
       const statusSearch = searchStatus || "";
       let response = await axios.get(getTicket(statusSearch, page), {
         withCredentials: true
@@ -26,6 +29,8 @@ const Schedules = () => {
       }
     } catch(error) {
       message.error(error.response.data.Message)
+    } finally {
+      setLoading(false);
     }
   },[searchStatus, page]);
 
@@ -296,7 +301,7 @@ const Schedules = () => {
 
   const columns = [
     {
-      title: 'Số thứ tự',
+      title: 'STT',
       dataIndex: 'sequenceNumber',
       key: 'sequenceNumber',
       render: (_, __, index) => index + 1 + page * 10,
@@ -305,36 +310,135 @@ const Schedules = () => {
       title: 'Tên bệnh nhân',
       dataIndex: 'NamePatient',
       key: 'NamePatient',
+      sorter: (a, b) => a.NamePatient.localeCompare(b.NamePatient),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Ngày sinh',
       dataIndex: 'DateOfBirth',
       key: 'DateOfBirth',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <Input
+            placeholder="Nhập năm sinh"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const yearOfBirth = moment(record.DateOfBirth, 'DD/MM/YYYY').year();
+        return yearOfBirth.toString() === value;
+      },
     },
     {
       title: 'Thời gian',
       dataIndex: 'Time',
       key: 'Time',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <TimePicker
+            format="HH:mm"
+            defaultValue={selectedKeys[0] ? moment(selectedKeys[0], 'HH:mm') : null}
+            onChange={(time, timeString) => setSelectedKeys(timeString ? [timeString] : [])}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+            okButtonProps={{ style: { backgroundColor: '#007bff' } }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      onFilter: (value, record) => {
+        const time = moment(record.Time, 'HH:mm');
+        return time.format('HH:mm') === value;
+      },
     },
     {
       title: 'Ngày khám',
       dataIndex: 'Date',
       key: 'Date',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <Input
+            placeholder="Nhập ngày khám"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const date = moment(record.Date, 'DD/MM/YYYY').date().toString().padStart(2, '0');
+        const filterValue = value.toString().padStart(2, '0');
+        return date === filterValue || date === value;
+      },
     },
     {
       title: 'Khoa',
       dataIndex: 'Department',
       key: 'Department',
+      sorter: (a, b) => a.Department.localeCompare(b.Department),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Vị trí',
       dataIndex: 'Area',
       key: 'Area',
+      sorter: (a, b) => a.Area.localeCompare(b.Area),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Phòng',
       dataIndex: 'Clinic',
       key: 'Clinic',
+      sorter: (a, b) => a.Clinic.localeCompare(b.Clinic),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Trạng thái',
@@ -344,7 +448,13 @@ const Schedules = () => {
         if (text === 'WAITING') return 'Đang chờ';
         if (text === 'COMPLETED') return 'Đã khám';
         return text;
-      }
+      },
+      sorter: (a, b) => {
+        const textA = a.Status === 'WAITING' ? 'Đang chờ' : (a.Status === 'COMPLETED' ? 'Đã khám' : a.Status);
+        const textB = b.Status === 'WAITING' ? 'Đang chờ' : (b.Status === 'COMPLETED' ? 'Đã khám' : b.Status);
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -352,7 +462,7 @@ const Schedules = () => {
       key: 'options',
       render: (_,ticket) => (
         <Space size="middle">
-          <Button type="link" className="read" disabled={ticket.Status === 'COMPLETED'} onClick={() => openConfirmationReceipt(ticket)}>
+          <Button type="link" className="read" onClick={() => openConfirmationReceipt(ticket)}>
             Xem
           </Button>
         </Space>
@@ -386,6 +496,7 @@ const Schedules = () => {
       <Table 
         columns={columns} 
         dataSource={data}
+        loading={{ indicator: <Loading/>, spinning: loading }}
         pagination={{
           total: totalItems,
           pageSize: 10,

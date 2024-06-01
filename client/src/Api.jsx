@@ -142,7 +142,8 @@ export const getDataStatistics = `${host}/api/admin/dashboard`
 
 //Diagnostic
 //Diagnostic by doctor
-export const diagnosticByDoctor = `${host}/api/doctor/diagnostic-image/run`
+// export const diagnosticByDoctor = `${host}/api/doctor/diagnostic-image/run`
+export const diagnosticByDoctor = `https://b714-2405-4802-93a1-54c-cc29-4d21-f259-984b.ngrok-free.app/image/predict`
 //Save diagnostic by doctor
 export const saveDiagnostic = `${host}/api/doctor/diagnostic-image/save`
 //Chat 

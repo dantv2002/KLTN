@@ -1,10 +1,10 @@
 import axios from "axios";
 import moment from "moment"
 import { message, Button, Table, Form, Modal, Space, Input, DatePicker, Select } from "antd";
-import { EditOutlined } from '@ant-design/icons';
 import { useState, useEffect } from "react";
 import { deleteRecord, getAllRecordsPatient, newRecordsPatient, updateRecordPatient, getBiosignalPatient } from "../../Api";
 import {SearchOutlined} from "@ant-design/icons"
+import Loading from "../../hook/Loading";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Records = () => {
@@ -39,32 +39,30 @@ const Records = () => {
   const [visibleUpdate, setVisibleUpdate] = useState(false);
   const [idUpdate, setIdUpdate] = useState("");
   const [formUpdate] = Form.useForm();
+  const [idDelete, setIdDelete] = useState("");
+  const [visibleDelete, setVisibleDelete] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Enable/disable update
-  const [editingEmail, setEditingEmail] = useState(false);
-  const [editingFullName, setEditingFullName] = useState(false);
-  const [editingBirthday, setEditingBirthday] = useState(false);
-  const [editingGender, setEditingGender] = useState(false);
-  const [editingPhone, setEditingPhone] = useState(false);
-  const [editingIdentity, setEditingIdentity] = useState(false);
-  const [editingAddress, setEditingAddress] = useState(false);
-  const [editingHealth, setEditingHealth] = useState(false);
-
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    const fetchPatientRecords = async() => {
-      try {
-        let response = await axios.get(getAllRecordsPatient, {
-          withCredentials: true
-        })
-        if (response.status === 200) {
-          setData(response.data.Data.Records)
+      const fetchPatientRecords = async() => {
+        try {
+          setLoading(true)
+          let response = await axios.get(getAllRecordsPatient, {
+            withCredentials: true
+          })
+          if (response.status === 200) {
+            setData(response.data.Data.Records)
+          }
+        } catch(error) {
+          message.error(error.response.data.Message)
+        } finally {
+          setLoading(false);
         }
-      } catch(error) {
-        message.error(error.response.data.Message)
       }
-    }
-    fetchPatientRecords();
+      fetchPatientRecords()
   },[])
 
   const formLayout = {
@@ -96,7 +94,6 @@ const Records = () => {
       if (response.status === 200){
         sessionStorage.setItem("successMessage", response.data.Message)
         window.location.reload();
-
       }
     }catch(error){
       message.error(error.response.data.Message)
@@ -126,6 +123,10 @@ const Records = () => {
     setVisibleUpdate(true);
   };
 
+  const handleOpenForm = () => {
+    setEditing(true);
+  }
+
   const handleReadUpdateRecord = async() => {
     let dateofbirth = moment(updateBirthday).format("DD/MM/YYYY");
     try {
@@ -143,9 +144,9 @@ const Records = () => {
         withCredentials: true
       })
       if (response.status === 200){
+        message.success(response.data.Message);
         sessionStorage.setItem("successMessage", response.data.Message)
         window.location.reload();
-
       }
     }catch(error){
       message.error(error.response.data.Message)
@@ -154,19 +155,22 @@ const Records = () => {
 
   const handleCancelUpdate = () => {
     setVisibleUpdate(false);
-    setEditingEmail(false);
-    setEditingFullName(false);
-    setEditingBirthday(false);
-    setEditingGender(false);
-    setEditingPhone(false);
-    setEditingIdentity(false);
-    setEditingAddress(false);
-    setEditingHealth(false);
+    setEditing(false);
   };
 
   const handleDelete = async(id) => {
+    setIdDelete(id)
+    setVisibleDelete(true);
+  }
+
+  const handleCancelDelete = () => {
+    setVisibleDelete(false);
+    setIdDelete("");
+  }
+
+  const handleConfirmDelete = async() => {
     try {
-      let response = await axios.delete(deleteRecord(id),{
+      let response = await axios.delete(deleteRecord(idDelete),{
         withCredentials:true
       });
       if (response.status === 200){
@@ -174,7 +178,7 @@ const Records = () => {
         window.location.reload();
       }
     }catch(error){
-      sessionStorage.setItem("errorMessage", error.response.data.Message)
+      message.error(error.response.data.Message)
     }
   }
 
@@ -232,31 +236,6 @@ const Records = () => {
     setSearchDataEnd("");
     setVisibleRead(false);
   }
-
-  const handleEditEmail = () => {
-    setEditingEmail(true);
-  };
-  const handleEditFullName = () => {
-    setEditingFullName(true);
-  };
-  const handleEditBirthday = () => {
-    setEditingBirthday(true);
-  };
-  const handleEditGender = () => {
-    setEditingGender(true);
-  };
-  const handleEditPhone = () => {
-    setEditingPhone(true);
-  };
-  const handleEditIdentity = () => {
-    setEditingIdentity(true);
-  };
-  const handleEditAddress = () => {
-    setEditingAddress(true);
-  };
-  const handleEditHealth = () => {
-    setEditingHealth(true);
-  };
   
   const columns = [
     {
@@ -266,19 +245,61 @@ const Records = () => {
       render: (_, __, index) => index + 1,
     },
     {
+      title: 'Email',
+      dataIndex: 'Email',
+      key: 'Email',
+      sorter: (a, b) => a.Email.localeCompare(b.Email),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
       title: 'Họ tên',
       dataIndex: 'FullName',
       key: 'FullName',
+      sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Ngày sinh',
       dataIndex: 'DateOfBirth',
       key: 'DateOfBirth',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <Input
+            placeholder="Nhập năm sinh"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const yearOfBirth = moment(record.DateOfBirth, 'DD/MM/YYYY').year();
+        return yearOfBirth.toString() === value;
+      },
     },
     {
       title: 'CMND/CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',
+      sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -309,6 +330,7 @@ const Records = () => {
       <Table 
         columns={columns}
         dataSource={data}
+        loading={{ indicator: <Loading/>, spinning: loading }}
         pagination={false}
       />
       <Modal 
@@ -395,12 +417,17 @@ const Records = () => {
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem hồ sơ</h1>}
         visible={visibleUpdate}
-        onOk={() => formUpdate.submit()}
-        okText="Cập nhật"
-        onCancel={handleCancelUpdate}
-        cancelText="Thoát"
-        okButtonProps={{ disabled: !(editingEmail || editingFullName || editingBirthday || editingGender || editingPhone || editingIdentity || editingAddress || editingHealth), className: "bg-blue-700" }}
-        cancelButtonProps={{ className: "bg-red-600" }}
+        footer={[
+          <Button key="custom" disabled={editing} className="bg-green-500 text-white" onClick={handleOpenForm}>
+              Cập nhật
+          </Button>,
+          <Button key="submit" disabled={!editing} className="bg-blue-700" onClick={() => formUpdate.submit()}>
+            Lưu
+          </Button>,
+          <Button key="cancel" className="bg-red-600" onClick={handleCancelUpdate}>
+              Thoát
+          </Button>
+      ]}
       >
         <Form {...formLayout} form={formUpdate} onFinish={handleReadUpdateRecord}>
           <Form.Item className="relative" name="reupemail" label="Email" rules={[{ required: true, message: 'Email không được để trống!' }]}>
@@ -409,10 +436,8 @@ const Records = () => {
               placeholder="Nhập email"
               value={updateEmail}
               onChange={(e) => setUpdateEmail(e.target.value)}
-              disabled={!editingEmail}
-              className="pl-10"
+              disabled={!editing}
             />
-            <EditOutlined onClick={handleEditEmail} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
           <Form.Item className="relative" name="reupfullname" label="Họ tên" rules={[{ required: true, message: 'Họ tên không được để trống!' }]}>
             <Input 
@@ -420,35 +445,31 @@ const Records = () => {
               placeholder="Nhập họ tên"
               value={updateFullName}
               onChange={(e) => setUpdateFullName(e.target.value)}
-              disabled={!editingFullName}
-              className="pl-10"
+              disabled={!editing}
             />
-            <EditOutlined onClick={handleEditFullName} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
           <Form.Item className="relative" name="reupdayofbirth" label="Ngày sinh" rules={[{ required: true, message: 'Ngày sinh không được để trống!' }]}>
             <DatePicker
               type="text"
-              className="w-full pl-10"
+              className="w-full"
               placeholder="Chọn ngày sinh"
               value={updateBirthday ? moment(updateBirthday, 'DD/MM/YYYY') : null}
               onChange={(date, dateString) => setUpdateBirthday(dateString)}
-              disabled={!editingBirthday}
+              disabled={!editing}
             />
-            <EditOutlined onClick={handleEditBirthday} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
           <Form.Item className="relative" name="reupgender" label="Giới tính" rules={[{ required: true, message: 'Giới tính không được để trống!' }]}>
             <Select
               placeholder="Chọn giới tính"
+              className="w-full"
               value={updateGender}
               onChange={(value) => setUpdateGender(value)}
-              disabled={!editingGender}
-              className="pl-10"
+              disabled={!editing}
             >
               <Select.Option value="Nam">Nam</Select.Option>
               <Select.Option value="Nữ">Nữ</Select.Option>
               <Select.Option value="Khác">Khác</Select.Option>
             </Select>
-            <EditOutlined onClick={handleEditGender} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
           <Form.Item className="relative" name="reupphone" label="Điện thoại" rules={[{ required: true, message: 'Số điện thoại không được để trống!' }]}>
             <Input 
@@ -456,10 +477,8 @@ const Records = () => {
               placeholder="Nhập số điện thoại"
               value={updatePhone}
               onChange={(e) => setUpdatePhone(e.target.value)}
-              disabled={!editingPhone}
-              className="pl-10"
+              disabled={!editing}
             />
-            <EditOutlined onClick={handleEditPhone} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
           <Form.Item className="relative" name="reupidentity" label="CMND/CCCD" rules={[{ required: true, message: 'CMND/CCCD không được để trống!' }]}>
             <Input
@@ -467,10 +486,8 @@ const Records = () => {
               placeholder="Nhập CCCD/CMND"
               value={updateIdentity}
               onChange={(e) => setUpdateIdentity(e.target.value)}
-              disabled={!editingIdentity}
-              className="pl-10"
+              disabled={!editing}
             />
-            <EditOutlined onClick={handleEditIdentity} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
           <Form.Item className="relative" name="reupaddress" label="Địa chỉ" rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}>
             <Input
@@ -478,10 +495,8 @@ const Records = () => {
               placeholder="Nhập địa chỉ"
               value={updateAddress}
               onChange={(e) => setUpdateAddress(e.target.value)}
-              disabled={!editingAddress}
-              className="pl-10"
+              disabled={!editing}
             />
-            <EditOutlined onClick={handleEditAddress} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
           <Form.Item className="relative" name="reuphealth" label="Số BHYT" rules={[{ required: true, message: 'Số BHYT không được để trống!' }]}>
             <Input
@@ -489,10 +504,8 @@ const Records = () => {
               placeholder="Nhập số BHYT"
               value={updateHealth}
               onChange={(e) => setUpdateHealth(e.target.value)}
-              disabled={!editingHealth}
-              className="pl-10"
+              disabled={!editing}
             />
-            <EditOutlined onClick={handleEditHealth} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
         </Form>
       </Modal>
@@ -539,6 +552,20 @@ const Records = () => {
             <Line type="monotone" dataKey="Weight" name="Cân nặng" stroke="#387908" />
           </LineChart>
         </ResponsiveContainer>
+      </Modal>
+      <Modal
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận xóa hồ sơ</h1>}
+        visible={visibleDelete}
+        onOk={() => handleConfirmDelete()}
+        okText="Xác nhận"
+        onCancel={handleCancelDelete}
+        cancelText="Thoát"
+        okButtonProps={{ className: "bg-blue-700" }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+      >
+        <div className="text-center">
+          <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa hồ sơ này không?</p>
+        </div>
       </Modal>
     </div>
   )

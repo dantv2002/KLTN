@@ -69,8 +69,8 @@ const Navbar = () => {
         delay: 0,
         smooth: 'easeInOutQuart',
       });
+      window.history.replaceState({}, '', '/');
     }
-    window.history.replaceState({}, '', '/');
   }, []);
 
   const columnsDoctors = [
@@ -495,23 +495,23 @@ const Navbar = () => {
               <div className="relative group flex items-center">
                 <h1 className="mr-2">{name}</h1>
                 <AiOutlineDown className="text-white group-hover:text-hoverColor transition-all cursor-pointer" />
-                <ul className="absolute top-full left-0 w-48 bg-cyan-400 border rounded-md shadow-lg invisible opacity-0 mt-14 group-hover:mt-3 group-hover:opacity-100 group-hover:visible transition-all duration-500 font-rubik">
-                  <li className="py-2 px-4 rounded-md hover:bg-blue-700">
+                <ul className="absolute top-full left-0 w-48 bg-blue-700 border rounded-md shadow-lg invisible opacity-0 mt-14 group-hover:mt-3 group-hover:opacity-100 group-hover:visible transition-all duration-500 font-rubik">
+                  <li className="py-2 px-4 rounded-md hover:bg-black">
                     <a href="/records" className="hover:text-hoverColor transition-all cursor-pointer block">
                       Quản lý hồ sơ
                     </a>
                   </li>
-                  <li className="py-2 px-4 rounded-md hover:bg-blue-700">
+                  <li className="py-2 px-4 rounded-md hover:bg-black">
                     <a href="/schedules" className="hover:text-hoverColor transition-all cursor-pointer block">
                       Quản lý phiếu khám
                     </a>
                   </li>
-                  <li className="py-2 px-4 rounded-md hover:bg-blue-700">
+                  <li className="py-2 px-4 rounded-md hover:bg-black">
                     <a href="/medicals" className="hover:text-hoverColor transition-all cursor-pointer block">
                       Quản lý bệnh án
                     </a>
                   </li>
-                  <li className="py-2 px-4 rounded-md hover:bg-blue-700">
+                  <li className="py-2 px-4 rounded-md hover:bg-black">
                     <button
                       className="hover:text-hoverColor transition-all cursor-pointer block"
                       onClick={openFormChangePassword}
@@ -519,7 +519,7 @@ const Navbar = () => {
                       Đổi mật khẩu
                     </button>
                   </li>
-                  <li className="py-2 px-4 rounded-md hover:bg-blue-700">
+                  <li className="py-2 px-4 rounded-md hover:bg-black">
                     <button
                       className="hover:text-hoverColor transition-all cursor-pointer block"
                       onClick={() => handleReadDoctor()}
@@ -527,7 +527,7 @@ const Navbar = () => {
                       Đặt lịch khám
                     </button>
                   </li>
-                  <li className="py-2 px-4 rounded-md hover:bg-blue-700">
+                  <li className="py-2 px-4 rounded-md hover:bg-black">
                     <button
                       className="hover:text-hoverColor transition-all cursor-pointer block"
                       onClick={handleLogout}

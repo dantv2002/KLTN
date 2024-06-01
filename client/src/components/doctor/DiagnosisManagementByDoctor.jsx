@@ -8,7 +8,7 @@ import { diagnosticByDoctor, getMedicalNurDoc, getRecordNurDoc, saveDiagnostic }
 const ImageUploader = () => {
   const [image, setImage] = useState("");
   const [publicId, setPublicId] = useState("");
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState("a");
   const [idMedical, setIdMedical] = useState("");
   const [visibleInsert, setVisibleInsert] = useState(false);
   const [formInsert] = Form.useForm();
@@ -48,13 +48,13 @@ const ImageUploader = () => {
   const handleDiagnostic = async() => {
     try{
       let response = await axios.post(diagnosticByDoctor, {
-        Image: image
+        imageURL: image
       }, {
           withCredentials: true
       })
       if (response.status === 200){
         message.success(response.data.Message);
-        setResult(response.data.Data.result);
+        setResult(response.data);
       }
     }catch(error){
         message.error(error.response.data.Message);
@@ -343,7 +343,7 @@ const ImageUploader = () => {
                   Chẩn đoán
                 </Button>
               </div>
-            )};
+            )}
           </div>
         </div>
         <div className="w-full md:w-1/2 px-3">

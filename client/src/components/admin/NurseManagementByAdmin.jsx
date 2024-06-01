@@ -376,7 +376,6 @@ const NurseManagementByAdmin = () => {
                       value={levelInsert}
                       onChange={(value) => setLevelInsert(value)}
                     >
-                      <Select.Option value="LEVEL1">Level 1</Select.Option>
                       <Select.Option value="LEVEL2">Level 2</Select.Option>
                       <Select.Option value="LEVEL3">Level 3</Select.Option>
                       <Select.Option value="LEVEL4">Level 4</Select.Option>
@@ -488,7 +487,6 @@ const NurseManagementByAdmin = () => {
                       disabled={!editingLevel}
                       className="pl-10"
                     >
-                      <Select.Option value="LEVEL1">Level 1</Select.Option>
                       <Select.Option value="LEVEL2">Level 2</Select.Option>
                       <Select.Option value="LEVEL3">Level 3</Select.Option>
                       <Select.Option value="LEVEL4">Level 4</Select.Option>

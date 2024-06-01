@@ -82,9 +82,11 @@ const ReceptionManagementByNurse = () => {
     setVisibleConfirm(false);
   }
 
-  const handleConfirmCall = async(id) => {
+  const handleConfirmCall = async() => {
     try {
-      let response = await axios.put(updateTicket(id), {
+      let response = await axios.put(updateTicket(idConfirm),{
+        fullname: "helo",
+      },{
         withCredentials: true,
       })
       if (response.status === 200){
@@ -249,7 +251,7 @@ const ReceptionManagementByNurse = () => {
       <Modal
         title={<h1 className="text-3xl font-bold text-blue-700 text-center mb-4">Xác nhận gọi bệnh nhân</h1>}
         visible={visibleConfirm}
-        onOk={() => handleConfirmCall(idConfirm)}
+        onOk={() => handleConfirmCall()}
         okText="Xác nhận"
         onCancel={handleCancelConfirm}
         cancelText="Hủy"
