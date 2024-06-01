@@ -64,11 +64,15 @@ public class DepartmentService {
         return departments.map(department -> modelMapper.map(department, DepartmentDto.class));
     }
 
-    public DepartmentDto get(String id) {
+    public DepartmentDto get(String id, Boolean checkDeleted) {
         Department department = departmentRepository.findById(id).orElseThrow(() -> {
             log.error("Department not found");
             throw new CustomException("Khoa không tồn tại", HttpStatus.NOT_FOUND.value());
         });
+        if (checkDeleted && department.getDeleted()) {
+            log.error("Department not found");
+            throw new CustomException("Khoa không tồn tại", HttpStatus.NOT_FOUND.value());
+        }
         return modelMapper.map(department, DepartmentDto.class);
     }
 
@@ -81,7 +85,7 @@ public class DepartmentService {
 
     public void delete(String id) {
         log.info("Delete department with id: {}", id);
-        DepartmentDto departmentDto = this.get(id);
+        DepartmentDto departmentDto = this.get(id, true);
         departmentDto.setDeleted(true);
         departmentRepository.save(modelMapper.map(departmentDto, Department.class));
     }

@@ -74,7 +74,7 @@ public class DepartmentController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/department/{id}")
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
-        DepartmentDto department = departmentService.get(id);
+        DepartmentDto department = departmentService.get(id, true);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải thông tin khoa thành công");
         response.setStatus(HttpStatus.OK.value());

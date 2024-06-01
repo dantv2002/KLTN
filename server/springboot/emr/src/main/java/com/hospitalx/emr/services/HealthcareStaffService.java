@@ -51,7 +51,7 @@ public class HealthcareStaffService {
 
     // Check healthcare staff exists account
     public HealthcareStaffDto checkExistsAccount(String id) {
-        HealthcareStaffDto healthcareStaffDto = this.get(id);
+        HealthcareStaffDto healthcareStaffDto = this.get(id, true);
         if (healthcareStaffDto.getAccountId() != null) {
             log.error("Healthcare staff is already exists account");
             throw new CustomException("Nhân viên y tế này đã có tài khoản", HttpStatus.BAD_REQUEST.value());
@@ -89,7 +89,6 @@ public class HealthcareStaffService {
         });
     }
 
-    
     public HealthcareStaffDto save(HealthcareStaffDto t) {
         // validate
         validateStaff(t);
@@ -98,14 +97,13 @@ public class HealthcareStaffService {
             log.error("Identity card is already exists");
             throw new CustomException("Nhân viên y tế này đã tồn tại", HttpStatus.BAD_REQUEST.value());
         }
-        departmentService.get(t.getDepartmentId()); // check department exists
+        departmentService.get(t.getDepartmentId(), true); // check department exists
         HealthcareStaff entity = modelMapper.map(t, HealthcareStaff.class);
         entity = healthcareStaffRepository.save(entity);
         log.info("Save healthcare staff success with ID: " + entity.getId());
         return modelMapper.map(entity, HealthcareStaffDto.class);
     }
 
-    
     public Page<HealthcareStaffDto> getAll(String keyword, String type, Pageable pageable) {
         String[] parts = keyword.split("_", -1);
         parts[2] = parts[2].isEmpty() ? parts[2] : "^" + parts[2] + "$";
@@ -116,7 +114,7 @@ public class HealthcareStaffService {
                     parts[3], pageable);
             return entities.map(entity -> {
                 HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
-                String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId()).getNameDepartment();
+                String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false).getNameDepartment();
                 healthcareStaffDto.setDepartmentName(departmentName);
                 return healthcareStaffDto;
             });
@@ -144,41 +142,38 @@ public class HealthcareStaffService {
         log.info("Get all healthcare staffs success with total staffs: " + entities.getTotalElements());
         return entities.map(entity -> {
             HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
-            String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId()).getNameDepartment();
+            String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false).getNameDepartment();
             healthcareStaffDto.setDepartmentName(departmentName);
             return healthcareStaffDto;
         });
     }
 
-    
-    public HealthcareStaffDto get(String id) {
+    public HealthcareStaffDto get(String id, Boolean checkDeleted) {
         log.info("Get healthcare staff with ID: " + id);
         HealthcareStaff entity = healthcareStaffRepository.findById(id)
                 .orElseThrow(() -> new CustomException("Không tìm thấy nhân viên y tế", HttpStatus.NOT_FOUND.value()));
         log.info("Get healthcare staff success");
-        if (entity.getDeleted()) {
+        if (checkDeleted && entity.getDeleted()) {
             log.error("Healthcare staff is deleted");
             throw new CustomException("Không tìm thấy nhân viên y tế", HttpStatus.NOT_FOUND.value());
         }
         return modelMapper.map(entity, HealthcareStaffDto.class);
     }
 
-    
     public void update(HealthcareStaffDto t) {
-        get(t.getId()); // check staff exists
+        get(t.getId(), true); // check staff exists
         // validate
         validateStaff(t);
         log.info("Update healthcare staff: " + t.toString());
-        departmentService.get(t.getDepartmentId()); // check department exists
+        departmentService.get(t.getDepartmentId(), true); // check department exists
         HealthcareStaff entity = modelMapper.map(t, HealthcareStaff.class);
         entity = healthcareStaffRepository.save(entity);
         log.info("Update healthcare staff success with ID: " + entity.getId());
     }
 
-    
     public void delete(String id) {
         log.info("Delete healthcare staff with ID: " + id);
-        HealthcareStaff entity = modelMapper.map(get(id), HealthcareStaff.class);
+        HealthcareStaff entity = modelMapper.map(get(id, true), HealthcareStaff.class);
         entity.setDeleted(true);
         healthcareStaffRepository.save(entity);
         log.info("Delete healthcare staff success with ID: " + id);

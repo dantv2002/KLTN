@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class MedicalService{
+public class MedicalService {
     @Autowired
     private MedicalRepository medicalRepository;
     @Autowired
@@ -192,7 +192,6 @@ public class MedicalService{
         return mark.equalsIgnoreCase("YES");
     }
 
-    
     public MedicalDto save(MedicalDto t) {
         log.info("Save medical: " + t.toString());
         if (t.getType().equals(MedicalType.INPATIENT)) {
@@ -208,7 +207,6 @@ public class MedicalService{
         return modelMapper.map(medical, MedicalDto.class);
     }
 
-    
     public Page<MedicalDto> getAll(String keyword, String type, Pageable pageable) {
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         String doctorId = "";
@@ -228,7 +226,6 @@ public class MedicalService{
                 .map(medical -> this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class)));
     }
 
-    
     public MedicalDto get(String id) {
         log.info("Get medical by ID: " + id);
         Medical medical = medicalRepository.findById(id).orElseThrow(() -> {
@@ -238,7 +235,6 @@ public class MedicalService{
         return this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class));
     }
 
-    
     public void update(MedicalDto t) {
         log.info("Update medical with ID: " + t.getId());
         MedicalDto medical = this.get(t.getId());
@@ -260,7 +256,6 @@ public class MedicalService{
         log.info("Update medical success with ID: " + t.getId());
     }
 
-    
     public void delete(String id) {
         log.info("Delete medical with ID: " + id);
         MedicalDto medical = this.get(id);
@@ -322,9 +317,9 @@ public class MedicalService{
     }
 
     private void inpatientValidate(MedicalDto medical) {
-        departmentService.get(medical.getDepartmentAdmission());
+        departmentService.get(medical.getDepartmentAdmission(), true);
         if (medical.getDateTransfer() != null) {
-            departmentService.get(medical.getDepartmentTransfer());
+            departmentService.get(medical.getDepartmentTransfer(), true);
             if (medical.getDateTransfer().before(medical.getDateAdmission())) {
                 log.error("Medical date transfer is before date admission");
                 throw new CustomException("Thời gian chuyển khoa không được trước thời gian vào viện!",
@@ -349,13 +344,31 @@ public class MedicalService{
     }
 
     private MedicalDto addDepartmentWithDiaImage(MedicalDto medical) {
-        if (medical.getDoctorIdTreatment() != null && !medical.getDoctorIdTreatment().equals("")
-                && medical.getType() == MedicalType.OUTPATIENT) {
-            HealthcareStaffDto doctor = healthcareStaffService.get(medical.getDoctorIdTreatment());
-            String departmentId = doctor.getDepartmentId();
-            medical.setDepartmentId(departmentId);
+        Boolean isDoctor = medical.getDoctorIdTreatment() != null && !medical.getDoctorIdTreatment().equals("");
+        HealthcareStaffDto doctor = null;
+        if (isDoctor) {
+            doctor = healthcareStaffService.get(medical.getDoctorIdTreatment(), false);
+            medical.setDoctorNameTreatment(doctor.getFullName());
+        }
+        if (medical.getType() == MedicalType.OUTPATIENT) {
+            if (isDoctor) {
+                String departmentId = doctor.getDepartmentId();
+                medical.setDepartmentId(departmentId);
+                medical.setDepartmentName(departmentService.get(departmentId, false).getNameDepartment());
+            }
+        } else {
+            if (medical.getDepartmentAdmission() != null && !medical.getDepartmentAdmission().equals("")) {
+                medical.setDepartmentAdmissionName(
+                        departmentService.get(medical.getDepartmentAdmission(), false).getNameDepartment());
+            }
+            if (medical.getDepartmentTransfer() != null && !medical.getDepartmentTransfer().equals("")) {
+                medical.setDepartmentTransferName(
+                        departmentService.get(medical.getDepartmentTransfer(), false).getNameDepartment());
+            }
         }
         diagnosticService.getAll(medical.getId(), "", Pageable.unpaged()).stream().forEach(diaImageDto -> {
+            String doctorName = healthcareStaffService.get(diaImageDto.getDoctorIdPerform(), false).getFullName();
+            diaImageDto.setDoctorNamePerform(doctorName);
             medical.getDiagnosisImage().add(diaImageDto);
         });
         return medical;

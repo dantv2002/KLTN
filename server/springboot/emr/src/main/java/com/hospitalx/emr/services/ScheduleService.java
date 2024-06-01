@@ -73,7 +73,7 @@ public class ScheduleService {
 
     public List<ScheduleDto> getSchedule(String departmentId) {
         log.info("Get schedule of department: {}", departmentId);
-        departmentService.get(departmentId); // Check department exists
+        departmentService.get(departmentId, true); // Check department exists
         List<HealthcareStaffDto> doctors = healthcareStaffService.getAllByDepartmentId(departmentId);
         List<ScheduleDto> schedules = new ArrayList<>();
         Date date = new Date();
@@ -132,7 +132,7 @@ public class ScheduleService {
 
     public void deleteSchedule(String idDoctor, String idSchedule) {
         log.info("Deleting schedule");
-        healthcareStaffService.get(idDoctor); // Check doctor exists
+        healthcareStaffService.get(idDoctor, true); // Check doctor exists
         ScheduleDto scheduleDto = this.get(idSchedule);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -156,7 +156,7 @@ public class ScheduleService {
 
     public void updateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Updating schedule");
-        healthcareStaffService.get(idDoctor); // Check doctor exists
+        healthcareStaffService.get(idDoctor, true); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
@@ -174,7 +174,7 @@ public class ScheduleService {
 
     public void createSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Creating schedule for doctor: {}", idDoctor);
-        healthcareStaffService.get(idDoctor); // Check doctor exists
+        healthcareStaffService.get(idDoctor, true); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");

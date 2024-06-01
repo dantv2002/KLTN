@@ -68,6 +68,8 @@ public class MedicalDto {
     // Ngoại trú
     @JsonProperty("DepartmentId")
     private String departmentId; // Khoa khám bệnh ==> UPDATE
+    @JsonProperty("DepartmentName")
+    private String departmentName; // Tên khoa khám bệnh
     @JsonProperty("Date")
     @JsonFormat(pattern = "HH:mm dd/MM/yyyy")
     private Date date;// Thời gian đến khám
@@ -82,6 +84,8 @@ public class MedicalDto {
     private Date dateAdmission; // Thời gian vào viện
     @JsonProperty("DepartmentAdmission")
     private String departmentAdmission; // Khoa vào viện
+    @JsonProperty("DepartmentAdmissionName")
+    private String departmentAdmissionName; // Tên khoa vào viện
     @JsonProperty("DiagnosisAdmission")
     private String diagnosisAdmission; // Chuẩn đoán khi vào khoa điều trị
     @JsonProperty("DateTransfer")
@@ -89,6 +93,8 @@ public class MedicalDto {
     private Date dateTransfer; // Thời gian chuyển khoa
     @JsonProperty("DepartmentTransfer")
     private String departmentTransfer; // Khoa chuyển
+    @JsonProperty("DepartmentTransferName")
+    private String departmentTransferName; // Tên khoa chuyển
     @JsonProperty("DiagnosisTransfer")
     private String diagnosisTransfer; // Chuẩn đoán nơi chuyển đến
     //
@@ -103,6 +109,8 @@ public class MedicalDto {
     //
     @JsonProperty("DoctorIdTreatment")
     private String doctorIdTreatment; // Bác sĩ điều trị ==> UPDATE
+    @JsonProperty("DoctorNameTreatment")
+    private String doctorNameTreatment; // Tên bác sĩ điều trị
     @NotEmpty(message = "Vui lòng chọn hồ sơ bệnh nhân")
     @JsonProperty("RecordId")
     private String recordId; // Mã hồ sơ bệnh nhân

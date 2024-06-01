@@ -58,8 +58,8 @@ public class TicketService {
     public void createTicket(String idRecord, String idDoctor, String idSchedule) {
         log.info("Create ticket");
         RecordDto recordDto = recordService.get(idRecord);
-        HealthcareStaffDto doctorDto = healthcareStaffService.get(idDoctor);
-        DepartmentDto departmentDto = departmentService.get(doctorDto.getDepartmentId());
+        HealthcareStaffDto doctorDto = healthcareStaffService.get(idDoctor, true);
+        DepartmentDto departmentDto = departmentService.get(doctorDto.getDepartmentId(), true);
         ScheduleDto scheduleDto = scheduleService.get(idSchedule);
         String accountId = authManager.getAuthentication().getName();
         // Set value for ticket

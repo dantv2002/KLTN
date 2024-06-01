@@ -78,7 +78,7 @@ public class HealthcareStaffController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/healthcare-staff/{id}")
     public ResponseEntity<BaseResponse> get(@PathVariable("id") String id) {
-        HealthcareStaffDto data = healthcareStaffService.get(id);
+        HealthcareStaffDto data = healthcareStaffService.get(id, true);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải thông tin nhân viên y tế thành công");
         response.setStatus(HttpStatus.OK.value());
