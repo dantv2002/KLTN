@@ -4,7 +4,8 @@ import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker } from "antd";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
-import { PlusOutlined, SearchOutlined, EditOutlined } from "@ant-design/icons"
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
+import Loading from "../../hook/Loading";
 
 const NurseManagementByAdmin = () => {
 
@@ -36,18 +37,13 @@ const NurseManagementByAdmin = () => {
     const [listDepartment, setListDepartment] = useState([]);
     const [page, setPage] = useState("0");
     const [totalItems, setTotalItems] = useState("0");
+    const [loading, setLoading] = useState(false);
+    const [idDelete, setIdDelete] = useState("");
+    const [visibleDelete, setVisibleDelete] = useState(false);
 
 
       // Enable/disable update
-    const [editingFullName, setEditingFullName] = useState(false);
-    const [editingBirthday, setEditingBirthday] = useState(false);
-    const [editingGender, setEditingGender] = useState(false);
-    const [editingPhone, setEditingPhone] = useState(false);
-    const [editingIdentity, setEditingIdentity] = useState(false);
-    const [editingAddress, setEditingAddress] = useState(false);
-    const [editingLevel, setEditingLevel] = useState(false);
-    const [editingDepartment, setEditingDepartment] = useState(false);
-
+    const [editing, setEditing] = useState(false);
 
     const columnsNurses = [
         {
@@ -60,16 +56,39 @@ const NurseManagementByAdmin = () => {
           title: 'Họ tên',
           dataIndex: 'FullName',
           key: 'FullName',
+          sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Cấp bậc',
           dataIndex: 'Level',
           key: 'Level',
+          render: (text) => {
+            if (text === 'LEVEL2') return 'Level 2';
+            if (text === 'LEVEL3') return 'Level 3';
+            if (text === 'LEVEL4') return 'Level 4';
+            return text;
+          },
+          sorter: (a, b) => {
+            const renderLevel = (level) => {
+              if (level === 'LEVEL2') return 'Level 2';
+              if (level === 'LEVEL3') return 'Level 3';
+              if (level === 'LEVEL4') return 'Level 4';
+              return level;
+            };
+      
+            const textA = renderLevel(a.Level);
+            const textB = renderLevel(b.Level);
+            return textA.localeCompare(textB);
+          },
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Khoa',
           dataIndex: 'DepartmentName',
           key: 'DepartmentName',
+          sorter: (a, b) => a.DepartmentName.localeCompare(b.DepartmentName),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Tùy chọn',
@@ -80,7 +99,7 @@ const NurseManagementByAdmin = () => {
               <Button type="link" className="readupdate" onClick={() => handleReadUpdate(nurse)}>
                 Xem
               </Button>
-              <Button type="link" danger className="delete" onClick={() => handleDeleteNurse(nurse.Id)}>
+              <Button type="link" danger className="delete" onClick={() => handleConfirmDelete(nurse.Id)}>
                 Xóa
               </Button>
             </Space>
@@ -90,6 +109,7 @@ const NurseManagementByAdmin = () => {
 
     const fetchNurse = useCallback(async () => {
         try {
+          setLoading(true)
           let response = await axios.get(getNurse(searchKeyword, page), {
             withCredentials: true
           });
@@ -99,6 +119,8 @@ const NurseManagementByAdmin = () => {
           }
         } catch(error) {
           message.error(error.response.data.Message);
+        } finally {
+          setLoading(false);
         }
     },[searchKeyword, page]);
 
@@ -140,8 +162,19 @@ const NurseManagementByAdmin = () => {
     };
 
     const handleCancelInsert = () => {
-        setVisibleInsert(false);
+      formInsert.resetFields();
+      setVisibleInsert(false);
     };
+
+    const handleConfirmDelete = (id) => {
+      setIdDelete(id);
+      setVisibleDelete(true);
+    }
+
+    const handleCancelDelete = () => {
+      setIdDelete("");
+      setVisibleDelete(false);
+    }
 
     const handleCreateNurse = async() => {
         let dateofbirth = moment(birthdayInsert).format("DD/MM/YYYY");
@@ -161,6 +194,7 @@ const NurseManagementByAdmin = () => {
             })
             if (response.status === 200){
                 message.success(response.data.Message);
+                formInsert.resetFields();
                 setVisibleInsert(false)
                 fetchNurse();
             }
@@ -169,13 +203,15 @@ const NurseManagementByAdmin = () => {
         }
     }
 
-    const handleDeleteNurse = async(id) => {
+    const handleDeleteNurse = async() => {
         try {
-            let response = await axios.delete(deleteStaff(id),{
+            let response = await axios.delete(deleteStaff(idDelete),{
               withCredentials: true,
             })
             if (response.status === 200){
               message.success(response.data.Message);
+              setIdDelete("");
+              setVisibleDelete(false);
               fetchNurse();
             }
         }catch(error){
@@ -207,18 +243,13 @@ const NurseManagementByAdmin = () => {
       setVisibleUpdate(true);
     };
 
-    
+    const handleOpenForm = () => {
+      setEditing(true);
+    }
 
     const handleCancelUpdate = () => {
       setVisibleUpdate(false);
-      setEditingFullName(false);
-      setEditingBirthday(false);
-      setEditingGender(false);
-      setEditingPhone(false);
-      setEditingIdentity(false);
-      setEditingAddress(false);
-      setEditingLevel(false);
-      setEditingDepartment(false);
+      setEditing(false);
     };
 
     const handleUpdateNurse = async() => {
@@ -241,44 +272,12 @@ const NurseManagementByAdmin = () => {
           if (response.status === 200){
               message.success(response.data.Message);
               setVisibleUpdate(false);
-              setEditingFullName(false);
-              setEditingBirthday(false);
-              setEditingGender(false);
-              setEditingPhone(false);
-              setEditingIdentity(false);
-              setEditingAddress(false);
-              setEditingLevel(false);
-              setEditingDepartment(false);
+              setEditing(false);
               fetchNurse();
           }
       }catch(error){
           message.error(error.response.data.Message);
       }
-    }
-
-    const handleEditFullName = () => {
-      setEditingFullName(true);
-    };
-    const handleEditBirthday = () => {
-      setEditingBirthday(true);
-    };
-    const handleEditGender = () => {
-      setEditingGender(true);
-    };
-    const handleEditPhone = () => {
-      setEditingPhone(true);
-    };
-    const handleEditIdentity = () => {
-      setEditingIdentity(true);
-    };
-    const handleEditAddress = () => {
-      setEditingAddress(true);
-    };
-    const handleEditLevel = () => {
-      setEditingLevel(true);
-    };
-    const handleEditDepartment = () => {
-      setEditingDepartment(true);
     }
 
     const formLayout = {
@@ -300,6 +299,7 @@ const NurseManagementByAdmin = () => {
             <Table 
                 columns={columnsNurses} 
                 dataSource={dataNurses}
+                loading={{ indicator: <Loading/>, spinning: loading }}
                 pagination={{
                   total: totalItems,
                   pageSize: 10,
@@ -402,12 +402,18 @@ const NurseManagementByAdmin = () => {
             <Modal 
                 title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem thông tin điều dưỡng</h1>}
                 visible={visibleUpdate}
-                onOk={() => formUpdate.submit()}
-                okText="Cập nhật"
                 onCancel={handleCancelUpdate}
-                cancelText="Thoát"
-                okButtonProps={{ disabled: !(editingFullName || editingBirthday || editingGender || editingPhone || editingIdentity || editingAddress || editingLevel || editingDepartment), className: "bg-blue-700" }}
-                cancelButtonProps={{ className: "bg-red-600" }}
+                footer={[
+                  <Button key="custom" disabled={editing} className="bg-green-500 text-white" onClick={handleOpenForm}>
+                      Cập nhật
+                  </Button>,
+                  <Button key="submit" disabled={!editing} className="bg-blue-700" onClick={() => formUpdate.submit()}>
+                    Lưu
+                  </Button>,
+                  <Button key="cancel" className="bg-red-600" onClick={handleCancelUpdate}>
+                      Thoát
+                  </Button>
+                ]}
             >
               <Form {...formLayout} form={formUpdate} onFinish={handleUpdateNurse}>
                 <Form.Item className="relative" name="reupfullname" label="Họ tên" rules={[{ required: true, message: 'Họ tên không được để trống!' }]}>
@@ -416,10 +422,9 @@ const NurseManagementByAdmin = () => {
                       placeholder="Nhập họ tên"
                       value={fullnameUpdate}
                       onChange={(e) => setFullNameUpdate(e.target.value)}
-                      disabled={!editingFullName}
+                      disabled={!editing}
                       className="pl-10"
                     />
-                    <EditOutlined onClick={handleEditFullName} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupdayofbirth" label="Ngày sinh" rules={[{ required: true, message: 'Ngày sinh không được để trống!' }]}>
                     <DatePicker
@@ -428,23 +433,21 @@ const NurseManagementByAdmin = () => {
                       placeholder="Chọn ngày sinh"
                       value={birthdayUpdate ? moment(birthdayUpdate, 'DD/MM/YYYY') : null}
                       onChange={(date, dateString) => setBirthdayUpdate(dateString)}
-                      disabled={!editingBirthday}
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditBirthday} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupgender" label="Giới tính" rules={[{ required: true, message: 'Giới tính không được để trống!' }]}>
                     <Select
                       placeholder="Chọn giới tính"
                       value={genderUpdate}
                       onChange={(value) => setGenderUpdate(value)}
-                      disabled={!editingGender}
+                      disabled={!editing}
                       className="pl-10"
                     >
                       <Select.Option value="Nam">Nam</Select.Option>
                       <Select.Option value="Nữ">Nữ</Select.Option>
                       <Select.Option value="Khác">Khác</Select.Option>
                     </Select>
-                    <EditOutlined onClick={handleEditGender} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupphone" label="Điện thoại" rules={[{ required: true, message: 'Số điện thoại không được để trống!' }]}>
                     <Input 
@@ -452,10 +455,9 @@ const NurseManagementByAdmin = () => {
                       placeholder="Nhập số điện thoại"
                       value={phoneUpdate}
                       onChange={(e) => setPhoneUpdate(e.target.value)}
-                      disabled={!editingPhone}
+                      disabled={!editing}
                       className="pl-10"
                     />
-                    <EditOutlined onClick={handleEditPhone} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupidentity" label="CMND/CCCD" rules={[{ required: true, message: 'CMND/CCCD không được để trống!' }]}>
                     <Input
@@ -463,10 +465,9 @@ const NurseManagementByAdmin = () => {
                       placeholder="Nhập CCCD/CMND"
                       value={identityUpdate}
                       onChange={(e) => setIdentityUpdate(e.target.value)}
-                      disabled={!editingIdentity}
+                      disabled={!editing}
                       className="pl-10"
                     />
-                    <EditOutlined onClick={handleEditIdentity} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupaddress" label="Địa chỉ" rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}>
                     <Input
@@ -474,24 +475,22 @@ const NurseManagementByAdmin = () => {
                       placeholder="Nhập địa chỉ"
                       value={addressUpdate}
                       onChange={(value) => setAddressUpdate(value)}
-                      disabled={!editingAddress}
+                      disabled={!editing}
                       className="pl-10"
                     />
-                    <EditOutlined onClick={handleEditAddress} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reuplevel" label="Cấp bậc" rules={[{ required: true, message: 'Cấp bậc không được để trống!' }]}>
                     <Select
                       placeholder="Chọn cấp bậc"
                       value={levelUpdate}
                       onChange={(value) => setLevelUpdate(value)}
-                      disabled={!editingLevel}
+                      disabled={!editing}
                       className="pl-10"
                     >
                       <Select.Option value="LEVEL2">Level 2</Select.Option>
                       <Select.Option value="LEVEL3">Level 3</Select.Option>
                       <Select.Option value="LEVEL4">Level 4</Select.Option>
                     </Select>
-                    <EditOutlined onClick={handleEditLevel} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupdepartment" label="Khoa" rules={[{ required: true, message: 'Khoa không được để trống!' }]}>
                     <Select
@@ -499,7 +498,7 @@ const NurseManagementByAdmin = () => {
                       value={departmentUpdate}
                       onChange={(value) => setDepartmentUpdate(value)}
                       className="pl-10"
-                      disabled={!editingDepartment}
+                      disabled={!editing}
                     >
                       {listDepartment.map((department) => (
                         <Select.Option 
@@ -510,9 +509,22 @@ const NurseManagementByAdmin = () => {
                         </Select.Option>
                       ))}
                     </Select>
-                    <EditOutlined onClick={handleEditDepartment} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
               </Form>
+            </Modal>
+            <Modal
+              title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận xóa thông tin</h1>}
+              visible={visibleDelete}
+              onOk={() => handleDeleteNurse()}
+              okText="Xác nhận"
+              onCancel={handleCancelDelete}
+              cancelText="Thoát"
+              okButtonProps={{ className: "bg-blue-700" }}
+              cancelButtonProps={{ className: "bg-red-600" }}
+            >
+              <div className="text-center">
+                <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa thông tin điều dưỡng này không?</p>
+              </div>
             </Modal>
         </div>
     )

@@ -410,7 +410,6 @@ const Medicals = () => {
       key: 'Reason',
       sorter: (a, b) => a.Reason.localeCompare(b.Reason),
       sortDirections: ['ascend', 'descend'],
-
     },
     {
       title: 'Các cơ quan',

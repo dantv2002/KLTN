@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { createStaff, getDoctor, deleteStaff, updateStaff, getDepartmentAdmin} from "../../Api";
+import { createStaff, getDoctor, deleteStaff, updateStaff, showDepartmentAdmin} from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker } from "antd";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
-import { PlusOutlined, SearchOutlined, EditOutlined } from "@ant-design/icons"
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
+import Loading from "../../hook/Loading";
 
 const DoctorManagementByAdmin = () => {
 
@@ -32,9 +33,9 @@ const DoctorManagementByAdmin = () => {
     const [formUpdate] = Form.useForm();
     const [dataDoctors, setDataDoctors] = useState([]);
     const [keyword, setKeyword] = useState("");
-    const [title, setTitle] = useState("");
-    const [department, setDepartment] = useState("");
-    const [gender, setGender] = useState("");
+    const [title, setTitle] = useState(null);
+    const [department, setDepartment] = useState(null);
+    const [gender, setGender] = useState(null);
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchTitle, setSearchTitle] = useState("");
     const [searchDepartment, setSearchDepartment] = useState("");
@@ -42,17 +43,13 @@ const DoctorManagementByAdmin = () => {
     const [listDepartment, setListDepartment] = useState([]);
     const [page, setPage] = useState("0");
     const [totalItems, setTotalItems] = useState("0");
+    const [loading, setLoading] = useState(false)
+    const [visibleDelete, setVisibleDelete] = useState(false);
+    const [idDelete, setIdDelete] = useState("");
+  
 
       // Enable/disable update
-    const [editingFullName, setEditingFullName] = useState(false);
-    const [editingBirthday, setEditingBirthday] = useState(false);
-    const [editingGender, setEditingGender] = useState(false);
-    const [editingPhone, setEditingPhone] = useState(false);
-    const [editingIdentity, setEditingIdentity] = useState(false);
-    const [editingAddress, setEditingAddress] = useState(false);
-    const [editingTitle, setEditingTitle] = useState(false);
-    const [editingDepartment, setEditingDepartment] = useState(false);
-
+    const [editing, setEditing] = useState(false);
 
     const columnsDoctors = [
         {
@@ -65,16 +62,22 @@ const DoctorManagementByAdmin = () => {
           title: 'Họ tên',
           dataIndex: 'FullName',
           key: 'FullName',
+          sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Chức danh',
           dataIndex: 'Title',
           key: 'Title',
+          sorter: (a, b) => a.Title.localeCompare(b.Title),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Khoa',
           dataIndex: 'DepartmentName',
           key: 'DepartmentName',
+          sorter: (a, b) => a.DepartmentName.localeCompare(b.DepartmentName),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Tùy chọn',
@@ -85,7 +88,7 @@ const DoctorManagementByAdmin = () => {
               <Button type="link" className="readupdate" onClick={() => handleReadUpdate(doctor)}>
                 Xem
               </Button>
-              <Button type="link" danger className="delete" onClick={() => handleDeleteDoctor(doctor.Id)}>
+              <Button type="link" danger className="delete" onClick={() => handleConfirmDelete(doctor.Id)}>
                 Xóa
               </Button>
             </Space>
@@ -95,9 +98,11 @@ const DoctorManagementByAdmin = () => {
 
     const fetchDoctor = useCallback(async () => {
         try {
+          setLoading(true);
+          const titleSearch = searchTitle || "";
           const departmentSearch = searchDepartment || "";
           const genderSearch = searchGender || "";
-          let response = await axios.get(getDoctor(searchKeyword, searchTitle, departmentSearch, genderSearch, page), {
+          let response = await axios.get(getDoctor(searchKeyword, titleSearch, departmentSearch, genderSearch, page), {
             withCredentials: true
           });
           if (response.status === 200) {
@@ -106,12 +111,14 @@ const DoctorManagementByAdmin = () => {
           }
         } catch(error) {
           message.error(error.response.data.Message);
+        } finally {
+          setLoading(false);
         }
     }, [searchKeyword, searchTitle, searchDepartment, searchGender, page]);
 
     const fetchDepartment = async () => {
       try {
-        let response = await axios.get(getDepartmentAdmin("", ""), {
+        let response = await axios.get(showDepartmentAdmin, {
           withCredentials: true
         });
         if (response.status === 200) {
@@ -146,12 +153,23 @@ const DoctorManagementByAdmin = () => {
     };
 
     const handleInsert = () => {
-        setVisibleInsert(true);
+      setVisibleInsert(true);
     };
 
     const handleCancelInsert = () => {
-        setVisibleInsert(false);
+      formInsert.resetFields();
+      setVisibleInsert(false);
     };
+
+    const handleConfirmDelete = (id) => {
+      setIdDelete(id);
+      setVisibleDelete(true);
+    }
+
+    const handleCancelDelete = () => {
+      setIdDelete("");
+      setVisibleDelete(false);
+    }
 
     const handleCreateDoctor = async() => {
         let dateofbirth = moment(birthdayInsert).format("DD/MM/YYYY");
@@ -171,6 +189,7 @@ const DoctorManagementByAdmin = () => {
             })
             if (response.status === 200){
                 message.success(response.data.Message);
+                formInsert.resetFields();
                 setVisibleInsert(false)
                 fetchDoctor();
             }
@@ -179,13 +198,15 @@ const DoctorManagementByAdmin = () => {
         }
     }
 
-    const handleDeleteDoctor = async(id) => {
+    const handleDeleteDoctor = async() => {
         try {
-            let response = await axios.delete(deleteStaff(id),{
+            let response = await axios.delete(deleteStaff(idDelete),{
               withCredentials: true,
             })
             if (response.status === 200){
               message.success(response.data.Message);
+              setIdDelete("");
+              setVisibleDelete(false);
               fetchDoctor();
             }
         }catch(error){
@@ -217,18 +238,13 @@ const DoctorManagementByAdmin = () => {
       setVisibleUpdate(true);
     };
 
-    
+    const handleOpenForm = () => {
+      setEditing(true);
+    }
 
     const handleCancelUpdate = () => {
       setVisibleUpdate(false);
-      setEditingFullName(false);
-      setEditingBirthday(false);
-      setEditingGender(false);
-      setEditingPhone(false);
-      setEditingIdentity(false);
-      setEditingAddress(false);
-      setEditingTitle(false);
-      setEditingDepartment(false);
+      setEditing(false);
     };
 
     const handleUpdateDoctor = async() => {
@@ -251,44 +267,12 @@ const DoctorManagementByAdmin = () => {
           if (response.status === 200){
               message.success(response.data.Message);
               setVisibleUpdate(false);
-              setEditingFullName(false);
-              setEditingBirthday(false);
-              setEditingGender(false);
-              setEditingPhone(false);
-              setEditingIdentity(false);
-              setEditingAddress(false);
-              setEditingTitle(false);
-              setEditingDepartment(false);
+              setEditing(false);
               fetchDoctor();
           }
       }catch(error){
           message.error(error.response.data.Message);
       }
-    }
-
-    const handleEditFullName = () => {
-      setEditingFullName(true);
-    };
-    const handleEditBirthday = () => {
-      setEditingBirthday(true);
-    };
-    const handleEditGender = () => {
-      setEditingGender(true);
-    };
-    const handleEditPhone = () => {
-      setEditingPhone(true);
-    };
-    const handleEditIdentity = () => {
-      setEditingIdentity(true);
-    };
-    const handleEditAddress = () => {
-      setEditingAddress(true);
-    };
-    const handleEditTitle = () => {
-      setEditingTitle(true);
-    };
-    const handleEditDepartment = () => {
-      setEditingDepartment(true);
     }
 
     const formLayout = {
@@ -304,12 +288,19 @@ const DoctorManagementByAdmin = () => {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
             />
-            <Input
+            <Select
               className="w-96 mt-3 mr-3"
               placeholder="Tìm theo chức danh"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+              onChange={(value) => setTitle(value)}
+              allowClear
+            >
+              <Select.Option value="Ths">Ths</Select.Option>
+              <Select.Option value="TS">TS</Select.Option>
+              <Select.Option value="BS">BS</Select.Option>
+              <Select.Option value="BSCKI">BSCKI</Select.Option>
+              <Select.Option value="BSCKII">BSCKII</Select.Option>
+            </Select>
             <Select
               className="w-96 mt-3 mr-3"
               placeholder="Tìm theo khoa"
@@ -342,6 +333,7 @@ const DoctorManagementByAdmin = () => {
             <Table 
                 columns={columnsDoctors} 
                 dataSource={dataDoctors}
+                loading={{ indicator: <Loading/>, spinning: loading }}
                 pagination={{
                   total: totalItems,
                   pageSize: 10,
@@ -413,12 +405,18 @@ const DoctorManagementByAdmin = () => {
                     />
                 </Form.Item>
                 <Form.Item name="inserttitle" label="Chức danh" rules={[{ required: true, message: 'Chức danh không được để trống!' }]}>
-                    <Input
+                    <Select
                       type="text"
-                      placeholder="Nhập chức danh"
+                      placeholder="Chọn chức danh"
                       value={titleInsert}
-                      onChange={(e) => setTitleInsert(e.target.value)}
-                    />
+                      onChange={(value) => setTitleInsert(value)}
+                    >
+                      <Select.Option value="Ths">Ths</Select.Option>
+                      <Select.Option value="TS">TS</Select.Option>
+                      <Select.Option value="BS">BS</Select.Option>
+                      <Select.Option value="BSCKI">BSCKI</Select.Option>
+                      <Select.Option value="BSCKII">BSCKII</Select.Option>
+                    </Select>
                 </Form.Item>
                 <Form.Item name="insertdepartment" label="Khoa" rules={[{ required: true, message: 'Khoa không được để trống!' }]}>
                     <Select
@@ -441,12 +439,18 @@ const DoctorManagementByAdmin = () => {
             <Modal 
                 title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem thông tin bác sĩ</h1>}
                 visible={visibleUpdate}
-                onOk={() => formUpdate.submit()}
-                okText="Cập nhật"
                 onCancel={handleCancelUpdate}
-                cancelText="Thoát"
-                okButtonProps={{ disabled: !(editingFullName || editingBirthday || editingGender || editingPhone || editingIdentity || editingAddress || editingTitle || editingDepartment), className: "bg-blue-700" }}
-                cancelButtonProps={{ className: "bg-red-600" }}
+                footer={[
+                  <Button key="custom" disabled={editing} className="bg-green-500 text-white" onClick={handleOpenForm}>
+                      Cập nhật
+                  </Button>,
+                  <Button key="submit" disabled={!editing} className="bg-blue-700" onClick={() => formUpdate.submit()}>
+                    Lưu
+                  </Button>,
+                  <Button key="cancel" className="bg-red-600" onClick={handleCancelUpdate}>
+                      Thoát
+                  </Button>
+                ]}
             >
               <Form {...formLayout} form={formUpdate} onFinish={handleUpdateDoctor}>
                 <Form.Item className="relative" name="reupfullname" label="Họ tên" rules={[{ required: true, message: 'Họ tên không được để trống!' }]}>
@@ -455,35 +459,30 @@ const DoctorManagementByAdmin = () => {
                       placeholder="Nhập họ tên"
                       value={fullnameUpdate}
                       onChange={(e) => setFullNameUpdate(e.target.value)}
-                      disabled={!editingFullName}
-                      className="pl-10"
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditFullName} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupdayofbirth" label="Ngày sinh" rules={[{ required: true, message: 'Ngày sinh không được để trống!' }]}>
                     <DatePicker
                       type="text"
-                      className="w-full pl-10"
+                      className="w-full"
                       placeholder="Chọn ngày sinh"
                       value={birthdayUpdate ? moment(birthdayUpdate, 'DD/MM/YYYY') : null}
                       onChange={(date, dateString) => setBirthdayUpdate(dateString)}
-                      disabled={!editingBirthday}
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditBirthday} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupgender" label="Giới tính" rules={[{ required: true, message: 'Giới tính không được để trống!' }]}>
                     <Select
                       placeholder="Chọn giới tính"
                       value={genderUpdate}
                       onChange={(value) => setGenderUpdate(value)}
-                      disabled={!editingGender}
-                      className="pl-10"
+                      disabled={!editing}
                     >
                       <Select.Option value="Nam">Nam</Select.Option>
                       <Select.Option value="Nữ">Nữ</Select.Option>
                       <Select.Option value="Khác">Khác</Select.Option>
                     </Select>
-                    <EditOutlined onClick={handleEditGender} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupphone" label="Điện thoại" rules={[{ required: true, message: 'Số điện thoại không được để trống!' }]}>
                     <Input 
@@ -491,10 +490,8 @@ const DoctorManagementByAdmin = () => {
                       placeholder="Nhập số điện thoại"
                       value={phoneUpdate}
                       onChange={(e) => setPhoneUpdate(e.target.value)}
-                      disabled={!editingPhone}
-                      className="pl-10"
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditPhone} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupidentity" label="CMND/CCCD" rules={[{ required: true, message: 'CMND/CCCD không được để trống!' }]}>
                     <Input
@@ -502,10 +499,8 @@ const DoctorManagementByAdmin = () => {
                       placeholder="Nhập CCCD/CMND"
                       value={identityUpdate}
                       onChange={(e) => setIdentityUpdate(e.target.value)}
-                      disabled={!editingIdentity}
-                      className="pl-10"
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditIdentity} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupaddress" label="Địa chỉ" rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}>
                     <Input
@@ -513,29 +508,31 @@ const DoctorManagementByAdmin = () => {
                       placeholder="Nhập địa chỉ"
                       value={addressUpdate}
                       onChange={(e) => setAddressUpdate(e.target.value)}
-                      disabled={!editingAddress}
-                      className="pl-10"
+                      disabled={!editing}
+
                     />
-                    <EditOutlined onClick={handleEditAddress} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reuptitle" label="Chức danh" rules={[{ required: true, message: 'Chức danh không được để trống!' }]}>
-                    <Input
+                    <Select
                       type="text"
-                      placeholder="Nhập chức danh"
+                      placeholder="Chọn chức danh"
                       value={titleUpdate}
-                      onChange={(e) => setTitleUpdate(e.target.value)}
-                      disabled={!editingTitle}
-                      className="pl-10"
-                    />
-                    <EditOutlined onClick={handleEditTitle} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
+                      onChange={(value) => setTitleUpdate(value)}
+                      disabled={!editing}
+                    >
+                      <Select.Option value="Ths">Ths</Select.Option>
+                      <Select.Option value="TS">TS</Select.Option>
+                      <Select.Option value="BS">BS</Select.Option>
+                      <Select.Option value="BSCKI">BSCKI</Select.Option>
+                      <Select.Option value="BSCKII">BSCKII</Select.Option>
+                    </Select>
                 </Form.Item>
                 <Form.Item className="relative" name="reupdepartment" label="Khoa" rules={[{ required: true, message: 'Khoa không được để trống!' }]}>
                     <Select
                       placeholder="Chọn khoa"
                       value={departmentUpdate}
                       onChange={(value) => setDepartmentUpdate(value)}
-                      className="pl-10"
-                      disabled={!editingDepartment}
+                      disabled={!editing}
                     >
                       {listDepartment.map((department) => (
                         <Select.Option 
@@ -546,9 +543,22 @@ const DoctorManagementByAdmin = () => {
                         </Select.Option>
                       ))}
                     </Select>
-                    <EditOutlined onClick={handleEditDepartment} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
               </Form>
+            </Modal>
+            <Modal
+              title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận xóa thông tin</h1>}
+              visible={visibleDelete}
+              onOk={() => handleDeleteDoctor()}
+              okText="Xác nhận"
+              onCancel={handleCancelDelete}
+              cancelText="Thoát"
+              okButtonProps={{ className: "bg-blue-700" }}
+              cancelButtonProps={{ className: "bg-red-600" }}
+            >
+              <div className="text-center">
+                <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa thông tin bác sĩ này không?</p>
+              </div>
             </Modal>
         </div>
     )

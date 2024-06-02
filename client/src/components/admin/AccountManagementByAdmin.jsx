@@ -4,6 +4,7 @@ import { getAccount, lockunlockAcount, renewPassword, deleteAccount } from "../.
 import { message, Space, Button, Table, Input, Select, Modal, Form } from "antd";
 import { useLocation } from "react-router-dom";
 import {SearchOutlined} from "@ant-design/icons"
+import Loading from "../../hook/Loading";
 
 
 const AccountManagementByAdmin = () => {
@@ -11,7 +12,7 @@ const AccountManagementByAdmin = () => {
   const location = useLocation();
   const [dataAccount, setDataAccounts] = useState([])
   const [keyword, setKeyword] = useState("");
-  const [type, setType] = useState("");
+  const [type, setType] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchType, setSearchType] = useState("");
   const [idAccount, setIdAccount] = useState("");
@@ -22,9 +23,13 @@ const AccountManagementByAdmin = () => {
   const [formUpdate] = Form.useForm();
   const [page, setPage] = useState("0");
   const [totalItems, setTotalItems] = useState("0");
+  const [loading, setLoading] = useState(false);
+  const [visibleDelete, setVisibleDelete] = useState(false);
+  const [idDelete, setIdDelete] = useState("");
 
   const fetchAccount = useCallback(async () => {
     try {
+      setLoading(true);
       const typeSearch = searchType || "";
       let response = await axios.get(getAccount(searchKeyword, typeSearch, page), {
         withCredentials: true
@@ -35,6 +40,8 @@ const AccountManagementByAdmin = () => {
       }
     } catch(error) {
       message.error(error.response.data.Message);
+    } finally {
+      setLoading(false);
     }
   }, [searchKeyword, searchType, page]);
 
@@ -117,13 +124,25 @@ const AccountManagementByAdmin = () => {
     }
   }
 
-  const handleDelete = async(id) => {
+  const handleConfirmDelete = (id) => {
+    setIdDelete(id);
+    setVisibleDelete(true);
+  }
+
+  const handleCancelDelete = () => {
+    setIdDelete("");
+    setVisibleDelete(false);
+  }
+
+  const handleDelete = async() => {
     try{
-      let response = await axios.delete(deleteAccount(id),{
+      let response = await axios.delete(deleteAccount(idDelete),{
         withCredentials: true
       })
       if (response.status === 200){
         message.success(response.data.Message);
+        setIdDelete("");
+        setVisibleDelete(false);
         fetchAccount();
       }
     }catch(error){
@@ -143,16 +162,41 @@ const AccountManagementByAdmin = () => {
       title: 'Họ tên',
       dataIndex: 'FullName',
       key: 'FullName',
+      sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Email',
       dataIndex: 'Email',
       key: 'Email',
+      sorter: (a, b) => a.Email.localeCompare(b.Email),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
+      render: (text) => {
+        if (text === 'PATIENT') return 'Bệnh nhân';
+        if (text === 'RECEPTIONIST') return 'Tiếp nhận';
+        if (text === 'NURSE') return 'Điều dưỡng';
+        if (text === 'DOCTOR') return 'Bác sĩ';
+        return text;
+      },
+      sorter: (a, b) => {
+        const renderRole = (role) => {
+          if (role === 'PATIENT') return 'Bệnh nhân';
+          if (role === 'RECEPTIONIST') return 'Tiếp nhận';
+          if (role === 'NURSE') return 'Điều dưỡng';
+          if (role === 'DOCTOR') return 'Bác sĩ';
+          return role;
+        };
+  
+        const textA = renderRole(a.role);
+        const textB = renderRole(b.role);
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -172,7 +216,7 @@ const AccountManagementByAdmin = () => {
               Mở 
             </Button>
           )}
-          <Button type="link" danger className="renew" onClick={() => handleDelete(account.Id)}>
+          <Button type="link" danger className="renew" onClick={() => handleConfirmDelete(account.Id)}>
             Xóa
           </Button>
         </Space>
@@ -188,13 +232,13 @@ const AccountManagementByAdmin = () => {
   return (
     <div>
         <Input
-          className="w-96 mt-3 mr-3"
+          className="w-96 mt-3 mr-3 mb-2"
           placeholder="Tìm theo tên"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
         <Select
-          className="w-96 mt-3 mr-3"
+          className="w-96 mt-3 mr-3 mb-2"
           placeholder="Tìm theo vai trò"
           value={type}
           onChange={(value) => setType(value)}
@@ -205,10 +249,11 @@ const AccountManagementByAdmin = () => {
           <Select.Option value="nurse">Điều dưỡng</Select.Option>
           <Select.Option value="receptionist">Tiếp nhận</Select.Option>
         </Select>
-        <Button onClick={() => handleSearch()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+        <Button onClick={() => handleSearch()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
       <Table 
           columns={columnsAccounts} 
           dataSource={dataAccount}
+          loading={{ indicator: <Loading/>, spinning: loading }}
           pagination={{
             total: totalItems,
             pageSize: 10,
@@ -252,6 +297,20 @@ const AccountManagementByAdmin = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận xóa tài khoản</h1>}
+        visible={visibleDelete}
+        onOk={() => handleDelete()}
+        okText="Xác nhận"
+        onCancel={handleCancelDelete}
+        cancelText="Thoát"
+        okButtonProps={{ className: "bg-blue-700" }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+      >
+        <div className="text-center">
+          <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa tài khoản này không?</p>
+        </div>
       </Modal>
     </div>
   )

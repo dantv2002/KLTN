@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartmentAdmin } from "../../Api";
+import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartmentAdmin, deleteSchedule } from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker, InputNumber } from "antd";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
+import Loading from "../../hook/Loading";
 
 const ScheduleManagementByAdmin = () => {
 
@@ -13,8 +14,8 @@ const ScheduleManagementByAdmin = () => {
     const [dataDoctors, setDataDoctors] = useState([]);
     const [keyword, setKeyword] = useState("");
     const [title, setTitle] = useState("");
-    const [department, setDepartment] = useState("");
-    const [gender, setGender] = useState("");
+    const [department, setDepartment] = useState(null);
+    const [gender, setGender] = useState(null);
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchTitle, setSearchTitle] = useState("");
     const [searchDepartment, setSearchDepartment] = useState("");
@@ -39,6 +40,8 @@ const ScheduleManagementByAdmin = () => {
     const [totalItemsDoctor, setTotalItemsDoctor] = useState("0");
     const [pageSchedule, setPageSchedule] = useState("0");
     const [totalItemsSchedule, setTotalItemsSchedule] = useState("0");
+    const [loading, setLoading] = useState(false);
+    const [visibleDelete, setVisibleDelete] = useState(false);
 
     const columnsDoctors = [
         {
@@ -51,16 +54,22 @@ const ScheduleManagementByAdmin = () => {
           title: 'Họ tên',
           dataIndex: 'FullName',
           key: 'FullName',
+          sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Chức danh',
           dataIndex: 'Title',
           key: 'Title',
+          sorter: (a, b) => a.Title.localeCompare(b.Title),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Khoa',
           dataIndex: 'DepartmentName',
           key: 'DepartmentName',
+          sorter: (a, b) => a.DepartmentName.localeCompare(b.DepartmentName),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Tùy chọn',
@@ -81,7 +90,7 @@ const ScheduleManagementByAdmin = () => {
 
     const columnsSchedules = [
       {
-        title: 'Số thứ tự',
+        title: 'STT',
         dataIndex: 'sequenceNumber',
         key: 'sequenceNumber',
         render: (_, __, index) => index + 1 + pageSchedule * 10,
@@ -90,31 +99,82 @@ const ScheduleManagementByAdmin = () => {
         title: 'Ngày khám',
         dataIndex: 'Date',
         key: 'Date',
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+          <div className="w-full md:w-64 p-2">
+            <Input
+              placeholder="Nhập ngày khám"
+              value={selectedKeys[0]}
+              onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+              onPressEnter={() => confirm()}
+              style={{ width: 188, marginBottom: 8, display: 'block' }}
+            />
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              icon={<SearchOutlined />}
+              size="small"
+              className="bg-blue-700"
+              style={{ width: 90, marginRight: 8 }}
+            >
+              Lọc
+            </Button>
+            <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+              Đặt lại
+            </Button>
+          </div>
+        ),
+        filterIcon: (filtered) => (
+          <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+        ),
+        onFilter: (value, record) => {
+          const date = moment(record.Date, 'DD/MM/YYYY').date().toString().padStart(2, '0');
+          const filterValue = value.toString().padStart(2, '0');
+          return date === filterValue || date === value;
+        },
       },
       {
         title: 'Buổi',
         dataIndex: 'Time',
         key: 'Time',
+        render: (text) => {
+          if (text === 'MORNING') return 'Buổi sáng';
+          if (text === 'AFTERNOON') return 'Buổi chiều';
+          return text;
+        },
+        sorter: (a, b) => {
+          const textA = a.Time === 'MORNING' ? 'Buổi sáng' : (a.Time === 'AFTERNOON' ? 'Buổi chiều' : a.Time);
+          const textB = b.Time === 'MORNING' ? 'Buổi chiều' : (b.Time === 'AFTERNOON' ? 'Buổi chiều' : b.Time);
+          return textA.localeCompare(textB);
+        },
+        sortDirections: ['ascend', 'descend'],
       },
       {
         title: 'Vị trí',
         dataIndex: 'Location',
         key: 'Location',
+        sorter: (a, b) => a.Location.localeCompare(b.Location),
+        sortDirections: ['ascend', 'descend'],
       },
       {
         title: 'Số',
         dataIndex: 'Number',
         key: 'Number',
+        sorter: (a, b) => a.Number.localeCompare(b.Number),
+        sortDirections: ['ascend', 'descend'],
       },
       {
         title: 'Đã gọi tới',
         dataIndex: 'CallNumber',
         key: 'CallNumber',
+        sorter: (a, b) => a.CallNumber.localeCompare(b.CallNumber),
+        sortDirections: ['ascend', 'descend'],
       },
       {
         title: 'Phòng',
         dataIndex: 'Clinic',
         key: 'Clinic',
+        sorter: (a, b) => a.Clinic.localeCompare(b.Clinic),
+        sortDirections: ['ascend', 'descend'],
       },
       {
         title: 'Tùy chọn',
@@ -125,6 +185,9 @@ const ScheduleManagementByAdmin = () => {
             <Button type="link" onClick={() => handleUpdate(schedules)}>
               Cập nhật
             </Button>
+            <Button type="link" danger onClick={() => handleConfirmDelete(schedules.Id)}>
+              Xóa
+            </Button>
           </Space>
         ),
       },
@@ -132,6 +195,7 @@ const ScheduleManagementByAdmin = () => {
 
     const fetchDoctor = useCallback(async () => {
       try {
+        setLoading(true);
         const departmentSearch = searchDepartment || "";
         const genderSearch = searchGender || "";
         let response = await axios.get(getDoctor(searchKeyword, searchTitle, departmentSearch, genderSearch, pageDoctor), {
@@ -143,6 +207,8 @@ const ScheduleManagementByAdmin = () => {
         }
       } catch(error) {
         message.error(error.response.data.Message);
+      } finally {
+        setLoading(false);
       }
     }, [searchKeyword, searchTitle, searchDepartment, searchGender, pageDoctor]);
 
@@ -195,10 +261,9 @@ const ScheduleManagementByAdmin = () => {
     }
 
     const fetchSchedule = useCallback(async () => {
-      console.log(idDoctor);
-      console.log(pageSchedule);
       if (shouldReloadFormRead) {
         try{
+          setLoading(true);
           let response = await axios.get(getSchedule(idDoctor, pageSchedule),{
             withCredentials: true
           })
@@ -208,6 +273,8 @@ const ScheduleManagementByAdmin = () => {
           }
         }catch(error){
           message.error(error.response.data.Message)
+        } finally {
+          setLoading(false);
         }
         setShouldReloadFormRead(false);
       }
@@ -338,6 +405,31 @@ const ScheduleManagementByAdmin = () => {
       }
     };
 
+    const handleConfirmDelete = (id) => {
+      setIdSchedule(id);
+      setVisibleDelete(true);
+    }
+
+    const handleCancelDelete = () => {
+      setVisibleDelete(false);
+    }
+
+    const handleDeleteSchedule = async() => {
+      try {
+        let response = await axios.delete(deleteSchedule(idDoctor, idSchedule),{
+          withCredentials: true,
+        })
+        if (response.status === 200){
+          message.success(response.data.Message);
+          setVisibleDelete(false);
+          setShouldReloadFormRead(true);
+          setPageSchedule("0");
+        }
+    }catch(error){
+      message.error(error.response.data.Message);
+    }
+    }
+
     return (
       <div>
         <Input
@@ -383,6 +475,7 @@ const ScheduleManagementByAdmin = () => {
         <Table 
             columns={columnsDoctors} 
             dataSource={dataDoctors}
+            loading={{ indicator: <Loading/>, spinning: loading }}
             pagination={{
               total: totalItemsDoctor,
               pageSize: 10,
@@ -403,6 +496,7 @@ const ScheduleManagementByAdmin = () => {
           {newSchedules.map((schedule, index) => (
             <div key={index}>
               <Form {...formLayout} form={formInsert}>
+                <h2 className="text-sm font-bold mb-2 ml-3 text-green-400">Lịch khám {index + 1}</h2>
                 <Form.Item label="Ngày khám" rules={[{ required: true, message: 'Ngày khám không được để trống!' }]}>
                   <DatePicker
                     className="w-full"
@@ -413,7 +507,7 @@ const ScheduleManagementByAdmin = () => {
                 </Form.Item>
                 <Form.Item label="Thời gian" rules={[{ required: true, message: 'Thời gian không được để trống!' }]}>
                   <Select
-                    className="w-96 mt-3 mr-3"
+                    className="w-full"
                     placeholder="Chọn thời gian khám"
                     onChange={(value) => handleTimeChange(value, index)}
                   >
@@ -461,11 +555,12 @@ const ScheduleManagementByAdmin = () => {
           cancelText="Thoát"
           okButtonProps={{ hidden: true }}
           cancelButtonProps={{ className: "bg-red-600" }}
-          width={800}
+          width={900}
         >
           <Table 
             columns={columnsSchedules} 
             dataSource={dataSchedules}
+            loading={{ indicator: <Loading/>, spinning: loading }}
             pagination={{
               total: totalItemsSchedule,
               pageSize: 10,
@@ -551,6 +646,20 @@ const ScheduleManagementByAdmin = () => {
               />
             </Form.Item>
           </Form>
+        </Modal>
+        <Modal
+          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận xóa lịch khám</h1>}
+          visible={visibleDelete}
+          onOk={() => handleDeleteSchedule()}
+          okText="Xác nhận"
+          onCancel={handleCancelDelete}
+          cancelText="Thoát"
+          okButtonProps={{ className: "bg-blue-700" }}
+          cancelButtonProps={{ className: "bg-red-600" }}
+        >
+          <div className="text-center">
+            <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa lịch khám này không?</p>
+          </div>
         </Modal>
       </div>
     )
