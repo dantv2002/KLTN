@@ -167,6 +167,21 @@ const Medicals = () => {
       if (result === "CURED"){
         return "Đã khỏi"
       }
+      if (result === "RELIEVED"){
+        return "Giảm bớt"
+      }
+      if (result === "UNCHANGED"){
+        return "Không đổi"
+      }
+      if (result === "WORSENED"){
+        return "Nặng hơn"
+      }
+      if (result === "DEATH"){
+        return "Tử vong"
+      }
+      if (result === "ACCIDENT"){
+        return "Tai nạn"
+      }
     }
   
     return (
