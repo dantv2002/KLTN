@@ -15,6 +15,7 @@ import {SearchOutlined} from "@ant-design/icons"
 import replacePlusWithSpace from "../../hook/ReplacePlusWithSpace";
 import { useNavigate, useLocation } from 'react-router-dom';
 import moment from "moment";
+import Loading from "../../hook/Loading";
 
 const Navbar = () => {
   const [menu, setMenu] = useState(false);
@@ -48,6 +49,7 @@ const Navbar = () => {
   const [totalItemsDoctor, setTotalItemsDoctor] = useState("0");
   const [pageSchedule, setPageSchedule] = useState("0");
   const [totalItemsSchedule, setTotalItemsSchedule] = useState("0");
+  const [loading, setLoading] = useState(false);
 
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -84,16 +86,22 @@ const Navbar = () => {
       title: 'Họ tên',
       dataIndex: 'FullName',
       key: 'FullName',
+      sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Chức danh',
       dataIndex: 'Title',
       key: 'Title',
+      sorter: (a, b) => a.Title.localeCompare(b.Title),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Khoa',
       dataIndex: 'DepartmentName',
       key: 'DepartmentName',
+      sorter: (a, b) => a.DepartmentName.localeCompare(b.DepartmentName),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -120,21 +128,68 @@ const Navbar = () => {
       title: 'Ngày khám',
       dataIndex: 'Date',
       key: 'Date',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <Input
+            placeholder="Nhập ngày khám"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const date = moment(record.Date, 'DD/MM/YYYY').date().toString().padStart(2, '0');
+        const filterValue = value.toString().padStart(2, '0');
+        return date === filterValue || date === value;
+      },
     },
     {
       title: 'Buổi',
       dataIndex: 'Time',
       key: 'Time',
+      render: (text) => {
+        if (text === 'MORNING') return 'Buổi sáng';
+        if (text === 'AFTERNOON') return 'Buổi chiều';
+        return text;
+      },
+      sorter: (a, b) => {
+        const textA = a.Time === 'MORNING' ? 'Buổi sáng' : (a.Time === 'AFTERNOON' ? 'Buổi chiều' : a.Time);
+        const textB = b.Time === 'MORNING' ? 'Buổi chiều' : (b.Time === 'AFTERNOON' ? 'Buổi chiều' : b.Time);
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Số',
       dataIndex: 'Number',
       key: 'Number',
+      sorter: (a, b) => a.Number.localeCompare(b.Number),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Phòng',
       dataIndex: 'Clinic',
       key: 'Clinic',
+      sorter: (a, b) => a.Clinic.localeCompare(b.Clinic),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -161,16 +216,51 @@ const Navbar = () => {
       title: 'Họ tên',
       dataIndex: 'FullName',
       key: 'FullName',
+      sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Ngày sinh',
       dataIndex: 'DateOfBirth',
       key: 'DateOfBirth',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <Input
+            placeholder="Nhập năm sinh"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const yearOfBirth = moment(record.DateOfBirth, 'DD/MM/YYYY').year();
+        return yearOfBirth.toString() === value;
+      },
     },
     {
       title: 'CMND/CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',
+      sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -252,6 +342,7 @@ const Navbar = () => {
   const fetchDoctor = useCallback(async () => {
     if (name) {
       try {
+        setLoading(true);
         const departmentSearch = searchDepartment || "";
         const genderSearch = searchGender || "";
         let response = await axios.get(getDoctorPatient(searchKeyword, searchTitle, departmentSearch, genderSearch, pageDoctor), {
@@ -263,6 +354,8 @@ const Navbar = () => {
         }
       } catch(error) {
         message.error(error.response.data.Message);
+      } finally {
+        setLoading(false);
       }
     }
   }, [name, searchKeyword, searchTitle, searchDepartment, searchGender, pageDoctor]);
@@ -324,6 +417,7 @@ const Navbar = () => {
 
   const fetchSchedule = useCallback(async () => {
     try{
+      setLoading(true)
       let response = await axios.get(getSchedulePatient(idDoctor, pageSchedule),{
         withCredentials: true
       })
@@ -333,6 +427,8 @@ const Navbar = () => {
       }
     }catch(error){
       message.error(error.response.data.Message)
+    }finally{
+      setLoading(false);
     }
   }, [idDoctor, pageSchedule]);
 
@@ -353,6 +449,7 @@ const Navbar = () => {
 
   const handleSearchSchedule = async () => {
     try {
+      setLoading(true);
         if (!time || !moment(time).isValid()) {
             await fetchSchedule();
         } else {
@@ -369,12 +466,15 @@ const Navbar = () => {
         }
     } catch (error) {
         message.error(error.response.data.Message);
+    } finally {
+      setLoading(false)
     }
 };
 
   const handleReadRecord = async(id) => {
     setIdSchedule(id);
     try{
+      setLoading(true)
       let response = await axios.get(getAllRecordsPatient,{
         withCredentials: true
       })
@@ -385,6 +485,8 @@ const Navbar = () => {
       }
     }catch(error){
       message.error(error.response.data.Message)
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -413,11 +515,13 @@ const Navbar = () => {
         <div>
           <div className=" flex flex-row justify-between p-5 md:px-32 px-5 bg-blue-700 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]">
             <div className="flex flex-row items-center cursor-pointer" onClick={() => window.location.href = '/'}>
-              <div className="flex items-center">
+              <div className="flex items-center relative">
                 <img className="h-auto min-w-[10px] max-w-[40px]" src={logo} alt="logo" />
                 <div className="ml-2 flex flex-col">
-                  <span className="text-[13px] font-rubik font-semibold text-black">Bệnh viện X</span>
-                  <span className="text-[10px] font-medium font-rubik text-black">Trung tâm sức khỏe</span>
+                  <span className="text-[13px] font-rubik font-semibold text-white">Bệnh viện X</span>
+                  <span className="text-[10px] font-medium font-rubik text-white relative">
+                    Trung tâm sức khỏe
+                  </span>
                 </div>
               </div>
             </div>
@@ -716,6 +820,7 @@ const Navbar = () => {
           <Table
             columns={columnsDoctors} 
             dataSource={dataDoctors}
+            loading={{ indicator: <Loading/>, spinning: loading }}
             pagination={{
               total: totalItemsDoctor,
               pageSize: 10,
@@ -742,6 +847,7 @@ const Navbar = () => {
           <Table 
             columns={columnsSchedules} 
             dataSource={dataSchedules}
+            loading={{ indicator: <Loading/>, spinning: loading }}
             pagination={{
               total: totalItemsSchedule,
               pageSize: 10,
@@ -762,6 +868,7 @@ const Navbar = () => {
           <Table 
             columns={columnsRecords} 
             dataSource={dataRecords}
+            loading={{ indicator: <Loading/>, spinning: loading }}
           />
         </Modal>
       </div>  

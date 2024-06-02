@@ -52,24 +52,34 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="popup-form absolute mt-12 text-black">
-        <Form onFinish={handleLogin} className="w-80 md:w-96 space-y-3 bg-white p-5 rounded-xl flex flex-col">
+        <Form onFinish={handleLogin} className="w-80 md:w-96 bg-white p-5 rounded-xl flex flex-col">
           <img className=" mx-auto w-50 h-auto min-w-[120px] max-w-[200px] mt-2" src={logo} alt="logo" />
-          <h1 className=" text-3xl font-semibold text-center text-blue-700 font-rubik">
+          <h1 className=" text-3xl font-semibold text-center text-blue-700 font-rubik mt-3">
             Đăng nhập
           </h1>
-          <Form.Item className="flex flex-col w-full" name="email" label="Email" rules={[{ required: true, message: 'Hãy nhập email của bạn!' }]}>
+          <h1 className="font-medium">Email:</h1>
+          <Form.Item 
+            className="w-full" 
+            name="email" 
+            rules={[{ required: true, message: 'Hãy nhập email của bạn!' }]}
+          >
             <Input 
               type="text"
-              className="rounded-lg" 
+              className="rounded-lg w-full" 
               placeholder="Nhập email của bạn" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </Form.Item>
-          <Form.Item className="flex flex-col w-full" name="password" label="Mật khẩu" rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn!' }]}>
+          <h1  className="font-medium">Mật khẩu:</h1>
+          <Form.Item 
+            className="w-full" 
+            name="password" 
+            rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn!' }]}
+          >
             <Input.Password 
               type="text"
-              className="rounded-lg"
+              className="rounded-lg w-full"
               placeholder="Nhập mật khẩu của bạn"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -78,9 +88,9 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
           <a onClick={openFormResetInternal} className="text-blue-700 text-[15px] font-medium font-rubik underline text-right">Quên mật khẩu</a>
           <span className="text-center">Hoặc</span>
           <a href={googleApi}>
-            <img className="mx-auto w-[10px] h-auto min-w-[20px] max-w-[40px]" src={google} alt="google" />
+            <img className="mx-auto w-[10px] h-auto min-w-[20px] max-w-[40px] mt-2" src={google} alt="google" />
           </a>
-          <div className="text-center">
+          <div className="text-center mt-2 mb-2">
             <span className="text-black text-[15px] font-normal font-rubik">Bạn chưa có tài khoản? </span>
             <a onClick={openFormRegister} className="text-red-600 text-[15px] font-medium font-rubik underline">Đăng ký</a>
           </div>

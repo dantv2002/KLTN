@@ -50,12 +50,13 @@ const Register = ({ closeFormRegister, openFormLogin, openFormConfirm }) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="popup-form max-h-full overflow-auto bg-white p-5 rounded-xl shadow-lg">
-                <Form onFinish={handleRegister} className="w-80 md:w-96 space-y-3 bg-white p-3 rounded-xl flex flex-col">
+                <Form onFinish={handleRegister} className="w-80 md:w-96 bg-white p-3 rounded-xl flex flex-col">
                     <img className=" mx-auto w-50 h-auto min-w-[120px] max-w-[200px] mt-2" src={logo} alt="logo" />
-                    <h1 className=" text-3xl font-semibold text-center text-blue-700 font-rubik">
+                    <h1 className=" text-3xl font-semibold text-center text-blue-700 font-rubik mt-3">
                         Đăng ký
                     </h1>
-                    <Form.Item name="name" label="Họ tên" rules={[{ required: true, message: 'Hãy nhập họ tên của bạn!' }]}>
+                    <h1 className="font-medium">Họ tên</h1>
+                    <Form.Item name="name" rules={[{ required: true, message: 'Hãy nhập họ tên của bạn!' }]}>
                         <Input 
                             type="text"
                             placeholder="Nhập tên của bạn" 
@@ -63,7 +64,8 @@ const Register = ({ closeFormRegister, openFormLogin, openFormConfirm }) => {
                             onChange={(e) => setFullName(e.target.value)}
                         />
                     </Form.Item>
-                    <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Hãy nhập email của bạn!' }]}>
+                    <h1 className="font-medium">Email</h1>
+                    <Form.Item name="email" rules={[{ required: true, message: 'Hãy nhập email của bạn!' }]}>
                         <Input 
                             type="text"
                             placeholder="Nhập email của bạn" 
@@ -71,7 +73,8 @@ const Register = ({ closeFormRegister, openFormLogin, openFormConfirm }) => {
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </Form.Item>
-                    <Form.Item name="password1" label="Mật khẩu" rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn!' }]}>
+                    <h1 className="font-medium">Mật khẩu</h1>
+                    <Form.Item name="password1" rules={[{ required: true, message: 'Hãy nhập mật khẩu của bạn!' }]}>
                         <Input.Password 
                             type="text"
                             placeholder="Nhập mật khẩu của bạn"
@@ -79,7 +82,8 @@ const Register = ({ closeFormRegister, openFormLogin, openFormConfirm }) => {
                             onChange={(e) => setPassword1(e.target.value)}
                         />
                     </Form.Item>
-                    <Form.Item name="password2" label="Nhập lại mật khẩu" rules={[{ required: true, message: 'Hãy nhập lại mật khẩu của bạn!' }]}>
+                    <h1 className="font-medium">Nhập lại mật khẩu</h1>
+                    <Form.Item name="password2" rules={[{ required: true, message: 'Hãy nhập lại mật khẩu của bạn!' }]}>
                         <Input.Password 
                             type="text"
                             placeholder="Nhập lại mật khẩu của bạn"
@@ -95,7 +99,7 @@ const Register = ({ closeFormRegister, openFormLogin, openFormConfirm }) => {
                     {showFormLogin && <Login closeFormLogin={closeFormLogin}/>}
                     {showFormConfirm && <ConfirmPassword closeFormConfirm={()=> setShowFormConfirm(false)}/>}
 
-                    <div className="flex gap-5 items-center justify-center">
+                    <div className="flex gap-5 items-center justify-center mt-3">
                         <Button
                             className="bg-blue-700 text-white px-10 rounded-md"
                             htmlType="submit"

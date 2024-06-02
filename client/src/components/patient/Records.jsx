@@ -323,7 +323,7 @@ const Records = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center lg:px-32 px-5 items-center"  >
-      <h1 className=" text-3xl font-rubik text-blue-700 mb-6 mt-28">Quản lý hồ sơ</h1>
+      <h1 className=" text-3xl font-rubik text-blue-700 mb-6 mt-28 font-bold">Quản lý hồ sơ</h1>
       <button onClick={handleInsert} className="text-[15px] bg-cyan-400 h-9 text-white px-4 py-2 rounded-[5px] hover:bg-hoverColor transition duration-300 ease-in-out mb-4">
         Thêm hồ sơ
       </button>
@@ -417,6 +417,7 @@ const Records = () => {
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem hồ sơ</h1>}
         visible={visibleUpdate}
+        onCancel={handleCancelUpdate}
         footer={[
           <Button key="custom" disabled={editing} className="bg-green-500 text-white" onClick={handleOpenForm}>
               Cập nhật

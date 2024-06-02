@@ -97,9 +97,9 @@ const Medicals = () => {
       DiagnosisDischarge,
       Type,
       Summary,
-      DepartmentId,
+      DepartmentName,
       Date,
-      DoctorIdTreatment,
+      DoctorNameTreatment,
       DiagnosisImage,
       SpecializedExamination,
       Prognosis,
@@ -138,7 +138,8 @@ const Medicals = () => {
                 <img src={image.UrlImage} alt={image.Content} />
                 <p className="text-base font-rubik"><b>Phương pháp:</b> {image.Method}</p>
                 <p className="text-base font-rubik"><b>Nội dung:</b> {image.Content}</p>
-                <p className="text-base font-rubik"><b>Chẩn đoán:</b> {image.Conclude}</p> 
+                <p className="text-base font-rubik"><b>Chẩn đoán:</b> {image.Conclude}</p>
+                <p className="text-base font-rubik"><b>Bác sĩ thực hiện:</b> {image.DoctorNamePerform}</p>
                 <hr className="my-8 border-gray-300"/>
               </div>
             ))}
@@ -184,8 +185,8 @@ const Medicals = () => {
                 <p className="text-base font-rubik"><b>Chẩn đoán khi ra viện:</b> {DiagnosisDischarge}</p>
                 <p className="text-base font-rubik"><b>Kết quả:</b> {changResult(Result)}</p>
                 <p className="text-base font-rubik"><b>Loại bệnh án:</b> {changeType(Type)}</p>
-                <p className="text-base font-rubik"><b>Khoa:</b> {DepartmentId}</p>
-                <p className="text-base font-rubik"><b>Bác sĩ khám:</b> {DoctorIdTreatment}</p>
+                <p className="text-base font-rubik"><b>Khoa:</b> {DepartmentName}</p>
+                <p className="text-base font-rubik"><b>Bác sĩ khám:</b> {DoctorNameTreatment}</p>
               </Panel>
             </Collapse>
             <Collapse className="w-full mt-2 text-lg font-rubik">
@@ -216,8 +217,8 @@ const Medicals = () => {
                 <p className="text-base font-rubik"><b>Chẩn đoán khi ra viện:</b> {DiagnosisDischarge}</p>
                 <p className="text-base font-rubik"><b>Kết quả:</b> {changResult(Result)}</p>
                 <p className="text-base font-rubik"><b>Loại bệnh án:</b> {changeType(Type)}</p>
-                <p className="text-base font-rubik"><b>Khoa:</b> {DepartmentId}</p>
-                <p className="text-base font-rubik"><b>Bác sĩ khám:</b> {DoctorIdTreatment}</p>
+                <p className="text-base font-rubik"><b>Khoa:</b> {DepartmentName}</p>
+                <p className="text-base font-rubik"><b>Bác sĩ khám:</b> {DoctorNameTreatment}</p>
               </Panel>
             </Collapse>
             <Collapse className="w-full mt-2 text-lg font-rubik">
@@ -449,7 +450,7 @@ const Medicals = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center lg:px-32 px-5 items-center">
-        <h1 className=" text-3xl font-rubik text-blue-700 mb-6 mt-28">Quản lý bệnh án</h1>
+        <h1 className=" text-3xl font-rubik text-blue-700 mb-6 mt-28 font-bold">Quản lý bệnh án</h1>
         <Table 
         columns={columnsRecords}
         loading={{ indicator: <Loading/>, spinning: loading }}

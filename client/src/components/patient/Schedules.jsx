@@ -472,7 +472,7 @@ const Schedules = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center lg:px-32 px-5 items-center">
-      <h1 className=" text-3xl font-rubik text-blue-700 mb-6 mt-28">Quản lý lịch khám</h1>
+      <h1 className=" text-3xl font-rubik text-blue-700 mb-6 mt-28 font-bold">Quản lý lịch khám</h1>
       <div className="flex items-center mb-5">
         <Select
           className="w-96 mr-3"

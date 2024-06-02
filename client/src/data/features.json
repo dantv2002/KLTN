@@ -2,787 +2,787 @@
     {
      "index": 0,
      "feature_EN": "abdominal pain",
-     "feature_VI": "đau bụng",
+     "feature_VI": "Đau bụng",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 1,
      "feature_EN": "abnormal menstruation",
-     "feature_VI": "kinh nguyệt bất thường",
+     "feature_VI": "Kinh nguyệt bất thường",
      "category": "Hệ sinh sản"
     },
     {
      "index": 2,
      "feature_EN": "acidity",
-     "feature_VI": "axit dạ dày",
+     "feature_VI": "Axit dạ dày",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 3,
      "feature_EN": "acute liver failure",
-     "feature_VI": "suy gan cấp",
+     "feature_VI": "Suy gan cấp",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 4,
      "feature_EN": "altered sensorium",
-     "feature_VI": "ý thức thay đổi",
+     "feature_VI": "Ý thức thay đổi",
      "category": "Thần kinh"
     },
     {
      "index": 5,
      "feature_EN": "anxiety",
-     "feature_VI": "lo lắng",
+     "feature_VI": "Lo lắng",
      "category": "Thần kinh"
     },
     {
      "index": 6,
      "feature_EN": "back pain",
-     "feature_VI": "đau lưng",
+     "feature_VI": "Đau lưng",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 7,
      "feature_EN": "belly pain",
-     "feature_VI": "đau bụng",
+     "feature_VI": "Đau bụng dưới",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 8,
      "feature_EN": "blackheads",
-     "feature_VI": "mụn đầu đen",
+     "feature_VI": "Mụn đầu đen",
      "category": "Da liễu"
     },
     {
      "index": 9,
      "feature_EN": "bladder discomfort",
-     "feature_VI": "khó chịu bàng quang",
+     "feature_VI": "Khó chịu bàng quang",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 10,
      "feature_EN": "blister",
-     "feature_VI": "phồng rộp",
+     "feature_VI": "Phồng rộp",
      "category": "Da liễu"
     },
     {
      "index": 11,
      "feature_EN": "blood in sputum",
-     "feature_VI": "có máu trong đờm",
+     "feature_VI": "Có máu trong đờm",
      "category": "Hệ hô hấp"
     },
     {
      "index": 12,
      "feature_EN": "bloody stool",
-     "feature_VI": "phân có máu",
+     "feature_VI": "Phân có máu",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 13,
      "feature_EN": "blurred and distorted vision",
-     "feature_VI": "mờ và biến dạng tầm nhìn",
+     "feature_VI": "Mờ và biến dạng tầm nhìn",
      "category": "Mắt"
     },
     {
      "index": 14,
      "feature_EN": "breathlessness",
-     "feature_VI": "khó thở",
+     "feature_VI": "Khó thở",
      "category": "Hệ hô hấp"
     },
     {
      "index": 15,
      "feature_EN": "brittle nails",
-     "feature_VI": "móng giòn",
+     "feature_VI": "Móng giòn",
      "category": "Da liễu"
     },
     {
      "index": 16,
      "feature_EN": "bruising",
-     "feature_VI": "bầm tím",
+     "feature_VI": "Bầm tím",
      "category": "Da liễu"
     },
     {
      "index": 17,
      "feature_EN": "burning micturition",
-     "feature_VI": "nóng rát khi tiểu",
+     "feature_VI": "Nóng rát khi tiểu",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 18,
      "feature_EN": "chest pain",
-     "feature_VI": "đau ngực",
+     "feature_VI": "Đau ngực",
      "category": "Hệ hô hấp"
     },
     {
      "index": 19,
      "feature_EN": "chills",
-     "feature_VI": "ớn lạnh",
+     "feature_VI": "Ớn lạnh",
      "category": "Toàn thân"
     },
     {
      "index": 20,
      "feature_EN": "cold hands and feets",
-     "feature_VI": "tay và chân lạnh",
+     "feature_VI": "Tay và chân lạnh",
      "category": "Toàn thân"
     },
     {
      "index": 21,
      "feature_EN": "coma",
-     "feature_VI": "hôn mê",
+     "feature_VI": "Hôn mê",
      "category": "Thần kinh"
     },
     {
      "index": 22,
      "feature_EN": "congestion",
-     "feature_VI": "nghẹt mũi",
+     "feature_VI": "Nghẹt mũi",
      "category": "Hệ hô hấp"
     },
     {
      "index": 23,
      "feature_EN": "constipation",
-     "feature_VI": "táo bón",
+     "feature_VI": "Táo bón",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 24,
      "feature_EN": "continuous feel of urine",
-     "feature_VI": "cảm giác tiểu liên tục",
+     "feature_VI": "Cảm giác tiểu liên tục",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 25,
      "feature_EN": "continuous sneezing",
-     "feature_VI": "hắt hơi liên tục",
+     "feature_VI": "Hắt hơi liên tục",
      "category": "Hệ hô hấp"
     },
     {
      "index": 26,
      "feature_EN": "cough",
-     "feature_VI": "ho",
+     "feature_VI": "Ho",
      "category": "Hệ hô hấp"
     },
     {
      "index": 27,
      "feature_EN": "cramps",
-     "feature_VI": "chuột rút",
+     "feature_VI": "Chuột rút",
      "category": "Toàn thân"
     },
     {
      "index": 28,
      "feature_EN": "dark urine",
-     "feature_VI": "nước tiểu sẫm màu",
+     "feature_VI": "Nước tiểu sẫm màu",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 29,
      "feature_EN": "dehydration",
-     "feature_VI": "mất nước",
+     "feature_VI": "Mất nước",
      "category": "Toàn thân"
     },
     {
      "index": 30,
      "feature_EN": "depression",
-     "feature_VI": "trầm cảm",
+     "feature_VI": "Trầm cảm",
      "category": "Tâm lý"
     },
     {
      "index": 31,
      "feature_EN": "diarrhoea",
-     "feature_VI": "tiêu chảy",
+     "feature_VI": "Tiêu chảy",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 32,
      "feature_EN": "dischromic patches",
-     "feature_VI": "mảng da đổi màu",
+     "feature_VI": "Mảng da đổi màu",
      "category": "Da liễu"
     },
     {
      "index": 33,
      "feature_EN": "distention of abdomen",
-     "feature_VI": "bụng phình to",
+     "feature_VI": "Bụng phình to",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 34,
      "feature_EN": "dizziness",
-     "feature_VI": "chóng mặt",
+     "feature_VI": "Chóng mặt",
      "category": "Thần kinh"
     },
     {
      "index": 35,
      "feature_EN": "drying and tingling lips",
-     "feature_VI": "môi khô và ngứa ran",
+     "feature_VI": "Môi khô và ngứa ran",
      "category": "Da liễu"
     },
     {
      "index": 36,
      "feature_EN": "enlarged thyroid",
-     "feature_VI": "tuyến giáp to",
+     "feature_VI": "Tuyến giáp to",
      "category": "Toàn thân"
     },
     {
      "index": 37,
      "feature_EN": "excessive hunger",
-     "feature_VI": "đói quá mức",
+     "feature_VI": "Đói quá mức",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 38,
      "feature_EN": "extra marital contacts",
-     "feature_VI": "quan hệ ngoài hôn nhân",
+     "feature_VI": "Quan hệ ngoài hôn nhân",
      "category": "Toàn thân"
     },
     {
      "index": 39,
      "feature_EN": "family history",
-     "feature_VI": "tiền sử gia đình",
+     "feature_VI": "Tiền sử gia đình",
      "category": "Toàn thân"
     },
     {
      "index": 40,
      "feature_EN": "fast heart rate",
-     "feature_VI": "tim đập nhanh",
+     "feature_VI": "Tim đập nhanh",
      "category": "Tim mạch"
     },
     {
      "index": 41,
      "feature_EN": "fatigue",
-     "feature_VI": "mệt mỏi",
+     "feature_VI": "Mệt mỏi",
      "category": "Toàn thân"
     },
     {
      "index": 42,
      "feature_EN": "fluid overload",
-     "feature_VI": "quá tải dịch",
+     "feature_VI": "Quá tải dịch",
      "category": "Toàn thân"
     },
     {
      "index": 43,
      "feature_EN": "foul smell of urine",
-     "feature_VI": "nước tiểu có mùi hôi",
+     "feature_VI": "Nước tiểu có mùi hôi",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 44,
      "feature_EN": "headache",
-     "feature_VI": "đau đầu",
+     "feature_VI": "Đau đầu",
      "category": "Thần kinh"
     },
     {
      "index": 45,
      "feature_EN": "high fever",
-     "feature_VI": "sốt cao",
+     "feature_VI": "Sốt cao",
      "category": "Toàn thân"
     },
     {
      "index": 46,
      "feature_EN": "hip joint pain",
-     "feature_VI": "đau khớp hông",
+     "feature_VI": "Đau khớp hông",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 47,
      "feature_EN": "history of alcohol consumption",
-     "feature_VI": "tiền sử uống rượu",
+     "feature_VI": "Tiền sử uống rượu",
      "category": "Toàn thân"
     },
     {
      "index": 48,
      "feature_EN": "increased appetite",
-     "feature_VI": "tăng cảm giác thèm ăn",
+     "feature_VI": "Tăng cảm giác thèm ăn",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 49,
      "feature_EN": "indigestion",
-     "feature_VI": "khó tiêu",
+     "feature_VI": "Khó tiêu",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 50,
      "feature_EN": "inflammatory nails",
-     "feature_VI": "móng bị viêm",
+     "feature_VI": "Móng bị viêm",
      "category": "Da liễu"
     },
     {
      "index": 51,
      "feature_EN": "internal itching",
-     "feature_VI": "ngứa bên trong",
+     "feature_VI": "Ngứa bên trong",
      "category": "Da liễu"
     },
     {
      "index": 52,
      "feature_EN": "irregular sugar level",
-     "feature_VI": "đường huyết không đều",
+     "feature_VI": "Đường huyết không đều",
      "category": "Toàn thân"
     },
     {
      "index": 53,
      "feature_EN": "irritability",
-     "feature_VI": "dễ cáu gắt",
+     "feature_VI": "Dễ cáu gắt",
      "category": "Thần kinh"
     },
     {
      "index": 54,
      "feature_EN": "irritation in anus",
-     "feature_VI": "kích ứng hậu môn",
+     "feature_VI": "Kích ứng hậu môn",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 55,
      "feature_EN": "itching",
-     "feature_VI": "ngứa",
+     "feature_VI": "Ngứa",
      "category": "Da liễu"
     },
     {
      "index": 56,
      "feature_EN": "joint pain",
-     "feature_VI": "đau khớp",
+     "feature_VI": "Đau khớp",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 57,
      "feature_EN": "knee pain",
-     "feature_VI": "đau đầu gối",
+     "feature_VI": "Đau đầu gối",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 58,
      "feature_EN": "lack of concentration",
-     "feature_VI": "thiếu tập trung",
+     "feature_VI": "Thiếu tập trung",
      "category": "Thần kinh"
     },
     {
      "index": 59,
      "feature_EN": "lethargy",
-     "feature_VI": "uể oải",
+     "feature_VI": "Uể oải",
      "category": "Thần kinh"
     },
     {
      "index": 60,
      "feature_EN": "loss of appetite",
-     "feature_VI": "chán ăn",
+     "feature_VI": "Chán ăn",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 61,
      "feature_EN": "loss of balance",
-     "feature_VI": "mất cân bằng",
+     "feature_VI": "Mất cân bằng",
      "category": "Thần kinh"
     },
     {
      "index": 62,
      "feature_EN": "loss of smell",
-     "feature_VI": "mất khứu giác",
+     "feature_VI": "Mất khứu giác",
      "category": "Hệ hô hấp"
     },
     {
      "index": 63,
      "feature_EN": "malaise",
-     "feature_VI": "mệt mỏi",
+     "feature_VI": "Mệt mỏi",
      "category": "Thần kinh"
     },
     {
      "index": 64,
      "feature_EN": "mild fever",
-     "feature_VI": "sốt nhẹ",
+     "feature_VI": "Sốt nhẹ",
      "category": "Toàn thân"
     },
     {
      "index": 65,
      "feature_EN": "mood swings",
-     "feature_VI": "thay đổi tâm trạng",
+     "feature_VI": "Thay đổi tâm trạng",
      "category": "Tâm lý"
     },
     {
      "index": 66,
      "feature_EN": "movement stiffness",
-     "feature_VI": "cứng cơ",
+     "feature_VI": "Cứng cơ",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 67,
      "feature_EN": "mucoid sputum",
-     "feature_VI": "đờm nhầy",
+     "feature_VI": "Đờm nhầy",
      "category": "Hệ hô hấp"
     },
     {
      "index": 68,
      "feature_EN": "muscle pain",
-     "feature_VI": "đau cơ",
+     "feature_VI": "Đau cơ",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 69,
      "feature_EN": "muscle wasting",
-     "feature_VI": "teo cơ",
+     "feature_VI": "Teo cơ",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 70,
      "feature_EN": "muscle weakness",
-     "feature_VI": "yếu cơ",
+     "feature_VI": "Yếu cơ",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 71,
      "feature_EN": "nausea",
-     "feature_VI": "buồn nôn",
+     "feature_VI": "Buồn nôn",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 72,
      "feature_EN": "neck pain",
-     "feature_VI": "đau cổ",
+     "feature_VI": "Đau cổ",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 73,
      "feature_EN": "nodal skin eruptions",
-     "feature_VI": "nốt sần trên da",
+     "feature_VI": "Nốt sần trên da",
      "category": "Da liễu"
     },
     {
      "index": 74,
      "feature_EN": "obesity",
-     "feature_VI": "béo phì",
+     "feature_VI": "Béo phì",
      "category": "Toàn thân"
     },
     {
      "index": 75,
      "feature_EN": "pain behind the eyes",
-     "feature_VI": "đau sau mắt",
+     "feature_VI": "Đau sau mắt",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 76,
      "feature_EN": "pain during bowel movements",
-     "feature_VI": "đau khi đại tiện",
+     "feature_VI": "Đau khi đại tiện",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 77,
      "feature_EN": "pain in anal region",
-     "feature_VI": "đau vùng hậu môn",
+     "feature_VI": "Đau vùng hậu môn",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 78,
      "feature_EN": "painful walking",
-     "feature_VI": "đau khi đi bộ",
+     "feature_VI": "Đau khi đi bộ",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 79,
      "feature_EN": "palpitations",
-     "feature_VI": "hồi hộp",
+     "feature_VI": "Hồi hộp",
      "category": "Tim mạch"
     },
     {
      "index": 80,
      "feature_EN": "passage of gases",
-     "feature_VI": "xì hơi",
+     "feature_VI": "Xì hơi",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 81,
      "feature_EN": "patches in throat",
-     "feature_VI": "mảng trắng ở cổ họng",
+     "feature_VI": "Mảng trắng ở cổ họng",
      "category": "Hệ hô hấp"
     },
     {
      "index": 82,
      "feature_EN": "phlegm",
-     "feature_VI": "đờm",
+     "feature_VI": "Đờm",
      "category": "Hệ hô hấp"
     },
     {
      "index": 83,
      "feature_EN": "polyuria",
-     "feature_VI": "tiểu nhiều",
+     "feature_VI": "Tiểu nhiều",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 84,
      "feature_EN": "prominent veins on calf",
-     "feature_VI": "tĩnh mạch nổi rõ ở bắp chân",
+     "feature_VI": "Tĩnh mạch nổi rõ ở bắp chân",
      "category": "Tim mạch"
     },
     {
      "index": 85,
      "feature_EN": "puffy face and eyes",
-     "feature_VI": "mặt và mắt sưng húp",
+     "feature_VI": "Mặt và mắt sưng húp",
      "category": "Toàn thân"
     },
     {
      "index": 86,
      "feature_EN": "pus filled pimples",
-     "feature_VI": "mụn mủ",
+     "feature_VI": "Mụn mủ",
      "category": "Da liễu"
     },
     {
      "index": 87,
      "feature_EN": "receiving blood transfusion",
-     "feature_VI": "nhận truyền máu",
+     "feature_VI": "Nhận truyền máu",
      "category": "Toàn thân"
     },
     {
      "index": 88,
      "feature_EN": "receiving unsterile injections",
-     "feature_VI": "nhận tiêm không vô trùng",
+     "feature_VI": "Nhận tiêm không vô trùng",
      "category": "Toàn thân"
     },
     {
      "index": 89,
      "feature_EN": "red sore around nose",
-     "feature_VI": "vết loét đỏ quanh mũi",
+     "feature_VI": "Vết loét đỏ quanh mũi",
      "category": "Da liễu"
     },
     {
      "index": 90,
      "feature_EN": "red spots over body",
-     "feature_VI": "đốm đỏ trên cơ thể",
+     "feature_VI": "Đốm đỏ trên cơ thể",
      "category": "Da liễu"
     },
     {
      "index": 91,
      "feature_EN": "redness of eyes",
-     "feature_VI": "đỏ mắt",
+     "feature_VI": "Đỏ mắt",
      "category": "Mắt"
     },
     {
      "index": 92,
      "feature_EN": "restlessness",
-     "feature_VI": "bồn chồn",
+     "feature_VI": "Bồn chồn",
      "category": "Thần kinh"
     },
     {
      "index": 93,
      "feature_EN": "runny nose",
-     "feature_VI": "chảy nước mũi",
+     "feature_VI": "Chảy nước mũi",
      "category": "Hệ hô hấp"
     },
     {
      "index": 94,
      "feature_EN": "rusty sputum",
-     "feature_VI": "đờm rỉ sét",
+     "feature_VI": "Đờm rỉ sét",
      "category": "Hệ hô hấp"
     },
     {
      "index": 95,
      "feature_EN": "scurring",
-     "feature_VI": "sẹo",
+     "feature_VI": "Sẹo",
      "category": "Da liễu"
     },
     {
      "index": 96,
      "feature_EN": "shivering",
-     "feature_VI": "run rẩy",
+     "feature_VI": "Run rẩy",
      "category": "Toàn thân"
     },
     {
      "index": 97,
      "feature_EN": "silver like dusting",
-     "feature_VI": "bong da như vảy bạc",
+     "feature_VI": "Bong da như vảy bạc",
      "category": "Da liễu"
     },
     {
      "index": 98,
      "feature_EN": "sinus pressure",
-     "feature_VI": "áp lực xoang",
+     "feature_VI": "Áp lực xoang",
      "category": "Hệ hô hấp"
     },
     {
      "index": 99,
      "feature_EN": "skin peeling",
-     "feature_VI": "bong tróc da",
+     "feature_VI": "Bong tróc da",
      "category": "Da liễu"
     },
     {
      "index": 100,
      "feature_EN": "skin rash",
-     "feature_VI": "phát ban da",
+     "feature_VI": "Phát ban da",
      "category": "Da liễu"
     },
     {
      "index": 101,
      "feature_EN": "slurred speech",
-     "feature_VI": "nói lắp",
+     "feature_VI": "Nói lắp",
      "category": "Thần kinh"
     },
     {
      "index": 102,
      "feature_EN": "small dents in nails",
-     "feature_VI": "móng có vết lõm nhỏ",
+     "feature_VI": "Móng có vết lõm nhỏ",
      "category": "Da liễu"
     },
     {
      "index": 103,
      "feature_EN": "spinning movements",
-     "feature_VI": "chuyển động xoay tròn",
+     "feature_VI": "Chuyển động xoay tròn",
      "category": "Thần kinh"
     },
     {
      "index": 104,
      "feature_EN": "spotting urination",
-     "feature_VI": "đốm tiểu",
+     "feature_VI": "Đốm tiểu",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 105,
      "feature_EN": "stiff neck",
-     "feature_VI": "cứng cổ",
+     "feature_VI": "Cứng cổ",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 106,
      "feature_EN": "stomach bleeding",
-     "feature_VI": "chảy máu dạ dày",
+     "feature_VI": "Chảy máu dạ dày",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 107,
      "feature_EN": "stomach pain",
-     "feature_VI": "đau dạ dày",
+     "feature_VI": "Đau dạ dày",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 108,
      "feature_EN": "sunken eyes",
-     "feature_VI": "mắt trũng sâu",
+     "feature_VI": "Mắt trũng sâu",
      "category": "Toàn thân"
     },
     {
      "index": 109,
      "feature_EN": "sweating",
-     "feature_VI": "đổ mồ hôi",
+     "feature_VI": "Đổ mồ hôi",
      "category": "Toàn thân"
     },
     {
      "index": 110,
      "feature_EN": "swelled lymph nodes",
-     "feature_VI": "hạch bạch huyết sưng",
+     "feature_VI": "Hạch bạch huyết sưng",
      "category": "Toàn thân"
     },
     {
      "index": 111,
      "feature_EN": "swelling joints",
-     "feature_VI": "khớp sưng",
+     "feature_VI": "Khớp sưng",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 112,
      "feature_EN": "swelling of stomach",
-     "feature_VI": "bụng sưng",
+     "feature_VI": "Bụng sưng",
      "category": "Toàn thân"
     },
     {
      "index": 113,
      "feature_EN": "swollen blood vessels",
-     "feature_VI": "mạch máu sưng",
+     "feature_VI": "Mạch máu sưng",
      "category": "Tim mạch"
     },
     {
      "index": 114,
      "feature_EN": "swollen extremities",
-     "feature_VI": "tứ chi sưng",
+     "feature_VI": "Tứ chi sưng",
      "category": "Toàn thân"
     },
     {
      "index": 115,
      "feature_EN": "swollen legs",
-     "feature_VI": "chân sưng",
+     "feature_VI": "Chân sưng",
      "category": "Toàn thân"
     },
     {
      "index": 116,
      "feature_EN": "throat irritation",
-     "feature_VI": "kích ứng cổ họng",
+     "feature_VI": "Kích ứng cổ họng",
      "category": "Hệ hô hấp"
     },
     {
      "index": 117,
      "feature_EN": "toxic look (typhos)",
-     "feature_VI": "nhìn độc (thương hàn)",
+     "feature_VI": "Nhìn độc (thương hàn)",
      "category": "Toàn thân"
     },
     {
      "index": 118,
      "feature_EN": "ulcers on tongue",
-     "feature_VI": "loét lưỡi",
+     "feature_VI": "Loét lưỡi",
      "category": "Da liễu"
     },
     {
      "index": 119,
      "feature_EN": "unsteadiness",
-     "feature_VI": "không vững",
+     "feature_VI": "Không vững",
      "category": "Thần kinh"
     },
     {
      "index": 120,
      "feature_EN": "visual disturbances",
-     "feature_VI": "rối loạn thị giác",
+     "feature_VI": "Rối loạn thị giác",
      "category": "Mắt"
     },
     {
      "index": 121,
      "feature_EN": "vomiting",
-     "feature_VI": "nôn mửa",
+     "feature_VI": "Nôn mửa",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 122,
      "feature_EN": "watering from eyes",
-     "feature_VI": "chảy nước mắt",
+     "feature_VI": "Chảy nước mắt",
      "category": "Mắt"
     },
     {
      "index": 123,
      "feature_EN": "weakness in limbs",
-     "feature_VI": "yếu tay chân",
+     "feature_VI": "Yếu tay chân",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 124,
      "feature_EN": "weakness of one body side",
-     "feature_VI": "yếu một bên cơ thể",
+     "feature_VI": "Yếu một bên cơ thể",
      "category": "Cơ - Xương - Khớp"
     },
     {
      "index": 125,
      "feature_EN": "weight gain",
-     "feature_VI": "tăng cân",
+     "feature_VI": "Tăng cân",
      "category": "Toàn thân"
     },
     {
      "index": 126,
      "feature_EN": "weight loss",
-     "feature_VI": "giảm cân",
+     "feature_VI": "Giảm cân",
      "category": "Toàn thân"
     },
     {
      "index": 127,
      "feature_EN": "yellow crust ooze",
-     "feature_VI": "chảy dịch vàng có vảy",
+     "feature_VI": "Chảy dịch vàng có vảy",
      "category": "Da liễu"
     },
     {
      "index": 128,
      "feature_EN": "yellow urine",
-     "feature_VI": "nước tiểu vàng",
+     "feature_VI": "Nước tiểu vàng",
      "category": "Hệ tiêu hóa"
     },
     {
      "index": 129,
      "feature_EN": "yellowing of eyes",
-     "feature_VI": "vàng mắt",
+     "feature_VI": "Vàng mắt",
      "category": "Da liễu"
     },
     {
      "index": 130,
      "feature_EN": "yellowish skin",
-     "feature_VI": "da vàng",
+     "feature_VI": "Da vàng",
      "category": "Da liễu"
     }
 ]
