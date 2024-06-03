@@ -220,10 +220,10 @@ public class MedicalService {
         log.info("Get all medicals");
         if (role.equals("ROLE_PATIENT"))
             return medicalRepository.findAllByKeyword(parts[0], parts[1], pageable)
-                    .map(medical -> this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class)));
+                    .map(medical -> this.addInfo(modelMapper.map(medical, MedicalDto.class)));
 
         return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, pageable)
-                .map(medical -> this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class)));
+                .map(medical -> this.addInfo(modelMapper.map(medical, MedicalDto.class)));
     }
 
     public MedicalDto get(String id) {
@@ -232,7 +232,7 @@ public class MedicalService {
             log.error("Medical not found with ID: " + id);
             return new CustomException("Không tìm thấy bệnh án!", HttpStatus.NOT_FOUND.value());
         });
-        return this.addDepartmentWithDiaImage(modelMapper.map(medical, MedicalDto.class));
+        return this.addInfo(modelMapper.map(medical, MedicalDto.class));
     }
 
     public void update(MedicalDto t) {
@@ -343,8 +343,9 @@ public class MedicalService {
         }
     }
 
-    private MedicalDto addDepartmentWithDiaImage(MedicalDto medical) {
+    private MedicalDto addInfo(MedicalDto medical) {
         Boolean isDoctor = medical.getDoctorIdTreatment() != null && !medical.getDoctorIdTreatment().equals("");
+        medical.setPatientName(recordService.get(medical.getRecordId()).getFullName());
         HealthcareStaffDto doctor = null;
         if (isDoctor) {
             doctor = healthcareStaffService.get(medical.getDoctorIdTreatment(), false);

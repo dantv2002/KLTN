@@ -114,4 +114,6 @@ public class MedicalDto {
     @NotEmpty(message = "Vui lòng chọn hồ sơ bệnh nhân")
     @JsonProperty("RecordId")
     private String recordId; // Mã hồ sơ bệnh nhân
+    @JsonProperty("PatientName")
+    private String patientName; // Tên bệnh nhân
 }
