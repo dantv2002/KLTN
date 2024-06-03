@@ -91,7 +91,7 @@ export const callNext = (clinic, location) => `${host}/api/nurse/call-next?numbe
 //Get ticket by nurse
 export const getTicketByNurse = (keyword, page) => `${host}/api/nurse/tickets?keyword=${keyword}&page=${page}`
 //Update status by nurse
-export const updateTicket = (id) => `${host}/api/nurse/ticket/${id}`
+export const updateTicket = `${host}/api/nurse/ticket`
 
 //Ticker
 //Create ticker by patient
@@ -146,9 +146,12 @@ export const getDataStatistics = `${host}/api/admin/dashboard`
 
 //Diagnostic
 //Diagnostic by doctor
-// export const diagnosticByDoctor = `${host}/api/doctor/diagnostic-image/run`
-export const diagnosticByDoctor = `https://b714-2405-4802-93a1-54c-cc29-4d21-f259-984b.ngrok-free.app/image/predict`
+export const diagnosticByDoctor = `${host}/api/doctor/diagnostic-image/run`
 //Save diagnostic by doctor
 export const saveDiagnostic = `${host}/api/doctor/diagnostic-image/save`
 //Consultation
 export const consultation = `${host}/api/patient/medical-consultation`
+
+//Cloudinary
+//Delete image
+export const deleteImage = (id) => `${host}/api/doctor/delete-image/${id}`

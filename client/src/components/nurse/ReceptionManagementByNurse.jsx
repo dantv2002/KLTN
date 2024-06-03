@@ -4,6 +4,7 @@ import { message, Input, Button, Space, Table, Modal } from "antd"
 import { UserAddOutlined, SearchOutlined } from "@ant-design/icons"
 import { HiMiniSpeakerWave } from "react-icons/hi2";
 import { callNext, getTicketByNurse, updateTicket } from "../../Api"
+import Loading from "../../hook/Loading";
 
 const ReceptionManagementByNurse = () => {
 
@@ -22,9 +23,11 @@ const ReceptionManagementByNurse = () => {
   const [locationConfirm, setLocationConfirm] = useState("");
   const [departmentConfirm, setDepartmentConfirm] = useState("");
   const [callNumber, setCallNumber] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const handleCallPatient = async() => {
     try {
+      setLoading(true);
       let response = await axios.get(callNext(clinic, location), {
         withCredentials: true,
       })
@@ -37,6 +40,8 @@ const ReceptionManagementByNurse = () => {
       }
     }catch(error){
       message.error(error.response.data.Message);
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -84,8 +89,8 @@ const ReceptionManagementByNurse = () => {
 
   const handleConfirmCall = async() => {
     try {
-      let response = await axios.put(updateTicket(idConfirm),{
-        fullname: "helo",
+      let response = await axios.put(updateTicket,{
+        Id: idConfirm
       },{
         withCredentials: true,
       })
@@ -125,43 +130,10 @@ const ReceptionManagementByNurse = () => {
     }
   };
 
-  const speakEN = async (text) => {
-    const apiKey = 'AIzaSyCxE5hnFq4PyUadpmniiY1mPjN4I9lrBbU';
-    const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
-
-    const data = {
-      input: { text },
-      voice: { 
-        languageCode: 'en-US',
-        name: 'en-US-Standard-F', 
-        ssmlGender: 'FEMALE' },
-      audioConfig: { audioEncoding: 'MP3' }
-    };
-
-    try {
-      const response = await axios.post(url, data, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const audioContent = response.data.audioContent;
-      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-      audio.play();
-    } catch (error) {
-      console.error('Lỗi khi đọc văn bản:', error);
-    }
-  };
 
   const handleTextToSpeechVN = () => {
     if (callNumber !== 0) {
-      speakVN(`Xin mời bệnh nhân có số thứ tự tiếp theo là ${callNumber} vào khám bệnh`);
-    }
-  }
-
-  const handleTextToSpeechEN = () => {
-    if (callNumber !== 0) {
-      speakEN(`Please invite the patient whose next number is ${callNumber} to come in for examination`);
+      speakVN(`Xin mời bệnh nhân có số thứ tự tiếp theo là ${callNumber} vào khám bệnh xin nhắc lại bệnh nhân có số thứ tự tiếp theo là ${callNumber} vào khám bệnh`);
     }
   }
 
@@ -170,16 +142,22 @@ const ReceptionManagementByNurse = () => {
       title: 'Tên bệnh nhân',
       dataIndex: 'NamePatient',
       key: 'NamePatient',
+      sorter: (a, b) => a.NamePatient.localeCompare(b.NamePatient),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Vị trí khám',
       dataIndex: 'Area',
       key: 'Area',
+      sorter: (a, b) => a.Area.localeCompare(b.Area),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Phòng khám',
       dataIndex: 'Clinic',
       key: 'Clinic',
+      sorter: (a, b) => a.Clinic.localeCompare(b.Clinic),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Ngày khám',
@@ -190,11 +168,15 @@ const ReceptionManagementByNurse = () => {
       title: 'Số thứ tự',
       dataIndex: 'Number',
       key: 'Number',
+      sorter: (a, b) => a.Number.localeCompare(b.Number),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Khoa',
       dataIndex: 'Department',
       key: 'Department',
+      sorter: (a, b) => a.Department.localeCompare(b.Department),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -228,8 +210,7 @@ const ReceptionManagementByNurse = () => {
       />
       <br/>
       <Button onClick={() => handleCallPatient()} className="bg-green-500 text-white mt-3" htmlType="submit" icon={<UserAddOutlined/>} >Gọi bệnh nhân</Button>
-      <Button onClick={() => handleTextToSpeechVN()} className="bg-cyan-400 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát tiếng việt</Button>
-      <Button onClick={() => handleTextToSpeechEN()} className="bg-cyan-700 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát tiếng anh</Button>
+      <Button onClick={() => handleTextToSpeechVN()} className="bg-cyan-400 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát loa ngoài</Button>
       <hr className="my-8 border-gray-300"/>
       <Input
         className="w-96 mt-3 mr-3"
@@ -241,6 +222,7 @@ const ReceptionManagementByNurse = () => {
       <Table 
         columns={columns} 
         dataSource={data}
+        loading={{ indicator: <Loading/>, spinning: loading }}
         pagination={{
           total: totalItems,
           pageSize: 10,
