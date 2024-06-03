@@ -428,7 +428,7 @@ const Records = () => {
           <Button key="cancel" className="bg-red-600" onClick={handleCancelUpdate}>
               Thoát
           </Button>
-      ]}
+        ]}
       >
         <Form {...formLayout} form={formUpdate} onFinish={handleReadUpdateRecord}>
           <Form.Item className="relative" name="reupemail" label="Email" rules={[{ required: true, message: 'Email không được để trống!' }]}>

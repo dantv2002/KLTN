@@ -5,6 +5,11 @@ import axios from "axios";
 import { message, DatePicker, Button } from "antd";
 import {SearchOutlined} from "@ant-design/icons"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { FaUser,  FaFileAlt, FaFileMedical } from 'react-icons/fa';
+import { IoTicket } from "react-icons/io5";
+import { VscNewFile } from "react-icons/vsc";
+import { BsFileEarmarkLock } from "react-icons/bs";
+import { LuFileX } from "react-icons/lu";
 
 const DataStatisticsManagementByAdmin = () => {
 
@@ -37,6 +42,39 @@ const DataStatisticsManagementByAdmin = () => {
   const [searchDateStartMedical, setSearchDateStartMedical] = useState("");
   const [searchDateEndMedical, setSearchDataEndMedical] = useState("");
 
+  const [dayupdated, setDayUpdated] = useState("");
+
+  useEffect(() => {
+    const fetchCount = async() => {
+      try{
+        let dateStart = moment("01/01/2024", "DD/MM/YYYY").format("DD/MM/YYYY");
+        let dateEnd = moment("31/12/2024", "DD/MM/YYYY").format("DD/MM/YYYY");
+        let response = await axios.post(getDataStatistics, {
+          StartDate: dateStart,
+          EndDate: dateEnd,
+        },{
+          withCredentials: true
+        })
+        if (response.status === 200) {
+          setTotalAccount(response.data.Data.Account.Total);
+          setTotalTicket(response.data.Data.Ticket.Total);
+          setTotalRecord(response.data.Data.Record.Total);
+          setTotalMedical(response.data.Data.Medical.Total);
+          setNewMedical(response.data.Data.Medical.New);
+          setLockedMedical(response.data.Data.Medical.Locked);
+          setExpiredMedical(response.data.Data.Medical.Expired);
+
+          const endDate = moment();
+          let dateEnd = endDate.format("HH:mm DD/MM/YYYY");
+          setDayUpdated(dateEnd);
+        }
+      } catch(error) {
+        message.error(error.response.data.Message)
+      }
+    }
+    fetchCount();
+  },[])
+
   useEffect(() => {
     const fetchDataStatisticsAccount = async() => {
       if (searchDateStartAccount && searchDateEndAccount) {
@@ -51,7 +89,6 @@ const DataStatisticsManagementByAdmin = () => {
           })
           if (response.status === 200) {
             message.success(response.data.Message);
-            setTotalAccount(response.data.Data.Account.Total);
             setStatisticalAccount(response.data.Data.Account.Statistical);
           }
         } catch(error) {
@@ -64,7 +101,6 @@ const DataStatisticsManagementByAdmin = () => {
             Date: "0",
           }
         ];
-        setTotalAccount(0);
         setStatisticalAccount(dataFake);
       }
     }
@@ -85,7 +121,6 @@ const DataStatisticsManagementByAdmin = () => {
           })
           if (response.status === 200) {
             message.success(response.data.Message);
-            setTotalTicket(response.data.Data.Ticket.Total);
             setStatisticalTicket(response.data.Data.Ticket.Statistical);
           }
         } catch(error) {
@@ -98,7 +133,6 @@ const DataStatisticsManagementByAdmin = () => {
             Date: "0",
           }
         ];
-        setTotalTicket(0);
         setStatisticalTicket(dataFake);
       }
     }
@@ -119,7 +153,6 @@ const DataStatisticsManagementByAdmin = () => {
           })
           if (response.status === 200) {
             message.success(response.data.Message);    
-            setTotalRecord(response.data.Data.Record.Total);
             setStatisticalRecord(response.data.Data.Record.Statistical);
           }
         } catch(error) {
@@ -132,7 +165,6 @@ const DataStatisticsManagementByAdmin = () => {
             Date: "0",
           }
         ];
-        setTotalRecord(0);
         setStatisticalRecord(dataFake);
       }
     }
@@ -153,10 +185,6 @@ const DataStatisticsManagementByAdmin = () => {
           })
           if (response.status === 200) {
             message.success(response.data.Message);
-            setTotalMedical(response.data.Data.Medical.Total);
-            setNewMedical(response.data.Data.Medical.New);
-            setLockedMedical(response.data.Data.Medical.Locked);
-            setExpiredMedical(response.data.Data.Medical.Expired);
             setStatisticalMedical(response.data.Data.Medical.Statistical);
           }
         } catch(error) {
@@ -169,10 +197,6 @@ const DataStatisticsManagementByAdmin = () => {
             Date: "0",
           }
         ];
-        setTotalMedical(0);
-        setNewMedical(0);
-        setLockedMedical(0);
-        setExpiredMedical(0);
         setStatisticalMedical(dataFake);
       }
     }
@@ -202,6 +226,13 @@ const DataStatisticsManagementByAdmin = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-limegreen">Tài khoản</h1>
+      <div className="flex items-center mt-6 mb-5 bg-limegreen p-4 rounded w-72">
+        <FaUser className="text-4xl mr-4 text-white" />
+        <div className="flex flex-col">
+          <h2 className="text-base font-medium text-white">Số lượng tài khoản: <span className="font-bold">{totalAccount}</span></h2>
+          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+        </div>
+      </div>
       <div className="flex flex-wrap items-center mb-4">
         <DatePicker
           className="w-60 mr-3 mb-2"
@@ -234,11 +265,17 @@ const DataStatisticsManagementByAdmin = () => {
           <Bar dataKey="Count" name="Số lượng" fill="#32CD32" />
         </BarChart>
       </ResponsiveContainer>
-      <h2 className="text-xl font-semibold mt-4">Số lượng tài khoản: {totalAccount}</h2>
 
       <hr className="my-8 border-gray-300"/>
 
       <h1 className="text-2xl font-bold mb-4 text-blue2">Phiếu khám</h1>
+      <div className="flex items-center mt-6 mb-5 bg-blue2 p-4 rounded w-72">
+        <IoTicket className="text-4xl mr-4 text-white" />
+        <div className="flex flex-col">
+          <h2 className="text-base font-medium text-white">Số lượng phiếu khám: <span className="font-bold">{totalTicket}</span></h2>
+          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+        </div>
+      </div>
       <div className="flex flex-wrap items-center mb-4">
         <DatePicker
           className="w-60 mr-3 mb-2"
@@ -271,11 +308,17 @@ const DataStatisticsManagementByAdmin = () => {
           <Bar dataKey="Count" name="Số lượng" fill="#0000FF" />
         </BarChart>
       </ResponsiveContainer>
-      <h2 className="text-xl font-semibold mt-4">Số lượng phiếu khám: {totalTicket}</h2>
 
       <hr className="my-8 border-gray-300"/>
       
       <h1 className="text-2xl font-bold mb-4 text-chocolate">Hồ sơ bệnh nhân</h1>
+      <div className="flex items-center mt-6 mb-5 bg-chocolate p-4 rounded w-72">
+        <FaFileAlt className="text-4xl mr-4 text-white" />
+        <div className="flex flex-col">
+          <h2 className="text-base font-medium text-white">Số lượng hồ sơ: <span className="font-bold">{totalRecord}</span></h2>
+          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+        </div>
+      </div>
       <div className="flex flex-wrap items-center mb-4">
         <DatePicker
           className="w-60 mr-3 mb-2"
@@ -308,11 +351,48 @@ const DataStatisticsManagementByAdmin = () => {
           <Bar dataKey="Count" name="Số lượng" fill="#D2691E" />
         </BarChart>
       </ResponsiveContainer>
-      <h2 className="text-xl font-semibold mt-4">Số lượng hồ sơ: {totalRecord}</h2>
 
       <hr className="my-8 border-gray-300"/>
       
       <h1 className="text-2xl font-bold mb-4 text-darkmagenta">Hồ sơ bệnh án</h1>
+      <div className="flex flex-wrap justify-between">
+        <div className="w-1/4">
+          <div className="flex items-center mt-6 mb-5 bg-darkmagenta p-4 rounded w-auto mr-2">
+            <FaFileMedical className="text-2xl mr-2 text-white" />
+            <div className="flex flex-col">
+              <h2 className="text-xs font-medium text-white">Tổng số bệnh án: <span className="font-bold">{totalMedical}</span></h2>
+              <p className="text-[10px] text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+            </div>
+          </div>
+        </div>
+        <div className="w-1/4">
+          <div className="flex items-center mt-6 mb-5 bg-amber-600 p-4 rounded w-auto mr-2">
+            <VscNewFile className="text-2xl mr-2 text-white" />
+            <div className="flex flex-col">
+              <h2 className="text-xs font-medium text-white">Số bệnh án mới: <span className="font-bold">{newMedical}</span></h2>
+              <p className="text-[10px] text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+            </div>
+          </div>
+        </div>
+        <div className="w-1/4">
+          <div className="flex items-center mt-6 mb-5 bg-emerald-600 p-4 rounded w-auto mr-2">
+            <BsFileEarmarkLock className="text-2xl mr-2 text-white" />
+            <div className="flex flex-col">
+              <h2 className="text-xs font-medium text-white">Số bệnh án đã khóa: <span className="font-bold">{lockedMedical}</span></h2>
+              <p className="text-[10px] text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+            </div>
+          </div>
+        </div>
+        <div className="w-1/4">
+          <div className="flex items-center mt-6 mb-5 bg-rose-600 p-4 rounded w-auto">
+            <LuFileX className="text-2xl mr-2 text-white" />
+            <div className="flex flex-col">
+              <h2 className="text-xs font-medium text-white">Số bệnh án hết hạn: <span className="font-bold">{expiredMedical}</span></h2>
+              <p className="text-[10px] text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="flex flex-wrap items-center mb-4">
         <DatePicker
           className="w-60 mr-3 mb-2"
@@ -345,10 +425,6 @@ const DataStatisticsManagementByAdmin = () => {
           <Bar dataKey="Count" name="Số lượng" fill="#8B008B" />
         </BarChart>
       </ResponsiveContainer>
-      <h2 className="text-xl font-semibold mt-4">Tổng số lượng hồ sơ bệnh án: {totalMedical}</h2>
-      <h2 className="text-xl font-semibold mt-4">Số lượng hồ sơ bệnh án mới: {newMedical}</h2>
-      <h2 className="text-xl font-semibold mt-4">Số lượng hồ sơ bệnh án đã khóa: {lockedMedical}</h2>
-      <h2 className="text-xl font-semibold mt-4">Số lượng hồ sơ bệnh án hết hạn: {expiredMedical}</h2>
     </div>
     
   );

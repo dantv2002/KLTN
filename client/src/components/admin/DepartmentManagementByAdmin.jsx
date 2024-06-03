@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react"
-import { message, Space, Button, Table, Input, Modal, Select, Form } from "antd";
+import { message, Space, Button, Table, Input, Modal, Form } from "antd";
 import axios from "axios";
 import { createDepartment, deleteDepartment, getDepartmentAdmin, updateDepartment } from "../../Api";
-import { PlusOutlined, SearchOutlined, EditOutlined } from "@ant-design/icons"
-
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
+import Loading from "../../hook/Loading";
 
 const DepartmentManagementByAdmin = () => {
 
@@ -20,11 +20,12 @@ const DepartmentManagementByAdmin = () => {
   const [formInsert] = Form.useForm();
   const [visibleUpdate, setVisibleUpdate] = useState(false);
   const [formUpdate] = Form.useForm();
+  const [idDelete, setIdDelete] = useState("");
+  const [visibleDelete, setVisibleDelete] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Enable/disable update
-  const [editingDeleted, setEditingDeleted] = useState(false);
-  const [editingName, setEditingName] = useState(false);
-
+  const [editing, setEditing] = useState(false);
 
   const columns = [
     {
@@ -37,17 +38,15 @@ const DepartmentManagementByAdmin = () => {
       title: 'ID khoa',
       dataIndex: 'Id',
       key: 'Id',
+      sorter: (a, b) => a.Id.localeCompare(b.Id),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tên khoa',
       dataIndex: 'NameDepartment',
       key: 'NameDepartment',
-    },
-    {
-      title: 'Tình trạng',
-      dataIndex: 'deleted',
-      key: 'deleted',
-      render: (deleted) => (deleted ? 'Không tồn tại' : 'Tồn tại'),
+      sorter: (a, b) => a.NameDepartment.localeCompare(b.NameDepartment),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -58,7 +57,7 @@ const DepartmentManagementByAdmin = () => {
           <Button type="link" className="readupdate" onClick={() => handleReadUpdate(department)}>
             Xem
           </Button>
-          <Button type="link" danger className="delete" onClick={() => handleDeleteDepartment(department.Id)}>
+          <Button type="link" danger className="delete" onClick={() => handleConfirmDelete(department.Id)}>
             Xóa
           </Button>
         </Space>
@@ -68,16 +67,18 @@ const DepartmentManagementByAdmin = () => {
 
   const fetchDepartment = useCallback(async () => {
     try {
+      setLoading(true);
       let response = await axios.get(getDepartmentAdmin(searchKeyword, page), {
         withCredentials: true
       });
       if (response.status === 200) {
-        message.success(response.data.Message);
         setTotalItems(response.data.Data.TotalItems);
         setData(response.data.Data.Departments);
       }
     } catch(error) {
       message.error(error.response.data.Message);
+    } finally {
+      setLoading(false);
     }
   }, [searchKeyword, page]);
 
@@ -99,7 +100,18 @@ const DepartmentManagementByAdmin = () => {
   };
 
   const handleCancelInsert = () => {
+    formInsert.resetFields()
     setVisibleInsert(false);
+  }
+
+  const handleConfirmDelete = (id) => {
+    setIdDelete(id);
+    setVisibleDelete(true);
+  }
+
+  const handleCancelDelete = () => {
+    setIdDelete("");
+    setVisibleDelete(false);
   }
 
   const handleCreateDepartment = async() => {
@@ -111,9 +123,7 @@ const DepartmentManagementByAdmin = () => {
         })
         if (response.status === 200){
           message.success(response.data.Message);
-          setKeyword("");
-          setSearchKeyword("");
-          setPage("0");
+          formInsert.resetFields()
           setVisibleInsert(false);
           fetchDepartment();
         }
@@ -122,17 +132,14 @@ const DepartmentManagementByAdmin = () => {
       }
   }
 
-  const handleDeleteDepartment = async(id) => {
+  const handleDeleteDepartment = async() => {
     try{
-      let response = await axios.delete(deleteDepartment(id), {
+      let response = await axios.delete(deleteDepartment(idDelete), {
         withCredentials: true
       })
       if (response.status === 200){
         message.success(response.data.Message);
-        setKeyword("");
-        setSearchKeyword("");
-        setPage("0");
-        setVisibleInsert(false);
+        setVisibleDelete(false);
         fetchDepartment();
       }
     }catch(error){
@@ -152,19 +159,14 @@ const DepartmentManagementByAdmin = () => {
     setVisibleUpdate(true);
   }; 
 
+  const handleOpenForm = () => {
+    setEditing(true);
+  }
+
   const handleCancelReadUpdate = () => {
     setVisibleUpdate(false);
-    setEditingName(false);
-    setEditingDeleted(false);
+    setEditing(false);
   };
-
-  const handleEditName = () => {
-    setEditingName(true);
-  }
-
-  const handleEditDeleted = () => {
-    setEditingDeleted(true);
-  }
 
   const handleUpdateDepartment = async() => {
     try{
@@ -177,8 +179,7 @@ const DepartmentManagementByAdmin = () => {
       })
       if (response.status === 200){
         message.success(response.data.Message);
-        setEditingName(false);
-        setEditingDeleted(false);
+        setEditing(false);
         setVisibleUpdate(false);
         fetchDepartment();
       }
@@ -186,7 +187,6 @@ const DepartmentManagementByAdmin = () => {
       message.error(error.response.data.Message);
     }
   }
-
 
   const formLayout = {
     labelCol: { span: 6 },
@@ -207,6 +207,7 @@ const DepartmentManagementByAdmin = () => {
       <Table 
         columns={columns} 
         dataSource={data}
+        loading={{ indicator: <Loading/>, spinning: loading }}
         pagination={{
           total: totalItems,
           pageSize: 10,
@@ -238,12 +239,18 @@ const DepartmentManagementByAdmin = () => {
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem thông tin khoa</h1>}
         visible={visibleUpdate}
-        onOk={() => formUpdate.submit()}
-        okText="Cập nhật"
         onCancel={handleCancelReadUpdate}
-        cancelText="Thoát"
-        okButtonProps={{ disabled: !(editingDeleted || editingName) , className: "bg-blue-700" }}
-        cancelButtonProps={{ className: "bg-red-600" }}
+        footer={[
+          <Button key="custom" disabled={editing} className="bg-green-500 text-white" onClick={handleOpenForm}>
+              Cập nhật
+          </Button>,
+          <Button key="submit" disabled={!editing} className="bg-blue-700" onClick={() => formUpdate.submit()}>
+            Lưu
+          </Button>,
+          <Button key="cancel" className="bg-red-600" onClick={handleCancelReadUpdate}>
+              Thoát
+          </Button>
+        ]}
       >
         <Form {...formLayout} form={formUpdate} onFinish={handleUpdateDepartment}>
           <Form.Item className="relative" name="reupid" label="ID khoa" rules={[{ required: true, message: 'Id khoa không được để trống!' }]}>
@@ -252,35 +259,34 @@ const DepartmentManagementByAdmin = () => {
               placeholder="Nhập ID khoa"
               value={idUpdate}
               disabled={true}
-              className="pl-10"
             />
           </Form.Item>
           <Form.Item className="relative" name="reupname" label="Tên khoa" rules={[{ required: true, message: 'Tên khoa không được để trống!' }]}>
             <Input
               type="text"
-              className="w-full pl-10"
+              className="w-full"
               placeholder="Nhập tên khoa"
               value={nameUpdate}
               onChange={(e) => setNameUpdate(e.target.value)}
-              disabled={!editingName}
+              disabled={!editing}
             />
-            <EditOutlined onClick={handleEditName} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
-          </Form.Item>
-          <Form.Item className="relative" name="reupdeleted" label="Tình trạng" rules={[{ required: true, message: 'Tình trạng không được để trống!' }]}>
-            <Select
-              placeholder="Chọn tình trạng"
-              value={deletedUpdate}
-              onChange={(value) => setDeletedUpdate(value)}
-              disabled={!editingDeleted}
-              className="pl-10"
-            >
-              <Select.Option value={true}>Không tồn tại</Select.Option>
-              <Select.Option value={false}>Tồn tại</Select.Option>
-            </Select>
-            <EditOutlined onClick={handleEditDeleted} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
           </Form.Item>
         </Form>
-      </Modal>    
+      </Modal>
+      <Modal
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận xóa khoa</h1>}
+        visible={visibleDelete}
+        onOk={() => handleDeleteDepartment()}
+        okText="Xác nhận"
+        onCancel={handleCancelDelete}
+        cancelText="Thoát"
+        okButtonProps={{ className: "bg-blue-700" }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+      >
+        <div className="text-center">
+          <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa khoa này không?</p>
+        </div>
+      </Modal>
     </div>
   )
 }

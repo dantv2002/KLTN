@@ -76,6 +76,8 @@ export const getSchedule = (id, page) => `${host}/api/admin/schedules/${id}?page
 export const createSchedule = (id) => `${host}/api/admin/schedule/new/${id}`
 //Update by admin
 export const updateSchedule = (id) => `${host}/api/admin/schedules/${id}`
+//Delete by admin
+export const deleteSchedule = (idDoctor, idSchedule) => `${host}/api/admin/schedule/${idDoctor}/${idSchedule}`
 //Get list schedule by receptionist
 export const getListSchedule = (id) => `${host}/api/receptionist/schedules/${id}`
 //Register number schedule by receptionist
@@ -122,11 +124,13 @@ export const lockedMedical = (id) => `${host}/api/doctor/lock-medical/${id}`
 
 //Department
 //Get department by patient
-export const getDepartmentPatient = `${host}/api/patient/departments`
+export const getDepartmentPatient = `${host}/api/patient/departments?size=1000`
 //Get department by nurse doctor
-export const getDepartmentNurDoc = `${host}/api/nurse-doctor/departments`
+export const getDepartmentNurDoc = `${host}/api/nurse-doctor/departments?size=1000`
 //Get department by receptionist
 export const getDepartmentReceptionist = (keyword, page) => `${host}/api/receptionist/departments?keyword=${keyword}&page=${page}`
+//Get all department by admin
+export const showDepartmentAdmin = `${host}/api/admin/departments?size=1000`
 //Get department by admin
 export const getDepartmentAdmin = (keyword, page) => `${host}/api/admin/departments?keyword=${keyword}&page=${page}`
 //Create department by admin

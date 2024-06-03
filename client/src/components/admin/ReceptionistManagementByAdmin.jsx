@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { createStaff, getReceptionist, deleteStaff, updateStaff, getDepartmentAdmin} from "../../Api";
+import { createStaff, getReceptionist, deleteStaff, updateStaff, showDepartmentAdmin} from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker } from "antd";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
-import { PlusOutlined, SearchOutlined, EditOutlined } from "@ant-design/icons"
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
+import Loading from "../../hook/Loading";
 
 const ReceptionistManagementByAdmin = () => {
 
@@ -36,17 +37,12 @@ const ReceptionistManagementByAdmin = () => {
     const [listDepartment, setListDepartment] = useState([]);
     const [page, setPage] = useState("0");
     const [totalItems, setTotalItems] = useState("0");
+    const [loading, setLoading] = useState(false);
+    const [idDelete, setIdDelete] = useState("");
+    const [visibleDelete, setVisibleDelete] = useState(false);
 
       // Enable/disable update
-    const [editingFullName, setEditingFullName] = useState(false);
-    const [editingBirthday, setEditingBirthday] = useState(false);
-    const [editingGender, setEditingGender] = useState(false);
-    const [editingPhone, setEditingPhone] = useState(false);
-    const [editingIdentity, setEditingIdentity] = useState(false);
-    const [editingAddress, setEditingAddress] = useState(false);
-    const [editingComputerLiteracy, setEditingComputerLiteracy] = useState(false);
-    const [editingDepartment, setEditingDepartment] = useState(false);
-
+    const [editing, setEditing] = useState(false);
 
     const columnsReceptionists = [
         {
@@ -59,16 +55,22 @@ const ReceptionistManagementByAdmin = () => {
           title: 'Họ tên',
           dataIndex: 'FullName',
           key: 'FullName',
+          sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Trình độ tin học',
           dataIndex: 'ComputerLiteracy',
           key: 'ComputerLiteracy',
+          sorter: (a, b) => a.ComputerLiteracy.localeCompare(b.ComputerLiteracy),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Khoa',
           dataIndex: 'DepartmentName',
           key: 'DepartmentName',
+          sorter: (a, b) => a.DepartmentName.localeCompare(b.DepartmentName),
+          sortDirections: ['ascend', 'descend'],
         },
         {
           title: 'Tùy chọn',
@@ -79,7 +81,7 @@ const ReceptionistManagementByAdmin = () => {
               <Button type="link" className="readupdate" onClick={() => handleReadUpdate(receptionist)}>
                 Xem
               </Button>
-              <Button type="link" danger className="delete" onClick={() => handleDeleteReceptionist(receptionist.Id)}>
+              <Button type="link" danger className="delete" onClick={() => handleConfirmDelete(receptionist.Id)}>
                 Xóa
               </Button>
             </Space>
@@ -89,6 +91,7 @@ const ReceptionistManagementByAdmin = () => {
 
     const fetchReceptionist = useCallback(async () => {
         try {
+          setLoading(true);
           let response = await axios.get(getReceptionist(searchKeyword, page), {
             withCredentials: true
           });
@@ -98,12 +101,14 @@ const ReceptionistManagementByAdmin = () => {
           }
         } catch(error) {
           message.error(error.response.data.Message);
+        } finally {
+          setLoading(false);
         }
     },[searchKeyword, page]);
 
     const fetchDepartment = async () => {
       try {
-        let response = await axios.get(getDepartmentAdmin("", ""), {
+        let response = await axios.get(showDepartmentAdmin, {
           withCredentials: true
         });
         if (response.status === 200) {
@@ -139,8 +144,19 @@ const ReceptionistManagementByAdmin = () => {
     };
 
     const handleCancelInsert = () => {
-        setVisibleInsert(false);
+      formInsert.resetFields();
+      setVisibleInsert(false);
     };
+
+    const handleConfirmDelete = (id) => {
+      setIdDelete(id);
+      setVisibleDelete(true);
+    }
+
+    const handleCancelDelete = () => {
+      setIdDelete("");
+      setVisibleDelete(false);
+    }
 
     const handleCreateReceptionist = async() => {
         let dateofbirth = moment(birthdayInsert).format("DD/MM/YYYY");
@@ -160,6 +176,8 @@ const ReceptionistManagementByAdmin = () => {
             })
             if (response.status === 200){
                 message.success(response.data.Message);
+                formInsert.resetFields();
+                setVisibleInsert(false);
                 fetchReceptionist();
             }
         }catch(error){
@@ -167,13 +185,15 @@ const ReceptionistManagementByAdmin = () => {
         }
     }
 
-    const handleDeleteReceptionist = async(id) => {
+    const handleDeleteReceptionist = async() => {
         try {
-            let response = await axios.delete(deleteStaff(id),{
+            let response = await axios.delete(deleteStaff(idDelete),{
               withCredentials: true,
             })
             if (response.status === 200){
               message.success(response.data.Message);
+              setIdDelete("");
+              setVisibleDelete(true);
               fetchReceptionist();
             }
         }catch(error){
@@ -205,18 +225,13 @@ const ReceptionistManagementByAdmin = () => {
       setVisibleUpdate(true);
     };
 
-    
+    const handleOpenForm = () => {
+      setEditing(true);
+    }
 
     const handleCancelUpdate = () => {
       setVisibleUpdate(false);
-      setEditingFullName(false);
-      setEditingBirthday(false);
-      setEditingGender(false);
-      setEditingPhone(false);
-      setEditingIdentity(false);
-      setEditingAddress(false);
-      setEditingComputerLiteracy(false);
-      setEditingDepartment(false);
+      setEditing(false);
     };
 
     const handleUpdateReceptionist = async() => {
@@ -240,44 +255,12 @@ const ReceptionistManagementByAdmin = () => {
               message.success(response.data.Message);
               setVisibleUpdate(false);
               setVisibleInsert(false);
-              setEditingFullName(false);
-              setEditingBirthday(false);
-              setEditingGender(false);
-              setEditingPhone(false);
-              setEditingIdentity(false);
-              setEditingAddress(false);
-              setEditingComputerLiteracy(false);
-              setEditingDepartment(false);
+              setEditing(false);
               fetchReceptionist();
           }
       }catch(error){
           message.error(error.response.data.Message);
       }
-    }
-
-    const handleEditFullName = () => {
-      setEditingFullName(true);
-    };
-    const handleEditBirthday = () => {
-      setEditingBirthday(true);
-    };
-    const handleEditGender = () => {
-      setEditingGender(true);
-    };
-    const handleEditPhone = () => {
-      setEditingPhone(true);
-    };
-    const handleEditIdentity = () => {
-      setEditingIdentity(true);
-    };
-    const handleEditAddress = () => {
-      setEditingAddress(true);
-    };
-    const handleEditComputerLiteracy = () => {
-      setEditingComputerLiteracy(true);
-    };
-    const handleEditDepartment = () => {
-      setEditingDepartment(true);
     }
 
     const formLayout = {
@@ -299,6 +282,7 @@ const ReceptionistManagementByAdmin = () => {
             <Table 
                 columns={columnsReceptionists} 
                 dataSource={dataReceptionists}
+                loading={{ indicator: <Loading/>, spinning: loading }}
                 pagination={{
                   total: totalItems,
                   pageSize: 10,
@@ -397,12 +381,18 @@ const ReceptionistManagementByAdmin = () => {
             <Modal 
                 title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem thông tin nhân viên tiếp nhận</h1>}
                 visible={visibleUpdate}
-                onOk={() => formUpdate.submit()}
-                okText="Cập nhật"
                 onCancel={handleCancelUpdate}
-                cancelText="Thoát"
-                okButtonProps={{ disabled: !(editingFullName || editingBirthday || editingGender || editingPhone || editingIdentity || editingAddress || editingComputerLiteracy || editingDepartment), className: "bg-blue-700" }}
-                cancelButtonProps={{ className: "bg-red-600" }}
+                footer={[
+                  <Button key="custom" disabled={editing} className="bg-green-500 text-white" onClick={handleOpenForm}>
+                      Cập nhật
+                  </Button>,
+                  <Button key="submit" disabled={!editing} className="bg-blue-700" onClick={() => formUpdate.submit()}>
+                    Lưu
+                  </Button>,
+                  <Button key="cancel" className="bg-red-600" onClick={handleCancelUpdate}>
+                      Thoát
+                  </Button>
+                ]}
             >
               <Form {...formLayout} form={formUpdate} onFinish={handleUpdateReceptionist}>
                 <Form.Item className="relative" name="reupfullname" label="Họ tên" rules={[{ required: true, message: 'Họ tên không được để trống!' }]}>
@@ -411,35 +401,30 @@ const ReceptionistManagementByAdmin = () => {
                       placeholder="Nhập họ tên"
                       value={fullnameUpdate}
                       onChange={(e) => setFullNameUpdate(e.target.value)}
-                      disabled={!editingFullName}
-                      className="pl-10"
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditFullName} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupdayofbirth" label="Ngày sinh" rules={[{ required: true, message: 'Ngày sinh không được để trống!' }]}>
                     <DatePicker
                       type="text"
-                      className="w-full pl-10"
+                      className="w-full"
                       placeholder="Chọn ngày sinh"
                       value={birthdayUpdate ? moment(birthdayUpdate, 'DD/MM/YYYY') : null}
                       onChange={(date, dateString) => setBirthdayUpdate(dateString)}
-                      disabled={!editingBirthday}
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditBirthday} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupgender" label="Giới tính" rules={[{ required: true, message: 'Giới tính không được để trống!' }]}>
                     <Select
                       placeholder="Chọn giới tính"
                       value={genderUpdate}
                       onChange={(value) => setGenderUpdate(value)}
-                      disabled={!editingGender}
-                      className="pl-10"
+                      disabled={!editing}
                     >
                       <Select.Option value="Nam">Nam</Select.Option>
                       <Select.Option value="Nữ">Nữ</Select.Option>
                       <Select.Option value="Khác">Khác</Select.Option>
                     </Select>
-                    <EditOutlined onClick={handleEditGender} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupphone" label="Điện thoại" rules={[{ required: true, message: 'Số điện thoại không được để trống!' }]}>
                     <Input 
@@ -447,10 +432,8 @@ const ReceptionistManagementByAdmin = () => {
                       placeholder="Nhập số điện thoại"
                       value={phoneUpdate}
                       onChange={(e) => setPhoneUpdate(e.target.value)}
-                      disabled={!editingPhone}
-                      className="pl-10"
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditPhone} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupidentity" label="CMND/CCCD" rules={[{ required: true, message: 'CMND/CCCD không được để trống!' }]}>
                     <Input
@@ -458,10 +441,8 @@ const ReceptionistManagementByAdmin = () => {
                       placeholder="Nhập CCCD/CMND"
                       value={identityUpdate}
                       onChange={(e) => setIdentityUpdate(e.target.value)}
-                      disabled={!editingIdentity}
-                      className="pl-10"
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditIdentity} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupaddress" label="Địa chỉ" rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}>
                     <Input
@@ -469,28 +450,23 @@ const ReceptionistManagementByAdmin = () => {
                       placeholder="Nhập địa chỉ"
                       value={addressUpdate}
                       onChange={(value) => setAddressUpdate(value)}
-                      disabled={!editingAddress}
-                      className="pl-10"
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditAddress} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupcomputerliteracy" label="Trình độ tin học" rules={[{ required: true, message: 'Trình độ tin học không được để trống!' }]}>
                     <Input
                       placeholder="Nhập trình độ tin học"
                       value={computerLiteracyUpdate}
                       onChange={(e) => setComputerLiteracyUpdate(e.target.value)}
-                      disabled={!editingComputerLiteracy}
-                      className="pl-10"
+                      disabled={!editing}
                     />
-                    <EditOutlined onClick={handleEditComputerLiteracy} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
                 <Form.Item className="relative" name="reupdepartment" label="Khoa" rules={[{ required: true, message: 'Khoa không được để trống!' }]}>
                 <Select
                       placeholder="Chọn khoa"
                       value={departmentUpdate}
                       onChange={(value) => setDepartmentUpdate(value)}
-                      className="pl-10"
-                      disabled={!editingDepartment}
+                      disabled={!editing}
                     >
                       {listDepartment.map((department) => (
                         <Select.Option 
@@ -501,9 +477,22 @@ const ReceptionistManagementByAdmin = () => {
                         </Select.Option>
                       ))}
                     </Select>
-                    <EditOutlined onClick={handleEditDepartment} className="absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" />
                 </Form.Item>
               </Form>
+            </Modal>
+            <Modal
+              title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận xóa thông tin</h1>}
+              visible={visibleDelete}
+              onOk={() => handleDeleteReceptionist()}
+              okText="Xác nhận"
+              onCancel={handleCancelDelete}
+              cancelText="Thoát"
+              okButtonProps={{ className: "bg-blue-700" }}
+              cancelButtonProps={{ className: "bg-red-600" }}
+            >
+              <div className="text-center">
+                <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa tài khoản này không?</p>
+              </div>
             </Modal>
         </div>
     )
