@@ -28,7 +28,8 @@ class symptomModels:
         with open(path + 'symptoms/names.csv', newline='') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                self.labels[int(row['index'])] = row['Names_EN']
+                # self.labels[int(row['index'])] = row['Names_EN']
+                self.labels[int(row['index'])] = row['Names_VI']
                 # print(self.labels[int(row['index'])])
                 # print(row['index'])
         # print(self.labels)

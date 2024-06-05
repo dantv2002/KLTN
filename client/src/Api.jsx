@@ -1,4 +1,6 @@
 export const host = "http://localhost:8080/emr"
+// THIS IS YOUR SERVER DOMAIN, REPLACE IT WITH YOUR DOMAN
+// export const host = "http://kltn-spkt-benhvienx.me/emr"
 // Auth
 
 //Login
