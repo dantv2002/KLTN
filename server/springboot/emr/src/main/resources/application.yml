@@ -1,7 +1,7 @@
 client:
   # THIS IS YOUR SERVER DOMAIN/IP, REPLACE IT WITH YOUR DOMAIN/IP
   url: "http://localhost:5173"
-  # url: "http://kltn-spkt-benhvienx.me/emr"
+  # url: "http://kltn-spkt-benhvienx.me"
 
 server:
   servlet:
