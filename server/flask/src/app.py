@@ -6,7 +6,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 from src.services.predictImageServices import predictImageServices
 from src.services.predictSymptomServices import predictSymptomServices
@@ -32,14 +32,14 @@ def predictImages():
         predictSv = predictImageServices(imageURL, singleton_instance_deseaseModels)
         result = predictSv.predict()
         # Return result
-        rs = json.dumps(result)
-        return rs, 200
+        # rs = json.dumps(result)
+        return jsonify(result), 200
     except:
-        return "Server error", 500
+        return jsonify("Server error"), 500
 
 @app.route("/symptoms/predict", methods=["POST"])
 def predictSymptoms():
-    # try:
+    try:
         global singleton_instance_symptomModels
         symptoms = request.get_json()["symptoms"]
         # print(symptoms)
@@ -47,10 +47,11 @@ def predictSymptoms():
         result = predictSv.predict()
         # Return result
         if result is None:
-            return json.dumps({ "messages": "Please check your symptom! It is not in symptom list."}), 400
-        return json.dumps(result), 200
-    # except:
-    #     return "Server error", 500
+            # return jsonify({ "messages": "Please check your symptom! It is not in symptom list."}), 400
+            return jsonify({ "messages": "Vui lòng kiểm tra các triệu chứng! Có triệu chứng không thuộc danh sách triệu chứng."}), 400
+        return jsonify(result), 200
+    except:
+        return jsonify("Server error"), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')

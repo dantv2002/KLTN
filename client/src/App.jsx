@@ -31,6 +31,8 @@ import ProtectedRouteNurse from "./routes/ProtectedRouteNurse";
 import ProtectedRouteReceptionist from "./routes/ProtectedRouteReceptionist";
 import ProtectedRouteDoctor from "./routes/ProtectedRouteDoctor";
 import ProtectedRouteAdmin from "./routes/ProtectedRouteAdmin";
+import ProtectedRouteGuess from "./routes/ProtectedRouteGuess";
+import ProtectedRoutePatientAndGuess from "./routes/ProtectedRoutePatientAndGuess";
 
 const App = () => {
 
@@ -67,8 +69,18 @@ const App = () => {
 
   return (
     <Routes>
-      <Route path='/' element={<Home/>}/>
-      <Route path='/oauth2/redirect' element={<GoogleLogin/>}/>
+
+      <Route path='/' element={
+        <ProtectedRoutePatientAndGuess>
+          <Home/>
+        </ProtectedRoutePatientAndGuess>
+      }/>
+
+      <Route path='/oauth2/redirect' element={
+        <ProtectedRouteGuess>
+          <GoogleLogin/>
+        </ProtectedRouteGuess>
+      }/>
 
       <Route path='/records' element={
         <ProtectedRoutePatient>

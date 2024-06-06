@@ -7,25 +7,12 @@ import Services from "../components/home/Services";
 import Doctors from "../components/home/Doctors";
 import Blogs from "../components/home/Blogs";
 import Footer from "../components/home/Footer";
-import { BiSupport } from "react-icons/bi";
 import { CircularProgress } from "@mui/material";
 import { message } from 'antd';
-import Consultation from '../models/consultation/Consultation';
-import Cookies from "js-cookie"
 
 const Home = () => {
 
     const [loading, setLoading] = useState(true);
-    const [visible, setVisible] = useState(false);
-    const fullname = Cookies.get("FullName")
-
-    const showModal = () => {
-        setVisible(true);
-    };
-
-    const hideModal = () => {
-        setVisible(false);
-    };
 
     const location = useLocation();
 
@@ -75,19 +62,6 @@ const Home = () => {
                 <div id="contact">
                     <Footer />
                 </div>
-                {fullname && (
-                    <>
-                        {!visible && (
-                            <button
-                                className="fixed bottom-5 right-5 bg-cyan-400 text-white p-4 rounded-full transition-transform duration-300 transform hover:scale-110"
-                                onClick={showModal}
-                            >
-                                <BiSupport className="text-xl"/>
-                            </button>
-                        )}
-                        <Consultation visible={visible} hideModal={hideModal}/>
-                    </>
-                )}
             </div>
     );
 };

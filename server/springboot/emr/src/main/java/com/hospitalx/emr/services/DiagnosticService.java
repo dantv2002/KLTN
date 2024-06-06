@@ -29,8 +29,8 @@ public class DiagnosticService {
     private AuthManager authManager;
     @Autowired
     private ModelMapper modelMapper;
-    private String url = "http://localhost:5000"; // url nomal
-    // private String url = "http://PythonAPI:5000"; // url docker
+    // private String url = "http://localhost:5000"; // url nomal
+    private String url = "http://PythonAPI:5000"; // url docker
 
     public void lock(String medicalId) {
         log.info("Lock diagnostic image with medicalId: " + medicalId);

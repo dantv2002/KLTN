@@ -6,7 +6,7 @@ import {
     CopyOutlined,
     LogoutOutlined,
     DownOutlined,
-    FileOutlined,
+    BulbOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Avatar, Dropdown, message } from 'antd';
 const { Header, Sider, Content } = Layout;
@@ -120,7 +120,7 @@ const DashboardDoctor = () => {
                     },
                     {
                         key: '1',
-                        icon: <FileOutlined className="w-6 h-6"/>,
+                        icon: <BulbOutlined className="w-6 h-6"/>,
                         label: 'Chẩn đoán',
                     },
                 ]}

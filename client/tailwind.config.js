@@ -16,6 +16,10 @@ export default {
         'poppins': ['Poppins', 'sans-serif'],
         'rubik': ['Rubik', 'sans-serif'],
       },
+      screens: {
+        '14inch': '1536px',
+        '15.6inch': '1920px',
+      },
     },
   },
   plugins: [],

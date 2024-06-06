@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { message, Table, Input, Space, Button, Modal, Select, DatePicker, Form, Collapse, InputNumber } from "antd";
 import { getMedicalNurDoc, getRecordNurDoc, getDepartmentNurDoc, getMark, updateMedical, lockedMedical } from "../../Api";
 import { SearchOutlined } from '@ant-design/icons';
+import Loading from "../../hook/Loading";
 
 const { Panel } = Collapse;
 
@@ -20,7 +21,7 @@ const MedicalManagementByDoctor = () => {
   const [totalItemsMedical, setTotalItemsMedical] = useState("0");
   const [name, setName] = useState("");
   const [keywordRecord, setKeywordRecord] = useState("");
-  const [genderRecord, setGenderRecord] = useState("");
+  const [genderRecord, setGenderRecord] = useState(null);
   const [yearRecord, setYearRecord] = useState("");
   const [searchKeywordRecord, setSearchKeywordRecord] = useState("");
   const [searchGenderRecord, setSearchGenderRecord] = useState("");
@@ -34,6 +35,13 @@ const MedicalManagementByDoctor = () => {
   const [visibleReUpOutpatient, setVisibleReUpOutpatient] = useState(false);
   const [formUpdateOutpatient] = Form.useForm();
   const [visibleReadRecordMedical, setVisibleReadRecordMedical] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
+  const [visibleLocked, setVisibleLocked] = useState(false);
+  const [idLocked, setIdLocked] = useState("");
+  
+  const [edittingOutpatient, setEdittingOutpatient] = useState(false);
+  const [edittingInpatient, setEdittingInpatient] = useState(false);
 
   const columnsMedicals = [
     {
@@ -54,12 +62,56 @@ const MedicalManagementByDoctor = () => {
           return <span>N/A</span>;
         }
       },
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <DatePicker
+            placeholder="Chọn thời gian khám"
+            value={selectedKeys[0] ? moment(selectedKeys[0], 'DD/MM/YYYY') : null}
+            onChange={(date) => setSelectedKeys(date ? [date.format('DD/MM/YYYY')] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const date = moment(record.Date, 'DD/MM/YYYY');
+        const filterValue = moment(value, 'DD/MM/YYYY');
+        return date.isSame(filterValue, 'day');
+      },
     },
     {
       title: 'Lưu kho',
       dataIndex: 'Locked',
       key: 'Locked',
       render: (text, record) => (record.Locked ? 'Đã lưu' : 'Chưa lưu'),
+      sorter: (a, b) => {
+        if (a.Locked === b.Locked) {
+          return 0;
+        }
+        if (a.Locked) {
+          return -1;
+        }
+        if (b.Locked) {
+          return 1;
+        }
+        return 0;
+      },
     },
     {
       title: 'Đánh dấu sao',
@@ -69,13 +121,25 @@ const MedicalManagementByDoctor = () => {
         if (text === 'YES') return 'Có';
         if (text === 'NO') return 'Không';
         return text;
-      }
+      },
+      sorter: (a, b) => {
+        const textA = a.Mark === 'YES' ? 'Có' : (a.Mark === 'NO' ? 'Không' : a.Mark);
+        const textB = b.Mark === 'YES' ? 'Có' : (b.Mark === 'NO' ? 'Không' : b.Mark);
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Kết quả xuất viện',
       dataIndex: 'DiagnosisDischarge',
       key: 'DiagnosisDischarge',
       render: (text) => text ? text : 'Chưa xuất viện',
+      sorter: (a, b) => {
+        const textA = a.DiagnosisDischarge ? a.DiagnosisDischarge : 'Chưa xuất viện';
+        const textB = b.DiagnosisDischarge ? b.DiagnosisDischarge : 'Chưa xuất viện';
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Loại bệnh án',
@@ -85,7 +149,13 @@ const MedicalManagementByDoctor = () => {
         if (text === 'OUTPATIENT') return 'Ngoại trú';
         if (text === 'INPATIENT') return 'Nội trú';
         return text;
-      }
+      },
+      sorter: (a, b) => {
+        const textA = a.Type === 'OUTPATIENT' ? 'Ngoại trú' : (a.Type === 'INPATIENT' ? 'Nội trú' : a.Type);
+        const textB = b.Type === 'OUTPATIENT' ? 'Ngoại trú' : (b.Type === 'INPATIENT' ? 'Nội trú' : b.Type);
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -105,7 +175,7 @@ const MedicalManagementByDoctor = () => {
               Chưa đánh sao
             </Button>
           )}
-          <Button type="link" className="locked" disabled={medical.Locked} onClick={() => handleLockedMedical(medical.Id)}>
+          <Button type="link" className="locked" disabled={medical.Locked} onClick={() => handleConfirmLocked(medical.Id)}>
             Lưu kho
           </Button>
         </Space>
@@ -124,16 +194,51 @@ const MedicalManagementByDoctor = () => {
       title: 'Họ tên',
       dataIndex: 'FullName',
       key: 'FullName',
+      sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Ngày sinh',
       dataIndex: 'DateOfBirth',
       key: 'DateOfBirth',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <Input
+            placeholder="Nhập năm sinh"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const yearOfBirth = moment(record.DateOfBirth, 'DD/MM/YYYY').year();
+        return yearOfBirth.toString() === value;
+      },
     },
     {
       title: 'CMND/CCCD',
       dataIndex: 'IdentityCard',
-      key: 'IdentityCard',
+      key: 'IdentityCard',      
+      sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -151,6 +256,7 @@ const MedicalManagementByDoctor = () => {
 
   const fetchMedical = useCallback(async () => {
     try {
+      setLoading(true);
       const markSearch = searchMarkMedical || ""
       let response = await axios.get(getMedicalNurDoc(searchKeywordMedical, markSearch, searchIdRecord ,pageMedical), {
         withCredentials: true
@@ -161,6 +267,8 @@ const MedicalManagementByDoctor = () => {
       }
     } catch(error) {
       message.error(error.response.data.Message);
+    } finally {
+      setLoading(false);
     }
   }, [searchKeywordMedical, searchMarkMedical, searchIdRecord, pageMedical]);
 
@@ -170,6 +278,7 @@ const MedicalManagementByDoctor = () => {
 
   const fetchRecord = useCallback(async () => {
     try {
+      setLoading2(true);
       const genderSearch = searchGenderRecord || "";
       let response = await axios.get(getRecordNurDoc(genderSearch, searchKeywordRecord, searchYearRecord, pageRecord), {
         withCredentials: true
@@ -181,6 +290,8 @@ const MedicalManagementByDoctor = () => {
       }
     } catch(error) {
       message.error(error.response.data.Message);
+    } finally {
+      setLoading2(false);
     }
   },[searchKeywordRecord, searchGenderRecord, searchYearRecord, pageRecord]);
 
@@ -235,7 +346,7 @@ const MedicalManagementByDoctor = () => {
   const handleCancelReadRecordMedical = () => {
     setVisibleReadRecordMedical(false);
     setKeywordRecord("");
-    setGenderRecord("");
+    setGenderRecord(null);
     setYearRecord("");
     setSearchKeywordRecord("");
     setSearchGenderRecord("");
@@ -248,7 +359,7 @@ const MedicalManagementByDoctor = () => {
     setIdRecord(record.Id);
     setVisibleReadRecordMedical(false);
     setKeywordRecord("");
-    setGenderRecord("");
+    setGenderRecord(null);
     setYearRecord("");
     setSearchKeywordRecord("");
     setSearchGenderRecord("");
@@ -279,13 +390,25 @@ const MedicalManagementByDoctor = () => {
     }
   } 
 
-  const handleLockedMedical = async(id) => {
+  const handleConfirmLocked = (id) => {
+    setIdLocked(id);
+    setVisibleLocked(true);
+  }
+
+  const handleCancelLocked = () => {
+    setIdLocked("");
+    setVisibleLocked(false);
+  }
+
+  const handleLockedMedical = async() => {
     try {
-      let response = await axios.get(lockedMedical(id), {
+      let response = await axios.get(lockedMedical(idLocked), {
         withCredentials: true
       });
       if (response.status === 200) {
         message.success(response.data.Message);
+        setVisibleLocked(false);
+        setIdLocked("");
         fetchMedical();
       }
     } catch(error) {
@@ -294,6 +417,7 @@ const MedicalManagementByDoctor = () => {
   }
 
   const handleReadUpdate = (medical) => {
+    console.log(medical);
     if (medical.Type === "INPATIENT") {
       setVisibleReUpInpatient(true);
       formUpdateInpatient.setFieldsValue({
@@ -311,7 +435,7 @@ const MedicalManagementByDoctor = () => {
         Result: medical.Result,
         SpecializedExamination: medical.SpecializedExamination,
         Prognosis: medical.Prognosis,
-        DaysTreatment: parseInt(medical.DaysTreatment),
+        DaysTreatment: medical.DaysTreatment,
         DiagnosisDischarge: medical.DiagnosisDischarge,
         Locked: medical.Locked,
         CreateDate: medical.CreateDate,
@@ -320,14 +444,16 @@ const MedicalManagementByDoctor = () => {
         Mark: medical.Mark,
         Type: medical. Type,
         Summary: medical.Summary,
-        DateAdmission: moment(medical.DateAdmission, "HH:mm DD/MM/YYYY"),
+        DateAdmission: medical.DateAdmission ? moment(medical.DateAdmission, "HH:mm DD/MM/YYYY") : null,
         DepartmentAdmission: medical.DepartmentAdmission,
         DiagnosisAdmission: medical.DiagnosisAdmission,
-        DateTransfer: moment(medical.DateTransfer, "HH:mm DD/MM/YYYY"),
+        DateTransfer:  medical.DateTransfer ? moment(medical.DateTransfer, "HH:mm DD/MM/YYYY") : null,
         DepartmentTransfer: medical.DepartmentTransfer,
         DiagnosisTransfer: medical.DiagnosisTransfer,
         DoctorIdTreatment: medical.DoctorIdTreatment,
+        DoctorNameTreatment: medical.DoctorNameTreatment,
         RecordId: medical.RecordId,
+        PatientName: medical.PatientName,
         DiagnosisImage: medical.DiagnosisImage,
       });
     } else if (medical.Type === "OUTPATIENT") {
@@ -359,7 +485,9 @@ const MedicalManagementByDoctor = () => {
         DepartmentId: medical.DepartmentId,
         Date: moment(medical.Date, "HH:mm DD/MM/YYYY"),
         DoctorIdTreatment: medical.DoctorIdTreatment,
+        DoctorNameTreatment: medical.DoctorNameTreatment,
         RecordId: medical.RecordId,
+        PatientName: medical.PatientName,
         DiagnosisImage: medical.DiagnosisImage,
       });
     }
@@ -368,11 +496,21 @@ const MedicalManagementByDoctor = () => {
   const handleCancelReupOutpatient = () => {
     formUpdateOutpatient.resetFields();
     setVisibleReUpOutpatient(false);
+    setEdittingOutpatient(false);
+  }
+
+  const handleOpenFormOutpatient = () => {
+    setEdittingOutpatient(true);
   }
 
   const handleCancelReupInpatient = () => {
     formUpdateInpatient.resetFields();
     setVisibleReUpInpatient(false);
+    setEdittingInpatient(false);
+  }
+
+  const handleOpenFormInpatient = () => {
+    setEdittingInpatient(true);
   }
 
   const handleUpdateOutpatient = async(values) => {
@@ -428,10 +566,11 @@ const MedicalManagementByDoctor = () => {
     try {
       const response = await axios.put(updateMedical, data, { withCredentials: true });
       if (response.status === 200) {
+        fetchMedical();
         message.success(response.data.Message);
         setVisibleReUpOutpatient(false);
+        setEdittingOutpatient(false);
         formUpdateOutpatient.resetFields();
-        fetchMedical();
       }
     } catch (error) {
       message.error(error.response.data.Message);
@@ -488,10 +627,10 @@ const MedicalManagementByDoctor = () => {
       CreateDate,
       Mark,
       Type,
-      DateAdmission: DateAdmission.format("HH:mm DD/MM/YYYY"),
+      DateAdmission: DateAdmission ? DateAdmission.format("HH:mm DD/MM/YYYY") : "",
       DepartmentAdmission,
       DiagnosisAdmission,
-      DateTransfer: DateTransfer.format("HH:mm DD/MM/YYYY"),
+      DateTransfer: DateTransfer ? DateTransfer.format("HH:mm DD/MM/YYYY") : "",
       DepartmentTransfer,
       DiagnosisTransfer,
       Prognosis,
@@ -500,16 +639,17 @@ const MedicalManagementByDoctor = () => {
       TreatmentMethod,
       Result,
       SpecializedExamination,
-      DateDischarge: DateDischarge.format("HH:mm DD/MM/YYYY"),
+      DateDischarge: DateDischarge ? DateDischarge.format("HH:mm DD/MM/YYYY") : "",
     };
     
     try {
       const response = await axios.put(updateMedical, data, { withCredentials: true });
       if (response.status === 200) {
+        fetchMedical();
         message.success(response.data.Message);
         setVisibleReUpInpatient(false);
+        setEdittingInpatient(false);
         formUpdateInpatient.resetFields();
-        fetchMedical();
       }
     } catch (error) {
       message.error(error.response.data.Message);
@@ -551,6 +691,7 @@ const MedicalManagementByDoctor = () => {
       <Table 
         columns={columnsMedicals} 
         dataSource={dataMedical}
+        loading={{ indicator: <Loading/>, spinning: loading }}
         pagination={{
           total: totalItemsMedical,
           pageSize: 10,
@@ -561,49 +702,68 @@ const MedicalManagementByDoctor = () => {
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Cập nhật hồ sơ ngoại trú</h1>}
         visible={visibleReUpOutpatient}
-        onOk={() => formUpdateOutpatient.submit()}
-        okText="Cập nhật"
         onCancel={handleCancelReupOutpatient}
-        cancelText="Thoát"
-        okButtonProps={{ className: "bg-blue-700" }}
-        cancelButtonProps={{ className: "bg-red-600" }}
+        footer={[
+          <Button key="custom" disabled={edittingOutpatient} className="bg-green-500 text-white" onClick={handleOpenFormOutpatient}>
+              Cập nhật
+          </Button>,
+          <Button key="submit" disabled={!edittingOutpatient} className="bg-blue-700" onClick={() => formUpdateOutpatient.submit()}>
+            Lưu
+          </Button>,
+          <Button key="cancel" className="bg-red-600" onClick={handleCancelReupOutpatient}>
+              Thoát
+          </Button>
+        ]}
         width={800}
       >
         <Form {...formLayout} form={formUpdateOutpatient} onFinish={handleUpdateOutpatient} className="space-y-4">
           <Collapse className="w-full">
             <Panel header="Thông tin chung" key="1">
-              <Form.Item name="Id" label="Id bệnh án" rules={[{ required: true, message: 'Vui lòng nhập id bệnh án' }]} className="w-full">
+              <Form.Item name="Id" label="Id bệnh án" className="w-full">
                 <Input disabled={true}/>
               </Form.Item>
-              <Form.Item name="Reason" label="Lý do khám" className="w-full">
-                <Input />
+              <Form.Item name="Reason" label="Lý do khám" rules={[{ required: true, message: 'Vui lòng lý do khám' }]} className="w-full">
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
-              <Form.Item name="PathologicalProcess" label="Quá trình bệnh lý" className="w-full">
-                <Input />
+              <Form.Item name="PathologicalProcess" label="Quá trình bệnh lý" rules={[{ required: true, message: 'Vui lòng quá trình bệnh lý' }]} className="w-full">
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
-              <Form.Item name="MedicalHistory" label="Tiền sử bệnh" className="w-full">
-                <Input />
+              <Form.Item name="MedicalHistory" label="Tiền sử bệnh" rules={[{ required: true, message: 'Vui lòng nhập tiền sử bệnh' }]} className="w-full">
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
-              <Form.Item name="InitialDiagnosis" label="Chẩn đoán ban đầu" className="w-full">
-                <Input />
+              <Form.Item name="InitialDiagnosis" label="Chẩn đoán ban đầu" rules={[{ required: true, message: 'Vui lòng nhập chẩn đoán ban đầu' }]} className="w-full">
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
               <Form.Item name="ExamineOrgans" label="Kết quả khám các cơ quan" className="w-full">
-                <Input />
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
               <Form.Item name="DiagnosisDischarge" label="Chẩn đoán ra viện" className="w-full">
-                <Input />
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
               <Form.Item name="TreatmentMethod" label="Phương pháp điều trị" className="w-full">
-                <Input />
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
               <Form.Item name="Result" label="Kết quả điều trị" className="w-full">
-                <Input />
+                <Select placeholder="Chọn kết quả" disabled={!edittingOutpatient}>
+                  <Select.Option value="CURED">Khỏi bệnh</Select.Option>
+                  <Select.Option value="RELIEVED">Giảm bớt</Select.Option>
+                  <Select.Option value="UNCHANGED">Không đổi</Select.Option>
+                  <Select.Option value="WORSENED">Nặng hơn</Select.Option>
+                  <Select.Option value="DEATH">Tử vong</Select.Option>
+                  <Select.Option value="ACCIDENT">Tai nạn</Select.Option>
+                </Select>
               </Form.Item>
               <Form.Item name="DepartmentId" label="Khoa khám" className="w-full">
-                <Input />
+                <Select placeholder="Chọn khoa" disabled={!edittingOutpatient}>
+                  {listDepartment.map(department => (
+                    <Select.Option key={department.id} value={department.id}>
+                      {department.name}
+                    </Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
               <Form.Item name="Date" label="Thời gian đến khám" rules={[{ required: true, message: 'Vui lòng chọn thời gian đến khám' }]} className="w-full">
-                <DatePicker className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
+                <DatePicker disabled={!edittingOutpatient} className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
               </Form.Item>   
               <Form.Item name="CreateDate" label="Ngày tạo bệnh án" className="w-full">
                 <Input className="w-full" disabled={true}/>
@@ -614,28 +774,34 @@ const MedicalManagementByDoctor = () => {
               <Form.Item name="DueDate" label="Ngày thanh lý" className="w-full">
                 <Input className="w-full" disabled={true}/>
               </Form.Item>  
-              <Form.Item name="Locked" label="Lưu kho" rules={[{ required: true, message: 'Vui lòng chọn trạng thái lưu kho' }]} className="w-full">
+              <Form.Item name="Locked" label="Lưu kho" className="w-full">
                 <Select placeholder="Chọn trạng thái" disabled={true}>
                   <Select.Option value={false}>Chưa lưu</Select.Option>
                   <Select.Option value={true}>Đã lưu</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name="Mark" label="Đánh dấu sao" rules={[{ required: true, message: 'Vui lòng chọn trạng thái đánh dấu sao' }]} className="w-full">
+              <Form.Item name="Mark" label="Đánh dấu sao" className="w-full">
                 <Select placeholder="Chọn trạng thái" disabled={true}>
                   <Select.Option value="NO">Không</Select.Option>
                   <Select.Option value="YES">Có</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name="Type" label="Loại bệnh án" rules={[{ required: true, message: 'Vui lòng chọn loại bệnh án' }]} className="w-full">
+              <Form.Item name="Type" label="Loại bệnh án" className="w-full">
                 <Select placeholder="Chọn trạng thái" disabled = {true}>
                   <Select.Option value="OUTPATIENT">Ngoại trú</Select.Option>
                   <Select.Option value="INPATIENT">Nội trú</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name="DoctorIdTreatment" label="Bác sĩ điều trị" className="w-full">
+              <Form.Item name="DoctorIdTreatment" label="ID Bác sĩ điều trị" className="w-full" hidden={true}>
                 <Input disabled={true}/>
               </Form.Item>
-              <Form.Item name="RecordId" label="Id bệnh nhân" rules={[{ required: true, message: 'Vui lòng nhập id bệnh nhân' }]} className="w-full">
+              <Form.Item name="DoctorNameTreatment" label="Bác sĩ điều trị" className="w-full">
+                <Input disabled={true}/>
+              </Form.Item>
+              <Form.Item name="RecordId" label="Id bệnh nhân" className="w-full" hidden={true}>
+                <Input disabled={true}/>
+              </Form.Item>
+              <Form.Item name="PatientName" label="Bệnh nhân" className="w-full">
                 <Input disabled={true}/>
               </Form.Item>
             </Panel>
@@ -649,16 +815,19 @@ const MedicalManagementByDoctor = () => {
                       <Form.Item name={['DiagnosisImage', index, 'UrlImage']} label={`Hình ảnh ${index + 1}`} className="w-full">
                         <img src={image.UrlImage} alt={`Image ${index + 1}`} style={{ width: '100%', height: 'auto' }} />
                       </Form.Item>
-                      <Form.Item name={['DiagnosisImage', index, 'Method']} label="Phương pháp" rules={[{ required: true, message: 'Vui lòng nhập phương pháp' }]} className="w-full">
+                      <Form.Item name={['DiagnosisImage', index, 'Method']} label="Phương pháp" className="w-full">
                         <Input disabled={true}/>
                       </Form.Item>
-                      <Form.Item name={['DiagnosisImage', index, 'Content']} label="Nội dung" rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]} className="w-full">
+                      <Form.Item name={['DiagnosisImage', index, 'Content']} label="Nội dung" className="w-full">
                         <Input disabled={true}/>
                       </Form.Item>
-                      <Form.Item name={['DiagnosisImage', index, 'Conclude']} label="Kết luận" rules={[{ required: true, message: 'Vui lòng nhập kết luận' }]} className="w-full">
+                      <Form.Item name={['DiagnosisImage', index, 'Conclude']} label="Kết luận" className="w-full">
                         <Input disabled={true}/>
                       </Form.Item>
-                      <Form.Item name={['DiagnosisImage', index, 'DoctorIdPerform']} label="ID Bác sĩ thực hiện" rules={[{ required: true, message: 'Vui lòng nhập id bác sĩ thực hiện' }]} className="w-full">
+                      <Form.Item name={['DiagnosisImage', index, 'DoctorIdPerform']} label="ID Bác sĩ thực hiện" className="w-full" hidden={true}>
+                        <Input disabled={true} />
+                      </Form.Item>
+                      <Form.Item name={['DiagnosisImage', index, 'DoctorNamePerform']} label="Bác sĩ thực hiện" className="w-full">
                         <Input disabled={true} />
                       </Form.Item>
                     </div>
@@ -675,19 +844,19 @@ const MedicalManagementByDoctor = () => {
           <Collapse className="w-full">
             <Panel header="Thông tin sinh hiệu" key="3">
               <Form.Item name="HeartRate" label="Mạch đập" rules={[{ required: true, message: 'Vui lòng nhập mạch đập' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
               <Form.Item name="Temperature" label="Nhiệt độ" rules={[{ required: true, message: 'Vui lòng nhập nhiệt độ' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
               <Form.Item name="BloodPressure" label="Huyết áp" rules={[{ required: true, message: 'Vui lòng nhập huyết áp' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
               <Form.Item name="RespiratoryRate" label="Nhịp thở" rules={[{ required: true, message: 'Vui lòng nhập nhịp thở' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
               <Form.Item name="Weight" label="Cân nặng" rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingOutpatient}/>
               </Form.Item>
             </Panel>
           </Collapse>
@@ -696,52 +865,65 @@ const MedicalManagementByDoctor = () => {
       <Modal 
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Cập nhật hồ sơ nội trú</h1>}
         visible={visibleReUpInpatient}
-        onOk={() => formUpdateInpatient.submit()}
-        okText="Cập nhật"
         onCancel={handleCancelReupInpatient}
-        cancelText="Thoát"
-        okButtonProps={{ className: "bg-blue-700" }}
-        cancelButtonProps={{ className: "bg-red-600" }}
+        footer={[
+          <Button key="custom" disabled={edittingInpatient} className="bg-green-500 text-white" onClick={handleOpenFormInpatient}>
+              Cập nhật
+          </Button>,
+          <Button key="submit" disabled={!edittingInpatient} className="bg-blue-700" onClick={() => formUpdateInpatient.submit()}>
+            Lưu
+          </Button>,
+          <Button key="cancel" className="bg-red-600" onClick={handleCancelReupInpatient}>
+              Thoát
+          </Button>
+        ]}
         width={850}
       >
         <Form {...formLayout} form={formUpdateInpatient} onFinish={handleUpdateInpatient} className="space-y-4">
           <Collapse className="w-full">
             <Panel header="Thông tin chung" key="1">
-              <Form.Item name="Id" label="Id bệnh án" rules={[{ required: true, message: 'Vui lòng nhập id bệnh án' }]} className="w-full">
+              <Form.Item name="Id" label="Id bệnh án" className="w-full">
                 <Input disabled={true}/>
               </Form.Item>
-              <Form.Item name="Reason" label="Lý do khám" className="w-full">
-                <Input />
+              <Form.Item name="Reason" label="Lý do khám" rules={[{ required: true, message: 'Vui lòng lý do khám' }]} className="w-full">
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
-              <Form.Item name="PathologicalProcess" label="Quá trình bệnh lý" className="w-full">
-                <Input />
+              <Form.Item name="PathologicalProcess" label="Quá trình bệnh lý" rules={[{ required: true, message: 'Vui lòng quá trình bệnh lý' }]} className="w-full">
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
-              <Form.Item name="MedicalHistory" label="Tiền sử bệnh" className="w-full">
-                <Input />
+              <Form.Item name="MedicalHistory" label="Tiền sử bệnh" rules={[{ required: true, message: 'Vui lòng nhập tiền sử bệnh' }]} className="w-full">
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="TreatmentMethod" label="Phương pháp điều trị" className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="ExamineOrgans" label="Kết quả khám các cơ quan" className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="SpecializedExamination" label="Kết quả khám chuyên khoa" className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
-              <Form.Item name="Prognosis" label="Tiên lượng" className="w-full">
-                <Input />
+              <Form.Item name="Prognosis" label="Tiên lượng" rules={[{ required: true, message: 'Vui lòng nhập tiên lượng' }]} className="w-full">
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="DiagnosisDischarge" label="Chẩn đoán ra viện" className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="DateDischarge" label="Ngày ra viện" className="w-full">
-                <DatePicker className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
+                <DatePicker disabled={!edittingInpatient} placeholder="Chọn ngày ra viện" className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
               </Form.Item>
               <Form.Item name="DaysTreatment" label="Thời gian ra viện" className="w-full">
                 <InputNumber disabled={true}/>
               </Form.Item>
               <Form.Item name="Result" label="Kết quả điều trị" className="w-full">
-                <Input />
+                <Select disabled={!edittingInpatient}>
+                  <Select.Option value="CURED">Khỏi bệnh</Select.Option>
+                  <Select.Option value="RELIEVED">Giảm bớt</Select.Option>
+                  <Select.Option value="UNCHANGED">Không đổi</Select.Option>
+                  <Select.Option value="WORSENED">Nặng hơn</Select.Option>
+                  <Select.Option value="DEATH">Tử vong</Select.Option>
+                  <Select.Option value="ACCIDENT">Tai nạn</Select.Option>
+                </Select>
               </Form.Item>
               <Form.Item name="CreateDate" label="Ngày tạo bệnh án" className="w-full">
                 <Input className="w-full" disabled={true}/>
@@ -752,55 +934,73 @@ const MedicalManagementByDoctor = () => {
               <Form.Item name="DueDate" label="Ngày thanh lý" className="w-full">
                 <Input className="w-full" disabled={true}/>
               </Form.Item>  
-              <Form.Item name="Locked" label="Lưu kho" rules={[{ required: true, message: 'Vui lòng chọn trạng thái lưu kho' }]} className="w-full">
+              <Form.Item name="Locked" label="Lưu kho" className="w-full">
                 <Select placeholder="Chọn trạng thái" disabled={true}>
                   <Select.Option value={false}>Chưa lưu</Select.Option>
                   <Select.Option value={true}>Đã lưu</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name="Mark" label="Đánh dấu sao" rules={[{ required: true, message: 'Vui lòng chọn trạng thái đánh dấu sao' }]} className="w-full">
+              <Form.Item name="Mark" label="Đánh dấu sao" className="w-full">
                 <Select placeholder="Chọn trạng thái" disabled={true}>
                   <Select.Option value="NO">Không</Select.Option>
                   <Select.Option value="YES">Có</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name="Type" label="Loại bệnh án" rules={[{ required: true, message: 'Vui lòng chọn loại bệnh án' }]} className="w-full">
+              <Form.Item name="Type" label="Loại bệnh án" className="w-full">
                 <Select placeholder="Chọn trạng thái" disabled = {true}>
                   <Select.Option value="OUTPATIENT">Ngoại trú</Select.Option>
                   <Select.Option value="INPATIENT">Nội trú</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name="DoctorIdTreatment" label="Bác sĩ điều trị" className="w-full">
+              <Form.Item name="DoctorIdTreatment" label="Id Bác sĩ điều trị" className="w-full" hidden={true}>
+                <Input disabled={true}/>
+              </Form.Item>              
+              <Form.Item name="DoctorNameTreatment" label="Bác sĩ điều trị" className="w-full">
                 <Input disabled={true}/>
               </Form.Item>
-              <Form.Item name="RecordId" label="Id bệnh nhân" rules={[{ required: true, message: 'Vui lòng nhập id bệnh nhân' }]} className="w-full">
+              <Form.Item name="RecordId" label="Id bệnh nhân" className="w-full" hidden={true}>
+                <Input disabled={true}/>
+              </Form.Item>
+              <Form.Item name="PatientName" label="Bệnh nhân" className="w-full">
                 <Input disabled={true}/>
               </Form.Item>
             </Panel>
           </Collapse> 
           <Collapse className="w-full">
             <Panel header="Thông tin nhập viện" key="2">
-              <Form.Item name="DateAdmission" label="Thời gian"  className="w-full">
-                <DatePicker className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
+              <Form.Item name="DateAdmission" label="Thời gian" rules={[{ required: true, message: 'Vui lòng chọn ngày nhập viện' }]} className="w-full">
+                <DatePicker disabled={!edittingInpatient} placeholder="Chọn ngày nhập viện" className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
               </Form.Item>  
-              <Form.Item name="DepartmentAdmission" label="Khoa" className="w-full">
-                <Input />
+              <Form.Item name="DepartmentAdmission" label="Khoa" rules={[{ required: true, message: 'Vui lòng chọn khoa' }]} className="w-full">
+                <Select placeholder="Chọn khoa" disabled={!edittingInpatient}>
+                  {listDepartment.map(department => (
+                    <Select.Option key={department.id} value={department.id}>
+                      {department.name}
+                    </Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
-              <Form.Item name="DiagnosisAdmission" label="Chẩn đoán" className="w-full">
-                <Input />
+              <Form.Item name="DiagnosisAdmission" label="Chẩn đoán" rules={[{ required: true, message: 'Vui lòng nhập chẩn đoán' }]} className="w-full">
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
             </Panel>
           </Collapse>
           <Collapse className="w-full">
             <Panel header="Thông tin chuyển khoa" key="3">
               <Form.Item name="DateTransfer" label="Thời gian" className="w-full">
-                <DatePicker className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
+                <DatePicker disabled={!edittingInpatient} placeholder="Chọn ngày chuyển khoa" className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
               </Form.Item>  
               <Form.Item name="DepartmentTransfer" label="Khoa" className="w-full">
-                <Input />
+              <Select placeholder="Chọn khoa" disabled={!edittingInpatient}>
+                  {listDepartment.map(department => (
+                    <Select.Option key={department.id} value={department.id}>
+                      {department.name}
+                    </Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
               <Form.Item name="DiagnosisTransfer" label="Chẩn đoán" className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
             </Panel>
           </Collapse>
@@ -813,16 +1013,19 @@ const MedicalManagementByDoctor = () => {
                       <Form.Item name={['DiagnosisImage', index, 'UrlImage']} label={`Hình ảnh ${index + 1}`} className="w-full">
                         <img src={image.UrlImage} alt={`Image ${index + 1}`} style={{ width: '100%', height: 'auto' }} />
                       </Form.Item>
-                      <Form.Item name={['DiagnosisImage', index, 'Method']} label="Phương pháp" rules={[{ required: true, message: 'Vui lòng nhập phương pháp' }]} className="w-full">
+                      <Form.Item name={['DiagnosisImage', index, 'Method']} label="Phương pháp" className="w-full">
                         <Input disabled={true}/>
                       </Form.Item>
-                      <Form.Item name={['DiagnosisImage', index, 'Content']} label="Nội dung" rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]} className="w-full">
+                      <Form.Item name={['DiagnosisImage', index, 'Content']} label="Nội dung" className="w-full">
                         <Input disabled={true}/>
                       </Form.Item>
-                      <Form.Item name={['DiagnosisImage', index, 'Conclude']} label="Kết luận" rules={[{ required: true, message: 'Vui lòng nhập kết luận' }]} className="w-full">
+                      <Form.Item name={['DiagnosisImage', index, 'Conclude']} label="Kết luận" className="w-full">
                         <Input disabled={true}/>
                       </Form.Item>
-                      <Form.Item name={['DiagnosisImage', index, 'DoctorIdPerform']} label="ID Bác sĩ thực hiện" rules={[{ required: true, message: 'Vui lòng nhập id bác sĩ thực hiện' }]} className="w-full">
+                      <Form.Item name={['DiagnosisImage', index, 'DoctorIdPerform']} label="ID Bác sĩ thực hiện" className="w-full" hidden={true}>
+                        <Input disabled={true} />
+                      </Form.Item>
+                      <Form.Item name={['DiagnosisImage', index, 'DoctorNamePerform']} label="Bác sĩ thực hiện" className="w-full">
                         <Input disabled={true} />
                       </Form.Item>
                     </div>
@@ -839,19 +1042,19 @@ const MedicalManagementByDoctor = () => {
           <Collapse className="w-full">
             <Panel header="Thông tin sinh hiệu" key="5">
               <Form.Item name="HeartRate" label="Mạch đập" rules={[{ required: true, message: 'Vui lòng nhập mạch đập' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="Temperature" label="Nhiệt độ" rules={[{ required: true, message: 'Vui lòng nhập nhiệt độ' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="BloodPressure" label="Huyết áp" rules={[{ required: true, message: 'Vui lòng nhập huyết áp' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="RespiratoryRate" label="Nhịp thở" rules={[{ required: true, message: 'Vui lòng nhập nhịp thở' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
               <Form.Item name="Weight" label="Cân nặng" rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]} className="w-full">
-                <Input />
+                <Input disabled={!edittingInpatient}/>
               </Form.Item>
             </Panel>
           </Collapse>
@@ -893,6 +1096,7 @@ const MedicalManagementByDoctor = () => {
         <Table 
           columns={columnsRecordsMedical} 
           dataSource={dataRecord}
+          loading={{ indicator: <Loading/>, spinning: loading2 }}
           pagination={{
             total: totalItemsRecord,
             pageSize: 10,
@@ -900,6 +1104,20 @@ const MedicalManagementByDoctor = () => {
             onChange: handleChangPageRecord,
           }}
         />
+      </Modal>
+      <Modal
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận lưu kho</h1>}
+        visible={visibleLocked}
+        onOk={() => handleLockedMedical()}
+        okText="Xác nhận"
+        onCancel={handleCancelLocked}
+        cancelText="Thoát"
+        okButtonProps={{ className: "bg-blue-700" }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+      >
+        <div className="text-center">
+          <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn lưu kho bệnh án này không?</p>
+        </div>
       </Modal>
     </div>
   )

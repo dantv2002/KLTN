@@ -3,12 +3,14 @@ import { Image, Transformation, CloudinaryContext } from 'cloudinary-react';
 import { Upload, Button, message, Modal, Form, Input, Table, Select, Space, DatePicker } from 'antd';
 import { UploadOutlined, SearchOutlined } from '@ant-design/icons';
 import axios from 'axios';
-import { diagnosticByDoctor, getMedicalNurDoc, getRecordNurDoc, saveDiagnostic } from '../../Api';
+import { deleteImage, diagnosticByDoctor, getMedicalNurDoc, getRecordNurDoc, saveDiagnostic } from '../../Api';
+import moment from 'moment';
+import Loading from '../../hook/Loading';
 
-const ImageUploader = () => {
+const DiagnosisManagementByDoctor = () => {
   const [image, setImage] = useState("");
   const [publicId, setPublicId] = useState("");
-  const [result, setResult] = useState("a");
+  const [result, setResult] = useState("");
   const [idMedical, setIdMedical] = useState("");
   const [visibleInsert, setVisibleInsert] = useState(false);
   const [formInsert] = Form.useForm();
@@ -34,35 +36,70 @@ const ImageUploader = () => {
   const [pageRecordMedical, setPageRecordMedical] = useState("0");
   const [totalItemsRecordMedical, setTotalItemsRecordMedical] = useState("0");
   const [visibleUserManual, setVisibleUserManual] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingConsultan, setLoadingConsultan] = useState(false);
 
   const handleImageUpload = (info) => {
+    setIsLoading(true);
     if (info.file.status === 'done') {
       console.log('Upload success:', info.file.response);
       setImage(info.file.response.secure_url);
       setPublicId(info.file.response.public_id);
+      message.success("Tải ảnh lên thành công")
     } else if (info.file.status === 'error') {
       console.error('Upload error:', info.file.error);
+      message.error("Tải ảnh lên thất bại")
     }
   };
 
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        setIsLoading(false); 
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  const handleImageRemove = async() => {
+    try {
+      let response = await axios.delete(deleteImage(publicId),{
+        withCredentials: true,
+      })
+      if (response.status === 200){
+        message.success(response.data.Message);
+        setImage("");
+        setPublicId("");
+        setResult("");
+      }
+    }catch(error){
+      message.error(error.response.data.Message);
+    }
+  }
+
   const handleDiagnostic = async() => {
     try{
+      setLoadingConsultan(true)
       let response = await axios.post(diagnosticByDoctor, {
-        imageURL: image
+        Image: image
       }, {
           withCredentials: true
       })
       if (response.status === 200){
         message.success(response.data.Message);
-        setResult(response.data);
+        setResult(response.data.Data);
       }
     }catch(error){
         message.error(error.response.data.Message);
+    } finally {
+      setLoadingConsultan(false);
     }
   }
 
   const fetchMedical = useCallback(async () => {
     try {
+      setLoading(true);
       const markSearch = searchMarkMedical || ""
       let response = await axios.get(getMedicalNurDoc(searchKeywordMedical, markSearch, searchIdRecord ,pageMedical), {
         withCredentials: true
@@ -73,11 +110,14 @@ const ImageUploader = () => {
       }
     } catch(error) {
       message.error(error.response.data.Message);
+    } finally {
+      setLoading(false)
     }
   }, [searchKeywordMedical, searchMarkMedical, searchIdRecord, pageMedical]);
 
   const fetchRecord = useCallback(async () => {
     try {
+      setLoading(true);
       const genderSearch = searchGenderRecord || "";
       let response = await axios.get(getRecordNurDoc(genderSearch, searchKeywordRecord, searchYearRecord, pageRecordMedical), {
         withCredentials: true
@@ -88,6 +128,8 @@ const ImageUploader = () => {
       }
     } catch(error) {
       message.error(error.response.data.Message);
+    } finally {
+      setLoading(false);
     }
   },[searchKeywordRecord, searchGenderRecord, searchYearRecord, pageRecordMedical]);
 
@@ -229,11 +271,45 @@ const ImageUploader = () => {
           return <span>N/A</span>;
         }
       },
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <DatePicker
+            placeholder="Chọn thời gian khám"
+            value={selectedKeys[0] ? moment(selectedKeys[0], 'DD/MM/YYYY') : null}
+            onChange={(date) => setSelectedKeys(date ? [date.format('DD/MM/YYYY')] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const date = moment(record.Date, 'DD/MM/YYYY');
+        const filterValue = moment(value, 'DD/MM/YYYY');
+        return date.isSame(filterValue, 'day');
+      },
     },
     {
       title: 'Lí do khám',
       dataIndex: 'Reason',
       key: 'Reason',
+      sorter: (a, b) => a.Reason.localeCompare(b.Reason),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Đánh dấu sao',
@@ -243,13 +319,25 @@ const ImageUploader = () => {
         if (text === 'YES') return 'Có';
         if (text === 'NO') return 'Không';
         return text;
-      }
+      },
+      sorter: (a, b) => {
+        const textA = a.Mark === 'YES' ? 'Có' : (a.Mark === 'NO' ? 'Không' : a.Mark);
+        const textB = b.Mark === 'YES' ? 'Có' : (b.Mark === 'NO' ? 'Không' : b.Mark);
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Kết quả xuất viện',
       dataIndex: 'DiagnosisDischarge',
       key: 'DiagnosisDischarge',
       render: (text) => text ? text : 'Chưa xuất viện',
+      sorter: (a, b) => {
+        const textA = a.DiagnosisDischarge ? a.DiagnosisDischarge : 'Chưa xuất viện';
+        const textB = b.DiagnosisDischarge ? b.DiagnosisDischarge : 'Chưa xuất viện';
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Loại bệnh án',
@@ -259,7 +347,13 @@ const ImageUploader = () => {
         if (text === 'OUTPATIENT') return 'Ngoại trú';
         if (text === 'INPATIENT') return 'Nội trú';
         return text;
-      }
+      },
+      sorter: (a, b) => {
+        const textA = a.Type === 'OUTPATIENT' ? 'Ngoại trú' : (a.Type === 'INPATIENT' ? 'Nội trú' : a.Type);
+        const textB = b.Type === 'OUTPATIENT' ? 'Ngoại trú' : (b.Type === 'INPATIENT' ? 'Nội trú' : b.Type);
+        return textA.localeCompare(textB);
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -286,16 +380,51 @@ const ImageUploader = () => {
       title: 'Họ tên',
       dataIndex: 'FullName',
       key: 'FullName',
+      sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Ngày sinh',
       dataIndex: 'DateOfBirth',
       key: 'DateOfBirth',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <Input
+            placeholder="Nhập năm sinh"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const yearOfBirth = moment(record.DateOfBirth, 'DD/MM/YYYY').year();
+        return yearOfBirth.toString() === value;
+      },
     },
     {
       title: 'CMND/CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',
+      sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Tùy chọn',
@@ -320,7 +449,7 @@ const ImageUploader = () => {
     <div className="container mx-auto">
       <div className="flex flex-wrap -mx-3">
         <div className="w-full md:w-1/2 px-3">
-          <div className="w-96">
+          <div className="w-full">
             <Upload
               className="mt-3 mb-3"
               name="file"
@@ -328,33 +457,57 @@ const ImageUploader = () => {
               data={{ upload_preset: 'projectemr', cloud_name: 'successntd' }}
               listType="picture"
               onChange={handleImageUpload}
+              onRemove={handleImageRemove}
             >
               <Button className="mt-3 mb-3" icon={<UploadOutlined />}>Tải ảnh lên</Button>
             </Upload>
             {image && (
               <div className="mt-3 mb-3">
                 <h2 className="mt-3 mb-3 text-xl text-blue-700 font-semibold">Hình ảnh được tải lên:</h2>
-                <CloudinaryContext cloudName="successntd">
-                  <Image publicId={publicId}>
-                    <Transformation width="500" crop="scale" />
-                  </Image>
-                </CloudinaryContext>
-                <Button className="mt-3 mb-3 bg-green-600 text-white" onClick={handleDiagnostic}>
-                  Chẩn đoán
-                </Button>
+                {isLoading ? (
+                  <Loading/>
+                ) : (
+                  <div>
+                    <CloudinaryContext cloudName="successntd">
+                      <Image publicId={publicId}>
+                        <Transformation width="500" crop="scale" />
+                      </Image>
+                    </CloudinaryContext>
+                    <Button className="mt-3 mb-3 bg-green-600 text-white" onClick={handleDiagnostic}>
+                      Chẩn đoán
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
-        <div className="w-full md:w-1/2 px-3">
+        <div className="w-full md:w-1/2 px-28">
           <h1 className="mt-3 mb-3 text-2xl font-semibold text-red-600">Kết quả:</h1>
-          {result && (
-            <div>
-              <h2 className="mt-3 mb-3 text-xl">Bệnh: {result}</h2>
-              <Button className="mt-3 mb-3" onClick={() => handleSave()}>
-                Lưu chẩn đoán
-              </Button>
-            </div>
+          {loadingConsultan ? (
+            <Loading/>
+          ) : (
+            <>
+              {result && Object.keys(result).length > 0 && (
+                <>
+                  <ul>
+                    {Object.keys(result)
+                      .sort((a, b) => result[b] - result[a])
+                      .map((disease) => (
+                        <li key={disease} className="mb-2">
+                          <span className="font-normal text-black">Bệnh {disease}:</span>{' '}
+                          <span className="font-bold text-blue-500">
+                              {result[disease].toFixed(2)}%
+                          </span>
+                        </li>
+                    ))}
+                  </ul>
+                  <Button className="mt-3 mb-3" onClick={() => handleSave()}>
+                    Lưu chẩn đoán
+                  </Button>
+                </>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -426,6 +579,7 @@ const ImageUploader = () => {
         <Table 
           columns={columnsMedicals} 
           dataSource={dataMedical}
+          loading={{ indicator: <Loading/>, spinning: loading }}
           pagination={{
             total: totalItemsMedical,
             pageSize: 10,
@@ -470,6 +624,7 @@ const ImageUploader = () => {
         <Table 
           columns={columnsRecordsMedical} 
           dataSource={dataRecordMedical}
+          loading={{ indicator: <Loading/>, spinning: loading }}
           pagination={{
             total: totalItemsRecordMedical,
             pageSize: 10,
@@ -500,4 +655,4 @@ const ImageUploader = () => {
   );
 }
 
-export default ImageUploader;
+export default DiagnosisManagementByDoctor;

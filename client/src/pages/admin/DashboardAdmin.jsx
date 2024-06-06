@@ -5,9 +5,6 @@ import {
     UserOutlined,
     LogoutOutlined,
     DownOutlined,
-    IdcardOutlined,
-    CalendarOutlined,
-    BarChartOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Avatar, Dropdown, message } from 'antd';
 const { Header, Sider, Content } = Layout;
@@ -18,6 +15,12 @@ import ChangePassword from '../../models/ChangePassword';
 import Cookies from "js-cookie"
 import replacePlusWithSpace from '../../hook/ReplacePlusWithSpace';
 import { useLocation } from 'react-router-dom';
+import { FaUserDoctor } from "react-icons/fa6";
+import { MdNoAccounts } from "react-icons/md";
+import { MdAccountCircle } from "react-icons/md";
+import { FaChartBar, FaUserNurse, FaBookMedical, FaCalendarCheck, FaHospital } from "react-icons/fa";
+import { IoMdPersonAdd } from "react-icons/io";
+
 
 const DashboardAdmin = () => {
 
@@ -173,47 +176,47 @@ const DashboardAdmin = () => {
                 items={[
                 {
                     key: '0',
-                    icon: <BarChartOutlined className="w-6 h-6"/>,
+                    icon: <FaChartBar className="w-4 h-4"/>,
                     label: 'Thống kê',
                 },
                 {
                     key: '1',
-                    icon: <UserOutlined className="w-6 h-6"/>,
+                    icon: <MdAccountCircle className="w-4 h-4"/>,
                     label: 'Tài khoản',
                 },
                 {
                     key: '2',
-                    icon: <UserOutlined className="w-6 h-6"/>,
+                    icon: <MdNoAccounts className="w-4 h-4"/>,
                     label: 'Chưa có tài khoản',
                 },
                 {
                     key: '3',
-                    icon: <UserOutlined className="w-6 h-6"/>,
+                    icon: <FaUserDoctor className="w-4 h-4"/>,
                     label: 'Bác sĩ',
                 },
                 {
                     key: '4',
-                    icon: <UserOutlined className="w-6 h-6"/>,
+                    icon: <FaUserNurse className="w-4 h-4"/>,
                     label: 'Điều dưỡng',
                 },
                 {
                     key: '5',
-                    icon: <UserOutlined className="w-6 h-6"/>,
+                    icon: <IoMdPersonAdd className="w-4 h-4"/>,
                     label: 'Tiếp nhận',
                 },
                 {
                     key: '6',
-                    icon: <IdcardOutlined className="w-6 h-6"/>,
+                    icon: <FaBookMedical className="w-4 h-4"/>,
                     label: 'Bệnh án',
                 },
                 {   
                     key: '7',
-                    icon: <CalendarOutlined className="w-6 h-6"/>,
+                    icon: <FaCalendarCheck className="w-4 h-4"/>,
                     label: 'Lịch khám',
                 },
                 {   
                     key: '8',
-                    icon: <CalendarOutlined className="w-6 h-6"/>,
+                    icon: <FaHospital className="w-4 h-4"/>,
                     label: 'Khoa',
                 },
                 ]}
