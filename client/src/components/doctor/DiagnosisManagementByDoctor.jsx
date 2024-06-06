@@ -10,7 +10,7 @@ import Loading from '../../hook/Loading';
 const DiagnosisManagementByDoctor = () => {
   const [image, setImage] = useState("");
   const [publicId, setPublicId] = useState("");
-  const [result, setResult] = useState([]);
+  const [result, setResult] = useState("");
   const [idMedical, setIdMedical] = useState("");
   const [visibleInsert, setVisibleInsert] = useState(false);
   const [formInsert] = Form.useForm();
@@ -38,7 +38,7 @@ const DiagnosisManagementByDoctor = () => {
   const [visibleUserManual, setVisibleUserManual] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [eventLoading, setEventLoading] = useState(false);
+  const [loadingConsultan, setLoadingConsultan] = useState(false);
 
   const handleImageUpload = (info) => {
     setIsLoading(true);
@@ -71,6 +71,7 @@ const DiagnosisManagementByDoctor = () => {
         message.success(response.data.Message);
         setImage("");
         setPublicId("");
+        setResult("");
       }
     }catch(error){
       message.error(error.response.data.Message);
@@ -79,7 +80,7 @@ const DiagnosisManagementByDoctor = () => {
 
   const handleDiagnostic = async() => {
     try{
-      setEventLoading(true);
+      setLoadingConsultan(true)
       let response = await axios.post(diagnosticByDoctor, {
         Image: image
       }, {
@@ -92,7 +93,7 @@ const DiagnosisManagementByDoctor = () => {
     }catch(error){
         message.error(error.response.data.Message);
     } finally {
-      setEventLoading(false);
+      setLoadingConsultan(false);
     }
   }
 
@@ -481,30 +482,32 @@ const DiagnosisManagementByDoctor = () => {
             )}
           </div>
         </div>
-        <div className="w-full md:w-1/2 px-3">
+        <div className="w-full md:w-1/2 px-28">
           <h1 className="mt-3 mb-3 text-2xl font-semibold text-red-600">Kết quả:</h1>
-          {eventLoading ? (
+          {loadingConsultan ? (
             <Loading/>
           ) : (
-            <div>
-              <ul>
-              {result.length > 0 && Object.keys(result[0])
-                .sort((a, b) => result[0][b] - result[0][a])
-                .map((disease) => (
-                  <li key={disease} className="mb-2">
-                    <span className="font-normal text-black">Bệnh {disease}:</span>{' '}
-                    <span className="font-bold text-blue-500">
-                      {result[0][disease].toFixed(2)}%
-                    </span>
-                  </li>
-              ))}
-              </ul>
-              {result.length > 0 && (
-                <Button className="mt-3 mb-3" onClick={() => handleSave()}>
-                  Lưu chẩn đoán
-                </Button>
+            <>
+              {result && Object.keys(result).length > 0 && (
+                <>
+                  <ul>
+                    {Object.keys(result)
+                      .sort((a, b) => result[b] - result[a])
+                      .map((disease) => (
+                        <li key={disease} className="mb-2">
+                          <span className="font-normal text-black">Bệnh {disease}:</span>{' '}
+                          <span className="font-bold text-blue-500">
+                              {result[disease].toFixed(2)}%
+                          </span>
+                        </li>
+                    ))}
+                  </ul>
+                  <Button className="mt-3 mb-3" onClick={() => handleSave()}>
+                    Lưu chẩn đoán
+                  </Button>
+                </>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>

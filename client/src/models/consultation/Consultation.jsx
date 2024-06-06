@@ -12,6 +12,7 @@ const Consultation = ({ visible, hideModal }) => {
     const [selectedFeatures, setSelectedFeatures] = useState([]);
     const [result, setResult] = useState("");
     const [visibleResult, setVisibleResult] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const categorizedFeatures = features.reduce((acc, feature) => {
@@ -39,11 +40,11 @@ const Consultation = ({ visible, hideModal }) => {
 
     const handleSubmit = async() => {
         const symptoms = Object.values(selectedFeatures).flat();
-        const payload = { Symptoms: symptoms };
-        console.log(payload);
+        console.log(symptoms);
+        setLoading(true);
         try {
             let response = await axios.post(consultation, {
-                payload
+                Symptoms: symptoms
             }, {
                 withCredentials: true
             })
@@ -53,23 +54,26 @@ const Consultation = ({ visible, hideModal }) => {
             }
         }catch(error){
             message.error(error.response.data.Message)
+        } finally {
+            setLoading(false);
         }
-    };
+    }
 
     const handleCancelResult = () => {
         setVisibleResult(false);
+        setResult("");
     }
 
     return (
         <div>
             <Modal
-                title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Hỗ trợ trả lời triệu chứng</h1>}
+                title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Chẩn đoán sơ bộ</h1>}
                 visible={visible}
                 onCancel={hideModal}
                 onOk={handleSubmit}
                 okText="Xem kết quả"
                 cancelText="Thoát"
-                okButtonProps={{ className: "bg-blue-700" }}
+                okButtonProps={{ className: "bg-blue-700", loading: loading }}
                 cancelButtonProps={{ className: "bg-red-600" }}
                 width={600}
             >

@@ -16,6 +16,7 @@ import replacePlusWithSpace from "../../hook/ReplacePlusWithSpace";
 import { useNavigate, useLocation } from 'react-router-dom';
 import moment from "moment";
 import Loading from "../../hook/Loading";
+import Consultation from "../../models/consultation/Consultation";
 
 const Navbar = () => {
   const [menu, setMenu] = useState(false);
@@ -50,6 +51,8 @@ const Navbar = () => {
   const [pageSchedule, setPageSchedule] = useState("0");
   const [totalItemsSchedule, setTotalItemsSchedule] = useState("0");
   const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(false);
+
 
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -275,6 +278,14 @@ const Navbar = () => {
       ),
     },
   ];
+
+  const showModal = () => {
+      setVisible(true);
+  };
+
+  const hideModal = () => {
+      setVisible(false);
+  };
 
   const handleChange = () => {
     setMenu(!menu);
@@ -525,7 +536,7 @@ const Navbar = () => {
                 </div>
               </div>
             </div>
-            <nav className="hidden lg:flex flex-row items-center text-lg font-bold gap-8 font-rubik">
+            <nav className="hidden lg:flex flex-row items-center text-sm sm:text-xs md:text-sm 15.6inch:text-lg 14inch:text-base font-bold gap-8 font-rubik">
               <Link
                 to="home"
                 spy={true}
@@ -586,6 +597,46 @@ const Navbar = () => {
               >
                 Liên hệ
               </Link>
+              {name && (
+                <div className="relative group flex items-center">
+                  <h1 className="mr-2">Chức năng</h1>
+                  <AiOutlineDown className="text-white group-hover:text-hoverColor transition-all cursor-pointer" />
+                  <ul className="absolute top-full left-0 w-52 bg-blue-700 border rounded-md shadow-lg invisible opacity-0 mt-14 group-hover:mt-3 group-hover:opacity-100 group-hover:visible transition-all duration-500 font-rubik font-normal">
+                    <li className="py-2 px-4 rounded-md hover:bg-black">
+                      <a href="/records" className="hover:text-hoverColor transition-all cursor-pointer block">
+                        Quản lý hồ sơ
+                      </a>
+                    </li>
+                    <li className="py-2 px-4 rounded-md hover:bg-black">
+                      <a href="/schedules" className="hover:text-hoverColor transition-all cursor-pointer block">
+                        Quản lý phiếu khám
+                      </a>
+                    </li>
+                    <li className="py-2 px-4 rounded-md hover:bg-black">
+                      <a href="/medicals" className="hover:text-hoverColor transition-all cursor-pointer block">
+                        Quản lý bệnh án
+                      </a>
+                    </li>
+                    <li className="py-2 px-4 rounded-md hover:bg-black">
+                      <button
+                        className="hover:text-hoverColor transition-all cursor-pointer block"
+                        onClick={() => handleReadDoctor()}
+                      >
+                        Đặt lịch khám
+                      </button>
+                    </li>
+                    <li className="py-2 px-4 rounded-md hover:bg-black">
+                      <button
+                        className="hover:text-hoverColor transition-all cursor-pointer block"
+                        onClick={() => showModal()}
+                      >
+                          Chẩn đoán sơ bộ
+                      </button>
+                      <Consultation visible={visible} hideModal={hideModal}/>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </nav>
             <div className=" hidden lg:flex items-center relative">
             {!name ? (
@@ -596,39 +647,16 @@ const Navbar = () => {
                 Đăng nhập
               </button>
             ) : (
-              <div className="relative group flex items-center">
+              <div className="relative group flex items-center text-sm sm:text-xs md:text-sm 15.6inch:text-lg 14inch:text-base">
                 <h1 className="mr-2">{name}</h1>
                 <AiOutlineDown className="text-white group-hover:text-hoverColor transition-all cursor-pointer" />
                 <ul className="absolute top-full left-0 w-48 bg-blue-700 border rounded-md shadow-lg invisible opacity-0 mt-14 group-hover:mt-3 group-hover:opacity-100 group-hover:visible transition-all duration-500 font-rubik">
-                  <li className="py-2 px-4 rounded-md hover:bg-black">
-                    <a href="/records" className="hover:text-hoverColor transition-all cursor-pointer block">
-                      Quản lý hồ sơ
-                    </a>
-                  </li>
-                  <li className="py-2 px-4 rounded-md hover:bg-black">
-                    <a href="/schedules" className="hover:text-hoverColor transition-all cursor-pointer block">
-                      Quản lý phiếu khám
-                    </a>
-                  </li>
-                  <li className="py-2 px-4 rounded-md hover:bg-black">
-                    <a href="/medicals" className="hover:text-hoverColor transition-all cursor-pointer block">
-                      Quản lý bệnh án
-                    </a>
-                  </li>
                   <li className="py-2 px-4 rounded-md hover:bg-black">
                     <button
                       className="hover:text-hoverColor transition-all cursor-pointer block"
                       onClick={openFormChangePassword}
                     >
                       Đổi mật khẩu
-                    </button>
-                  </li>
-                  <li className="py-2 px-4 rounded-md hover:bg-black">
-                    <button
-                      className="hover:text-hoverColor transition-all cursor-pointer block"
-                      onClick={() => handleReadDoctor()}
-                    >
-                      Đặt lịch khám
                     </button>
                   </li>
                   <li className="py-2 px-4 rounded-md hover:bg-black">
@@ -757,8 +785,15 @@ const Navbar = () => {
               </button>
               <button
                 className="hover:text-hoverColor transition-all cursor-pointer block"
+                onClick={() => handleReadDoctor()}
               >
                 Đặt lịch khám
+              </button>
+              <button
+                className="hover:text-hoverColor transition-all cursor-pointer block"
+                onClick={() => showModal()}
+              >
+                Chẩn đoán sơ bộ
               </button>
               <button
                 className="text-white hover:text-hoverColor transition duration-300 ease-in-out"
