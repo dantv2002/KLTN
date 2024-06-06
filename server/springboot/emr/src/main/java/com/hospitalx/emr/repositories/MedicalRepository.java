@@ -13,6 +13,9 @@ import com.hospitalx.emr.models.entitys.Medical;
 
 @Repository
 public interface MedicalRepository extends MongoRepository<Medical, String> {
+    @Query(value = " { 'diagnosisDischarge': {$regex: ?0, $options: 'i'}, 'mark': {$regex: ?1, $options: 'i'}, 'recordId': {$regex: ?2}, 'doctorIdTreatment': {$regex: ?3}, 'locked': ?4 } ")
+    Page<Medical> findAllByKeyword(String keyword, String mark, String recordId, String doctorId, Boolean isLocked, Pageable pageable);
+
     @Query(value = " { 'diagnosisDischarge': {$regex: ?0, $options: 'i'}, 'mark': {$regex: ?1, $options: 'i'}, 'recordId': {$regex: ?2}, 'doctorIdTreatment': {$regex: ?3} } ")
     Page<Medical> findAllByKeyword(String keyword, String mark, String recordId, String doctorId, Pageable pageable);
 

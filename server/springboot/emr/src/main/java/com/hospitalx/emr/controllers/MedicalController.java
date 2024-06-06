@@ -53,6 +53,7 @@ public class MedicalController {
             @RequestParam(name = "showAll", defaultValue = "false", required = false) String showAll,
             @RequestParam(name = "mark", defaultValue = "", required = false) String mark,
             @RequestParam(name = "record", defaultValue = "", required = false) String recordId,
+            @RequestParam(name = "showLock", defaultValue = "true", required = false) String showLock,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
             @RequestParam(name = "sortBy", defaultValue = "createDate", required = false) String sortBy,
@@ -60,7 +61,7 @@ public class MedicalController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        keyword = keyword + "_" + recordId + "_" + showAll;
+        keyword = keyword + "_" + recordId + "_" + showAll + "_" + showLock;
         Page<MedicalDto> medicals = medicalService.getAll(keyword, mark, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải danh sách bệnh án thành công");

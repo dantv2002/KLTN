@@ -222,8 +222,14 @@ public class MedicalService {
             return medicalRepository.findAllByKeyword(parts[0], parts[1], pageable)
                     .map(medical -> this.addInfo(modelMapper.map(medical, MedicalDto.class)));
 
-        return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, pageable)
-                .map(medical -> this.addInfo(modelMapper.map(medical, MedicalDto.class)));
+        Boolean isLocked = parts[3].equalsIgnoreCase("true");
+        if (isLocked) {
+            return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, pageable)
+                    .map(medical -> this.addInfo(modelMapper.map(medical, MedicalDto.class)));
+        } else {
+            return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, false, pageable)
+                    .map(medical -> this.addInfo(modelMapper.map(medical, MedicalDto.class)));
+        }
     }
 
     public MedicalDto get(String id) {
