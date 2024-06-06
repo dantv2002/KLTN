@@ -23,9 +23,9 @@ public interface DepartmentRepository extends MongoRepository<Department, String
     @Query("{'deleted': false, 'nameDepartment': {$nin: ?0}}")
     Page<Department> findByAll(List<String> nameDepartment, Pageable pageable);
 
-    @Query("{'nameDepartment': {$regex: ?0, $options: 'i'}}")
+    @Query("{'nameDepartment': {$regex: ?0, $options: 'i'}, 'deleted': false}")
     Optional<Department> findByNameDepartment(String nameDepartment);
 
-    @Query("{'_id': {$ne: ?0}, 'nameDepartment': {$regex: ?1, $options: 'i'}}")
+    @Query("{'_id': {$ne: ?0}, 'nameDepartment': {$regex: ?1, $options: 'i'}, 'deleted': false}")
     Optional<Department> findByNotIdAndNameDepartment(String id, String nameDepartment);
 }

@@ -36,6 +36,7 @@ public class DepartmentController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/admin/department/new")
     public ResponseEntity<BaseResponse> create(@RequestBody @Valid DepartmentDto departmentDto) {
+        departmentDto.setNameDepartment(departmentDto.getNameDepartment().trim().replaceAll("\\s+", " "));
         departmentService.create(departmentDto);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tạo khoa mới thành công");
@@ -89,6 +90,7 @@ public class DepartmentController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/admin/department")
     public ResponseEntity<BaseResponse> update(@RequestBody @Valid DepartmentDto departmentDto) {
+        departmentDto.setNameDepartment(departmentDto.getNameDepartment().trim().replaceAll("\\s+", " "));
         departmentService.update(departmentDto);
         BaseResponse response = new BaseResponse();
         response.setMessage("Cập nhật thông tin khoa thành công");

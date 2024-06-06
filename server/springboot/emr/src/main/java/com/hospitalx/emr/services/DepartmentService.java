@@ -27,16 +27,9 @@ public class DepartmentService {
     private AuthManager authManager;
     @Autowired
     private ModelMapper modelMapper;
-    private Department departmentTemp;
 
     public void create(DepartmentDto departmentDto) {
         this.checkDepartmentExist(departmentDto.getNameDepartment());
-        if (departmentTemp != null) {
-            log.info("Restore department with name: {}", departmentTemp.getNameDepartment());
-            departmentTemp.setDeleted(false);
-            departmentRepository.save(departmentTemp);
-            return;
-        }
         this.save(departmentDto);
     }
 
@@ -91,20 +84,13 @@ public class DepartmentService {
     }
 
     private void checkDepartmentExist(String name) {
-        name = "^" + name + "$";
-        departmentTemp = null;
         departmentRepository.findByNameDepartment(name).ifPresent(department -> {
-            if (!department.getDeleted()) {
-                log.error("Department is existed");
-                throw new CustomException("Khoa đã tồn tại", HttpStatus.BAD_REQUEST.value());
-            } else {
-                departmentTemp = department;
-            }
+            log.error("Department is existed");
+            throw new CustomException("Khoa đã tồn tại", HttpStatus.BAD_REQUEST.value());
         });
     }
 
     private void checkDepartmentExist(String id, String name) {
-        name = "^" + name + "$";
         departmentRepository.findByNotIdAndNameDepartment(id, name).ifPresent(department -> {
             log.error("Department is existed");
             throw new CustomException("Khoa đã tồn tại", HttpStatus.BAD_REQUEST.value());
