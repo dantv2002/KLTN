@@ -29,6 +29,8 @@ public class DiagnosticService {
     private AuthManager authManager;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private HealthcareStaffService healthcareStaffService;
     // private String url = "http://localhost:5000"; // url nomal
     private String url = "http://PythonAPI:5000"; // url docker
 
@@ -76,8 +78,8 @@ public class DiagnosticService {
 
     public DiagnosticImageDto save(DiagnosticImageDto t) {
         log.info("Save diagnostic image");
-        String doctorId = authManager.getAuthentication().getName();
-        t.setDoctorIdPerform(doctorId);
+        String accountId = authManager.getAuthentication().getName();
+        t.setDoctorIdPerform(healthcareStaffService.getByAccountId(accountId).getId());
         return modelMapper.map(diagnosticImageRepository.save(modelMapper.map(t, DiagnosticImage.class)),
                 DiagnosticImageDto.class);
     }
