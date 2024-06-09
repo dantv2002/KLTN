@@ -1,6 +1,5 @@
 package com.hospitalx.emr.services;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -14,7 +13,6 @@ import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.NurseLevel;
 import com.hospitalx.emr.common.StaffType;
 import com.hospitalx.emr.exception.CustomException;
-import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.entitys.HealthcareStaff;
 import com.hospitalx.emr.repositories.HealthcareStaffRepository;
