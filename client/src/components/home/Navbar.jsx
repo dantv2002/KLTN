@@ -507,6 +507,7 @@ const Navbar = () => {
 
   const handleAppointment = async(id) => {
     try {
+      setLoading(true);
       let response = await axios.get(createTicker(idDoctor, idSchedule, id),{
         withCredentials: true
       })
@@ -518,6 +519,8 @@ const Navbar = () => {
       }
     }catch(error){
       message.error(error.response.data.Message)
+    } finally {
+      setLoading(false);
     }
   }
 

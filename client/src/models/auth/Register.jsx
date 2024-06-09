@@ -114,7 +114,7 @@ const Register = ({ closeFormRegister, openFormLogin, openFormConfirm }) => {
                             className="bg-red-600 text-white px-10 rounded-md"
                             onClick={closeFormRegister}
                         >
-                            Close
+                            Thoát
                         </Button>
                     </div>
                 </Form>

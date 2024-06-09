@@ -36,8 +36,7 @@ const ConfirmPassword = ({closeFormConfirm}) => {
                     </h1>
                     <span className=" text-center mt-3">Mã xác nhận đã được gửi qua email của bạn</span>
                     <span className=" text-center">Hãy nhập mã xác nhận vào ô bên dưới</span>
-                    <h1 className="font-medium">Mã xác nhận</h1>
-                    <Form.Item className="flex flex-col w-full" name="code" rules={[{ required: true, message: 'Hãy nhập email của bạn!' }]}>
+                    <Form.Item className="flex flex-col w-full mt-4" name="code" rules={[{ required: true, message: 'Hãy nhập email của bạn!' }]}>
                         <Input 
                             type="text"
                             className="rounded-lg" 
@@ -57,7 +56,7 @@ const ConfirmPassword = ({closeFormConfirm}) => {
                         className="bg-red-600 text-white px-10 rounded-md"
                         onClick={closeFormConfirm}
                         >
-                            Close
+                            Thoát
                         </Button>
                     </div>
                 </Form>

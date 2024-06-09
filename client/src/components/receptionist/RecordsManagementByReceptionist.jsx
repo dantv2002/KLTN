@@ -53,6 +53,7 @@ const RecordsManagementByReceptionist = () => {
   const [ticket, setTicket] = useState([]);
   const [visibleTicket, setVisibleTicket] = useState(false);
   const [nameDepartment, setNameDepartment] = useState("");
+  const [namePatient, setNamePatient] = useState("");
 
   // Enable/disable update
   const [editing, setEditing] = useState(false);
@@ -123,7 +124,7 @@ const RecordsManagementByReceptionist = () => {
           <Button type="link" className="readupdate" onClick={() => handleReadUpdate(records)}>
             Xem
           </Button>
-          <Button type="link" className="register" onClick={() => handleReadDepartment()} >
+          <Button type="link" className="register" onClick={() => handleReadDepartment(records)} >
             Đăng ký phòng khám
           </Button>
         </Space>
@@ -453,8 +454,9 @@ const RecordsManagementByReceptionist = () => {
     setPageDepartment("0");
   };
 
-  const handleReadDepartment = () => {
+  const handleReadDepartment = (record) => {
     setVisibleDepartment(true);
+    setNamePatient(record.FullName);
   }
 
   const handleChangPageDepartment = (page) => {
@@ -463,6 +465,8 @@ const RecordsManagementByReceptionist = () => {
 
   const handleCancelTicket = () => {
     setVisibleTicket(false);
+    setVisibleRead(false);
+    setVisibleDepartment(false);
   }
 
   const tranferTime = (value) => {
@@ -548,6 +552,9 @@ const RecordsManagementByReceptionist = () => {
                   font-size: 100px;
                   color: #007bff;
               }
+              .name {
+                  font-size: 15px;
+              }
           </style>
       </head>
       <body>
@@ -566,10 +573,13 @@ const RecordsManagementByReceptionist = () => {
               </div>
               <div class="separator"></div>
               <div class="field">
-                  <span class"label2">Số thứ tự của bạn:</span><br> <span class="number">${ticket.Number}</span>
+                  <span class"label">Số thứ tự của bạn:</span><br> <span class="number">${ticket.Number}</span>
               </div>
               <div class="field">
                   <span class="label">Số thứ tự đang phục vụ:</span> ${ticket.CallNumber}
+              </div>
+              <div class="field">
+                  <span class="label">Bệnh nhân:</span> <span class="name">${namePatient}</span>
               </div>
               <div class="separator"></div>
               <div class="flex-container">

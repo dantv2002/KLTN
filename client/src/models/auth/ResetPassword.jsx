@@ -95,7 +95,7 @@ const ResetPassword = ({ closeFormReset, openFormConfirm }) => {
                             className="bg-red-600 text-white px-10 rounded-md"
                             onClick={closeFormReset}
                         >
-                            Close
+                            Thoát
                         </Button>
                     </div>
                 </Form>

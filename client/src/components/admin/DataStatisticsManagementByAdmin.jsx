@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { getDataStatistics } from "../../Api";
 import moment from "moment";
 import axios from "axios";
-import { message, DatePicker, Button } from "antd";
+import { message, DatePicker, Button, Spin } from "antd";
 import {SearchOutlined} from "@ant-design/icons"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { FaUser,  FaFileAlt, FaFileMedical } from 'react-icons/fa';
@@ -44,6 +44,8 @@ const DataStatisticsManagementByAdmin = () => {
 
   const [dayupdated, setDayUpdated] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const fetchCount = async() => {
       try{
@@ -79,6 +81,7 @@ const DataStatisticsManagementByAdmin = () => {
     const fetchDataStatisticsAccount = async() => {
       if (searchDateStartAccount && searchDateEndAccount) {
         try {
+          setLoading(true);
           let datestart = moment(searchDateStartAccount).format("DD/MM/YYYY");
           let dateend = moment(searchDateEndAccount).format("DD/MM/YYYY");
           let response = await axios.post(getDataStatistics, {
@@ -93,6 +96,8 @@ const DataStatisticsManagementByAdmin = () => {
           }
         } catch(error) {
           message.error(error.response.data.Message)
+        }  finally {
+          setLoading(false);
         }
       } else {
         const dataFake = [
@@ -102,6 +107,7 @@ const DataStatisticsManagementByAdmin = () => {
           }
         ];
         setStatisticalAccount(dataFake);
+        setLoading(false);
       }
     }
     fetchDataStatisticsAccount();
@@ -111,6 +117,7 @@ const DataStatisticsManagementByAdmin = () => {
     const fetchDataStatisticsTicket = async() => {
       if (searchDateStartTicket && searchDateEndTicket) {
         try {
+          setLoading(true);
           let datestart = moment(searchDateStartTicket).format("DD/MM/YYYY");
           let dateend = moment(searchDateEndTicket).format("DD/MM/YYYY");
           let response = await axios.post(getDataStatistics, {
@@ -125,6 +132,8 @@ const DataStatisticsManagementByAdmin = () => {
           }
         } catch(error) {
           message.error(error.response.data.Message)
+        } finally {
+          setLoading(false);
         }
       } else {
         const dataFake = [
@@ -134,6 +143,7 @@ const DataStatisticsManagementByAdmin = () => {
           }
         ];
         setStatisticalTicket(dataFake);
+        setLoading(false);
       }
     }
     fetchDataStatisticsTicket();
@@ -143,6 +153,7 @@ const DataStatisticsManagementByAdmin = () => {
     const fetchDataStatisticsRecord = async() => {
       if (searchDateStartRecord && searchDateEndRecord) {
         try {
+          setLoading(true);
           let datestart = moment(searchDateStartRecord).format("DD/MM/YYYY");
           let dateend = moment(searchDateEndRecord).format("DD/MM/YYYY");
           let response = await axios.post(getDataStatistics, {
@@ -157,6 +168,8 @@ const DataStatisticsManagementByAdmin = () => {
           }
         } catch(error) {
           message.error(error.response.data.Message)
+        } finally {
+          setLoading(false);
         }
       } else {
         const dataFake = [
@@ -166,6 +179,7 @@ const DataStatisticsManagementByAdmin = () => {
           }
         ];
         setStatisticalRecord(dataFake);
+        setLoading(false)
       }
     }
     fetchDataStatisticsRecord();
@@ -175,6 +189,7 @@ const DataStatisticsManagementByAdmin = () => {
     const fetchDataStatisticsMedical = async() => {
       if (searchDateStartMedical && searchDateEndMedical) {
         try {
+          setLoading(true);
           let datestart = moment(searchDateStartMedical).format("DD/MM/YYYY");
           let dateend = moment(searchDateEndMedical).format("DD/MM/YYYY");
           let response = await axios.post(getDataStatistics, {
@@ -189,6 +204,8 @@ const DataStatisticsManagementByAdmin = () => {
           }
         } catch(error) {
           message.error(error.response.data.Message)
+        } finally {
+          setLoading(false)
         }
       } else {
         const dataFake = [
@@ -198,6 +215,7 @@ const DataStatisticsManagementByAdmin = () => {
           }
         ];
         setStatisticalMedical(dataFake);
+        setLoading(false);
       }
     }
     fetchDataStatisticsMedical();
@@ -225,135 +243,6 @@ const DataStatisticsManagementByAdmin = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-limegreen">Tài khoản</h1>
-      <div className="flex items-center mt-6 mb-5 bg-limegreen p-4 rounded w-72">
-        <FaUser className="text-4xl mr-4 text-white" />
-        <div className="flex flex-col">
-          <h2 className="text-base font-medium text-white">Số lượng tài khoản: <span className="font-bold">{totalAccount}</span></h2>
-          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center mb-4">
-        <DatePicker
-          className="w-60 mr-3 mb-2"
-          placeholder="Chọn ngày bắt đầu"
-          value={dateStartAccount ? moment(dateStartAccount, 'YYYY-MM-DD') : null}
-          onChange={(date, dateString) => setDateStartAccount(dateString)}
-        />
-        <DatePicker
-          className="w-60 mr-3 mb-2"
-          placeholder="Chọn ngày kết thúc"
-          value={dateEndAccount ? moment(dateEndAccount, 'YYYY-MM-DD') : null}
-          onChange={(date, dateString) => setDateEndAccount(dateString)}
-        />
-        <Button onClick={() => handleSearchAccount()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={<SearchOutlined />}>Tra cứu</Button>
-      </div>
-      <ResponsiveContainer className="mt-6" width="100%" height={400}>
-        <BarChart
-          width={500}
-          height={300}
-          data={statisticalAccount}
-          margin={{
-            top: 5, right: 30, left: 20, bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Date" name="Ngày"/>
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="Count" name="Số lượng" fill="#32CD32" />
-        </BarChart>
-      </ResponsiveContainer>
-
-      <hr className="my-8 border-gray-300"/>
-
-      <h1 className="text-2xl font-bold mb-4 text-blue2">Phiếu khám</h1>
-      <div className="flex items-center mt-6 mb-5 bg-blue2 p-4 rounded w-72">
-        <IoTicket className="text-4xl mr-4 text-white" />
-        <div className="flex flex-col">
-          <h2 className="text-base font-medium text-white">Số lượng phiếu khám: <span className="font-bold">{totalTicket}</span></h2>
-          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center mb-4">
-        <DatePicker
-          className="w-60 mr-3 mb-2"
-          placeholder="Chọn ngày bắt đầu"
-          value={dateStartTicket ? moment(dateStartTicket, 'YYYY-MM-DD') : null}
-          onChange={(date, dateString) => setDateStartTicket(dateString)}
-        />
-        <DatePicker
-          className="w-60 mr-3 mb-2"
-          placeholder="Chọn ngày kết thúc"
-          value={dateEndTicket ? moment(dateEndTicket, 'YYYY-MM-DD') : null}
-          onChange={(date, dateString) => setDateEndTicket(dateString)}
-        />
-        <Button onClick={() => handleSearchTicket()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={<SearchOutlined />}>Tra cứu</Button>
-      </div>
-      <ResponsiveContainer className="mt-6" width="100%" height={400}>
-        <BarChart
-          width={500}
-          height={300}
-          data={statisticalTicket}
-          margin={{
-            top: 5, right: 30, left: 20, bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Date" name="Ngày"/>
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="Count" name="Số lượng" fill="#0000FF" />
-        </BarChart>
-      </ResponsiveContainer>
-
-      <hr className="my-8 border-gray-300"/>
-      
-      <h1 className="text-2xl font-bold mb-4 text-chocolate">Hồ sơ bệnh nhân</h1>
-      <div className="flex items-center mt-6 mb-5 bg-chocolate p-4 rounded w-72">
-        <FaFileAlt className="text-4xl mr-4 text-white" />
-        <div className="flex flex-col">
-          <h2 className="text-base font-medium text-white">Số lượng hồ sơ: <span className="font-bold">{totalRecord}</span></h2>
-          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center mb-4">
-        <DatePicker
-          className="w-60 mr-3 mb-2"
-          placeholder="Chọn ngày bắt đầu"
-          value={dateStartRecord ? moment(dateStartRecord, 'YYYY-MM-DD') : null}
-          onChange={(date, dateString) => setDateStartRecord(dateString)}
-        />
-        <DatePicker
-          className="w-60 mr-3 mb-2"
-          placeholder="Chọn ngày kết thúc"
-          value={dateEndRecord ? moment(dateEndRecord, 'YYYY-MM-DD') : null}
-          onChange={(date, dateString) => setDateEndRecord(dateString)}
-        />
-        <Button onClick={() => handleSearchRecord()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={<SearchOutlined />}>Tra cứu</Button>
-      </div>
-      <ResponsiveContainer className="mt-6" width="100%" height={400}>
-        <BarChart
-          width={500}
-          height={300}
-          data={statisticalRecord}
-          margin={{
-            top: 5, right: 30, left: 20, bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Date" name="Ngày"/>
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="Count" name="Số lượng" fill="#D2691E" />
-        </BarChart>
-      </ResponsiveContainer>
-
-      <hr className="my-8 border-gray-300"/>
-      
       <h1 className="text-2xl font-bold mb-4 text-darkmagenta">Hồ sơ bệnh án</h1>
       <div className="flex flex-wrap justify-between">
         <div className="w-1/4">
@@ -406,7 +295,9 @@ const DataStatisticsManagementByAdmin = () => {
           value={dateEndMedical ? moment(dateEndMedical, 'YYYY-MM-DD') : null}
           onChange={(date, dateString) => setDateEndMedical(dateString)}
         />
-        <Button onClick={() => handleSearchMedical()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={<SearchOutlined />}>Tra cứu</Button>
+        <Button onClick={() => handleSearchMedical()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={loading ? <Spin /> : <SearchOutlined />} disabled={loading}>
+          {loading ? 'Loading...' : 'Tra cứu'}
+        </Button>
       </div>
       <ResponsiveContainer className="mt-6" width="100%" height={400}>
         <BarChart
@@ -425,8 +316,142 @@ const DataStatisticsManagementByAdmin = () => {
           <Bar dataKey="Count" name="Số lượng" fill="#8B008B" />
         </BarChart>
       </ResponsiveContainer>
+
+      <hr className="my-8 border-gray-300"/>
+
+      <h1 className="text-2xl font-bold mb-4 text-limegreen">Tài khoản</h1>
+      <div className="flex items-center mt-6 mb-5 bg-limegreen p-4 rounded w-72">
+        <FaUser className="text-4xl mr-4 text-white" />
+        <div className="flex flex-col">
+          <h2 className="text-base font-medium text-white">Số lượng tài khoản: <span className="font-bold">{totalAccount}</span></h2>
+          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center mb-4">
+        <DatePicker
+          className="w-60 mr-3 mb-2"
+          placeholder="Chọn ngày bắt đầu"
+          value={dateStartAccount ? moment(dateStartAccount, 'YYYY-MM-DD') : null}
+          onChange={(date, dateString) => setDateStartAccount(dateString)}
+        />
+        <DatePicker
+          className="w-60 mr-3 mb-2"
+          placeholder="Chọn ngày kết thúc"
+          value={dateEndAccount ? moment(dateEndAccount, 'YYYY-MM-DD') : null}
+          onChange={(date, dateString) => setDateEndAccount(dateString)}
+        />
+        <Button onClick={() => handleSearchAccount()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={loading ? <Spin /> : <SearchOutlined />} disabled={loading}>
+          {loading ? 'Loading...' : 'Tra cứu'}
+        </Button>
+      </div>
+      <ResponsiveContainer className="mt-6" width="100%" height={400}>
+        <BarChart
+          width={500}
+          height={300}
+          data={statisticalAccount}
+          margin={{
+            top: 5, right: 30, left: 20, bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="Date" name="Ngày"/>
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="Count" name="Số lượng" fill="#32CD32" />
+        </BarChart>
+      </ResponsiveContainer>
+
+      <hr className="my-8 border-gray-300"/>
+
+      <h1 className="text-2xl font-bold mb-4 text-blue2">Phiếu khám</h1>
+      <div className="flex items-center mt-6 mb-5 bg-blue2 p-4 rounded w-72">
+        <IoTicket className="text-4xl mr-4 text-white" />
+        <div className="flex flex-col">
+          <h2 className="text-base font-medium text-white">Số lượng phiếu khám: <span className="font-bold">{totalTicket}</span></h2>
+          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center mb-4">
+        <DatePicker
+          className="w-60 mr-3 mb-2"
+          placeholder="Chọn ngày bắt đầu"
+          value={dateStartTicket ? moment(dateStartTicket, 'YYYY-MM-DD') : null}
+          onChange={(date, dateString) => setDateStartTicket(dateString)}
+        />
+        <DatePicker
+          className="w-60 mr-3 mb-2"
+          placeholder="Chọn ngày kết thúc"
+          value={dateEndTicket ? moment(dateEndTicket, 'YYYY-MM-DD') : null}
+          onChange={(date, dateString) => setDateEndTicket(dateString)}
+        />
+        <Button onClick={() => handleSearchTicket()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={loading ? <Spin /> : <SearchOutlined />} disabled={loading}>
+          {loading ? 'Loading...' : 'Tra cứu'}
+        </Button>
+      </div>
+      <ResponsiveContainer className="mt-6" width="100%" height={400}>
+        <BarChart
+          width={500}
+          height={300}
+          data={statisticalTicket}
+          margin={{
+            top: 5, right: 30, left: 20, bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="Date" name="Ngày"/>
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="Count" name="Số lượng" fill="#0000FF" />
+        </BarChart>
+      </ResponsiveContainer>
+
+      <hr className="my-8 border-gray-300"/>
+      
+      <h1 className="text-2xl font-bold mb-4 text-chocolate">Hồ sơ bệnh nhân</h1>
+      <div className="flex items-center mt-6 mb-5 bg-chocolate p-4 rounded w-72">
+        <FaFileAlt className="text-4xl mr-4 text-white" />
+        <div className="flex flex-col">
+          <h2 className="text-base font-medium text-white">Số lượng hồ sơ: <span className="font-bold">{totalRecord}</span></h2>
+          <p className="text-xs text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center mb-4">
+        <DatePicker
+          className="w-60 mr-3 mb-2"
+          placeholder="Chọn ngày bắt đầu"
+          value={dateStartRecord ? moment(dateStartRecord, 'YYYY-MM-DD') : null}
+          onChange={(date, dateString) => setDateStartRecord(dateString)}
+        />
+        <DatePicker
+          className="w-60 mr-3 mb-2"
+          placeholder="Chọn ngày kết thúc"
+          value={dateEndRecord ? moment(dateEndRecord, 'YYYY-MM-DD') : null}
+          onChange={(date, dateString) => setDateEndRecord(dateString)}
+        />
+        <Button onClick={() => handleSearchRecord()} className="bg-blue-700 text-white mb-2" htmlType="submit" icon={loading ? <Spin /> : <SearchOutlined />} disabled={loading}>
+          {loading ? 'Loading...' : 'Tra cứu'}
+        </Button>
+      </div>
+      <ResponsiveContainer className="mt-6" width="100%" height={400}>
+        <BarChart
+          width={500}
+          height={300}
+          data={statisticalRecord}
+          margin={{
+            top: 5, right: 30, left: 20, bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="Date" name="Ngày"/>
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="Count" name="Số lượng" fill="#D2691E" />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
-    
   );
 }
 
