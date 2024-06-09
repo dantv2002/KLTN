@@ -108,7 +108,7 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
               className="bg-red-600 text-white px-10 rounded-md"
               onClick={closeFormLogin}
             >
-              Close
+              Thoát
             </Button>
           </div>
         </Form>

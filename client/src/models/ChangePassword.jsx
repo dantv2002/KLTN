@@ -85,7 +85,7 @@ const ChangePassword = ({closeFormChangePassword}) => {
                     className="bg-red-600 text-white px-10 rounded-md"
                     onClick={closeFormChangePassword}
                     >
-                        Đóng
+                        Thoát
                     </Button>
                 </div>
             </Form>

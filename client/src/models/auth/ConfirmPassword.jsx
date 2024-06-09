@@ -57,7 +57,7 @@ const ConfirmPassword = ({closeFormConfirm}) => {
                         className="bg-red-600 text-white px-10 rounded-md"
                         onClick={closeFormConfirm}
                         >
-                            Close
+                            Thoát
                         </Button>
                     </div>
                 </Form>
