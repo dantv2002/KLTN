@@ -132,7 +132,7 @@ public class ScheduleService {
 
     public void deleteSchedule(String idDoctor, String idSchedule) {
         log.info("Deleting schedule");
-        healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        HealthcareStaffDto doctor = healthcareStaffService.get(idDoctor, true); // Check doctor exists
         ScheduleDto scheduleDto = this.get(idSchedule);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -151,12 +151,16 @@ public class ScheduleService {
                     HttpStatus.BAD_REQUEST.value());
         }
         this.delete(idSchedule); // Delete schedule
+        if (!this.isCheckSchedule(idDoctor)) {
+            doctor.setIsSchedule(false);
+            healthcareStaffService.update(doctor);
+        }
         log.info("Deleted schedule");
     }
 
     public void updateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Updating schedule");
-        healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        HealthcareStaffDto doctor = healthcareStaffService.get(idDoctor, true); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
@@ -170,11 +174,18 @@ public class ScheduleService {
             }
             this.save(scheduleDto);
         }
+        if (doctor.getIsSchedule() == null) {
+            doctor.setIsSchedule(true);
+            healthcareStaffService.update(doctor);
+        } else if (!doctor.getIsSchedule()) {
+            doctor.setIsSchedule(true);
+            healthcareStaffService.update(doctor);
+        }
     }
 
     public void createSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Creating schedule for doctor: {}", idDoctor);
-        healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        HealthcareStaffDto doctor = healthcareStaffService.get(idDoctor, true); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
@@ -185,6 +196,13 @@ public class ScheduleService {
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             scheduleDto.setDoctorId(idDoctor);
             this.save(scheduleDto);
+        }
+        if (doctor.getIsSchedule() == null) {
+            doctor.setIsSchedule(true);
+            healthcareStaffService.update(doctor);
+        } else if (!doctor.getIsSchedule()) {
+            doctor.setIsSchedule(true);
+            healthcareStaffService.update(doctor);
         }
     }
 
@@ -293,5 +311,15 @@ public class ScheduleService {
                                     + " đã tồn tại",
                             HttpStatus.BAD_REQUEST.value());
                 });
+    }
+
+    public Boolean isCheckSchedule(String idDoctor) {
+        log.info("Check schedule of doctor: {}", idDoctor);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return scheduleRepository.existsByDoctorIdAndDateGreaterThanOrEqual(idDoctor, calendar.getTime()) > 0;
     }
 }

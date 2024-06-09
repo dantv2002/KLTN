@@ -1,5 +1,6 @@
 package com.hospitalx.emr.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -13,6 +14,7 @@ import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.NurseLevel;
 import com.hospitalx.emr.common.StaffType;
 import com.hospitalx.emr.exception.CustomException;
+import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.entitys.HealthcareStaff;
 import com.hospitalx.emr.repositories.HealthcareStaffRepository;
@@ -109,9 +111,12 @@ public class HealthcareStaffService {
         parts[2] = parts[2].isEmpty() ? parts[2] : "^" + parts[2] + "$";
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         if (role.equals(("ROLE_PATIENT"))) {
+            List<String> idDepartments = departmentService.getAll("", "", Pageable.unpaged()).stream()
+                    .map(department -> department.getId()).toList();
+            
             Page<HealthcareStaff> entities = healthcareStaffRepository.findByDoctorForPatient(StaffType.DOCTOR,
                     parts[0], parts[1], parts[2],
-                    parts[3], pageable);
+                    parts[3], idDepartments, pageable);
             return entities.map(entity -> {
                 HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
                 String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false).getNameDepartment();
@@ -213,5 +218,12 @@ public class HealthcareStaffService {
                 log.error("Staff type is invalid");
                 throw new CustomException("Loại nhân viên không hợp lệ", HttpStatus.BAD_REQUEST.value());
         }
+    }
+
+    public List<HealthcareStaffDto> getAllDoctorSchedule() {
+        log.info("Get all doctor schedule");
+        List<HealthcareStaff> entities = healthcareStaffRepository.findByAllDoctorSchedule();
+        log.info("Get all doctor schedule success with total staffs: " + entities.size());
+        return entities.stream().map(entity -> modelMapper.map(entity, HealthcareStaffDto.class)).toList();
     }
 }
