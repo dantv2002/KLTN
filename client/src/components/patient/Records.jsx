@@ -1,6 +1,6 @@
 import axios from "axios";
 import moment from "moment"
-import { message, Button, Table, Form, Modal, Space, Input, DatePicker, Select } from "antd";
+import { message, Button, Table, Form, Modal, Space, Input, DatePicker, Select, Spin } from "antd";
 import { useState, useEffect } from "react";
 import { deleteRecord, getAllRecordsPatient, newRecordsPatient, updateRecordPatient, getBiosignalPatient } from "../../Api";
 import {SearchOutlined} from "@ant-design/icons"
@@ -42,6 +42,7 @@ const Records = () => {
   const [idDelete, setIdDelete] = useState("");
   const [visibleDelete, setVisibleDelete] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingBiosignal, setLoadingBiosignal] = useState(false);
 
   // Enable/disable update
   const [editing, setEditing] = useState(false);
@@ -186,6 +187,7 @@ const Records = () => {
     const fetchPatientBiosignal = async() => {
       if (searchDateStart && searchDateEnd) {
         try {
+          setLoadingBiosignal(true);
           let datestart = moment(searchDateStart).format("DD/MM/YYYY");
           let dateend = moment(searchDateEnd).format("DD/MM/YYYY");
           let response = await axios.post(getBiosignalPatient(idRecord), {
@@ -200,6 +202,8 @@ const Records = () => {
           }
         } catch(error) {
           message.error(error.response.data.Message)
+        } finally {
+          setLoadingBiosignal(false);
         }
       }
     }
@@ -531,7 +535,9 @@ const Records = () => {
           value={dateEnd ? moment(dateEnd, 'YYYY-MM-DD') : null}
           onChange={(date, dateString) => setDateEnd(dateString)}
         />
-        <Button onClick={() => handleSearchBloodPressure()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tra cứu</Button>
+        <Button onClick={() => handleSearchBloodPressure()} className="bg-blue-700 text-white" htmlType="submit" icon={loadingBiosignal ? <Spin /> : <SearchOutlined />} disabled={loadingBiosignal}>
+          {loadingBiosignal ? 'Loading...' : 'Tra cứu'}
+        </Button>
         <ResponsiveContainer className="mt-6" width="100%" height={400}>
           <LineChart
             width={500}

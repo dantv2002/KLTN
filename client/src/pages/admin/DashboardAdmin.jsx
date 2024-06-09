@@ -102,7 +102,7 @@ const DashboardAdmin = () => {
                 setSelectedMenuKey('5');
                 break;
             case '/admin/medical':
-                setheaderTitle('Quản lý bệnh án');
+                setheaderTitle('Thanh lý bệnh án');
                 setSelectedMenuKey('6');
                 break;
             case '/admin/schedule':
@@ -146,7 +146,7 @@ const DashboardAdmin = () => {
                 break;
             case '6':
                 navigate('/admin/medical')
-                setheaderTitle('Quản lý bệnh án')
+                setheaderTitle('Thanh lý bệnh án')
                 break;
             case '7':
                 navigate('/admin/schedule')
@@ -207,7 +207,7 @@ const DashboardAdmin = () => {
                 {
                     key: '6',
                     icon: <FaBookMedical className="w-4 h-4"/>,
-                    label: 'Bệnh án',
+                    label: 'Thanh lý bệnh án',
                 },
                 {   
                     key: '7',
