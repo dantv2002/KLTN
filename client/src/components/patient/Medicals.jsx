@@ -1,6 +1,6 @@
 import { getAllRecordsPatient, getMedicalPatient } from "../../Api";
 import axios from "axios";
-import { message, Button, Space, Table, Modal, Input, Collapse } from "antd";
+import { message, Button, Space, Table, Modal, Input, Collapse, DatePicker } from "antd";
 import { useState, useEffect } from "react";
 import { SearchOutlined } from "@ant-design/icons"
 import Loading from "../../hook/Loading";
@@ -106,10 +106,10 @@ const Medicals = () => {
       DaysTreatment,
       DateDischarge,
       DateAdmission,
-      DepartmentAdmission,
+      DepartmentAdmissionName,
       DiagnosisAdmission,
       DateTransfer,
-      DepartmentTransfer,
+      DepartmentTransferName,
       DiagnosisTransfer
     } = medical;
   
@@ -232,21 +232,20 @@ const Medicals = () => {
                 <p className="text-base font-rubik"><b>Chẩn đoán khi ra viện:</b> {DiagnosisDischarge}</p>
                 <p className="text-base font-rubik"><b>Kết quả:</b> {changResult(Result)}</p>
                 <p className="text-base font-rubik"><b>Loại bệnh án:</b> {changeType(Type)}</p>
-                <p className="text-base font-rubik"><b>Khoa:</b> {DepartmentName}</p>
                 <p className="text-base font-rubik"><b>Bác sĩ khám:</b> {DoctorNameTreatment}</p>
               </Panel>
             </Collapse>
             <Collapse className="w-full mt-2 text-lg font-rubik">
               <Panel header="Thông tin nhập viện" key="2">
                 <p className="text-base font-rubik"><b>Ngày nhập viện:</b> {DateAdmission}</p>
-                <p className="text-base font-rubik"><b>Khoa nhập viện:</b> {DepartmentAdmission}</p>
+                <p className="text-base font-rubik"><b>Khoa nhập viện:</b> {DepartmentAdmissionName}</p>
                 <p className="text-base font-rubik"><b>Chẩn đoán nhập viện:</b> {DiagnosisAdmission}</p>
               </Panel>
             </Collapse>
             <Collapse className="w-full mt-2 text-lg font-rubik">
               <Panel header="Thông tin chuyển khoa" key="3">
                 <p className="text-base font-rubik"><b>Ngày chuyển khoa:</b> {DateTransfer}</p>
-                <p className="text-base font-rubik"><b>Khoa chuyển sang:</b> {DepartmentTransfer}</p>
+                <p className="text-base font-rubik"><b>Khoa chuyển sang:</b> {DepartmentTransferName}</p>
                 <p className="text-base font-rubik"><b>Chẩn đoán của khoa:</b> {DiagnosisTransfer}</p>
               </Panel>
             </Collapse>
@@ -368,15 +367,24 @@ const Medicals = () => {
       render: (_, __, index) => index + 1 + pageMedical * 10,
     },
     {
-      title: 'Ngày khám',
-      dataIndex: 'Date',
+      title: 'Thời gian khám/nhập viện',
       key: 'Date',
+      render: (text, record) => {
+        if (record.Type === 'OUTPATIENT') {
+          return <span>{record.Date}</span>;
+        } else if (record.Type === 'INPATIENT' && record.DateAdmission) {
+          return <span>{record.DateAdmission}</span>;
+        } else {
+          return <span>N/A</span>;
+        }
+      },
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div className="w-full md:w-64 p-2">
-          <Input
-            placeholder="Nhập ngày khám"
-            value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          <DatePicker
+            placeholder="Chọn thời gian khám"
+            format="DD/MM/YYYY"
+            value={selectedKeys[0] ? moment(selectedKeys[0], 'DD/MM/YYYY') : null}
+            onChange={(date) => setSelectedKeys(date ? [date.format('DD/MM/YYYY')] : [])}
             onPressEnter={() => confirm()}
             style={{ width: 188, marginBottom: 8, display: 'block' }}
           />
@@ -399,11 +407,13 @@ const Medicals = () => {
         <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
       onFilter: (value, record) => {
-        const date = moment(record.Date, 'DD/MM/YYYY').date().toString().padStart(2, '0');
-        const filterValue = value.toString().padStart(2, '0');
-        return date === filterValue || date === value;
+        const filterValue = moment(value, 'DD/MM/YYYY');
+        const dateOutpatient = moment(record.Date, 'HH:mm DD/MM/YYYY', true);
+        const dateInpatient = moment(record.DateAdmission, 'HH:mm DD/MM/YYYY', true);
+        return (record.Type === 'OUTPATIENT' && dateOutpatient.isSame(filterValue, 'day')) ||
+               (record.Type === 'INPATIENT' && dateInpatient.isSame(filterValue, 'day'));
       },
-    },
+    },    
     {
       title: 'Lí do',
       dataIndex: 'Reason',
@@ -412,24 +422,22 @@ const Medicals = () => {
       sortDirections: ['ascend', 'descend'],
     },
     {
-      title: 'Các cơ quan',
+      title: 'Kết quả khám các cơ quan',
       dataIndex: 'ExamineOrgans',
       key: 'ExamineOrgans',
       sorter: (a, b) => a.ExamineOrgans.localeCompare(b.ReasonExamineOrgans),
       sortDirections: ['ascend', 'descend'],
     },
     {
-      title: 'Chẩn đoán ban đầu',
-      dataIndex: 'InitialDiagnosis',
-      key: 'InitialDiagnosis',
-      sorter: (a, b) => a.InitialDiagnosis.localeCompare(b.InitialDiagnosis),
-      sortDirections: ['ascend', 'descend'],
-    },
-    {
-      title: 'Chẩn đoán xuất viện',
+      title: 'Kết quả xuất viện',
       dataIndex: 'DiagnosisDischarge',
       key: 'DiagnosisDischarge',
-      sorter: (a, b) => a.DiagnosisDischarge.localeCompare(b.DiagnosisDischarge),
+      render: (text) => text ? text : 'Chưa xuất viện',
+      sorter: (a, b) => {
+        const textA = a.DiagnosisDischarge ? a.DiagnosisDischarge : 'Chưa xuất viện';
+        const textB = b.DiagnosisDischarge ? b.DiagnosisDischarge : 'Chưa xuất viện';
+        return textA.localeCompare(textB);
+      },
       sortDirections: ['ascend', 'descend'],
     },
     {
