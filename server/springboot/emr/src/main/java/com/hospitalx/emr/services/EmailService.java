@@ -25,7 +25,7 @@ public class EmailService {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
                 messageHelper.setTo(ToEmail);
-                messageHelper.setSubject("EMR - Mã xác minh");
+                messageHelper.setSubject("Bệnh viện X - Mã xác minh");
                 //
                 Context context = new Context();
                 context.setVariable("UserName", UserName);
@@ -45,7 +45,7 @@ public class EmailService {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
                 messageHelper.setTo(ToEmail);
-                messageHelper.setSubject("EMR - Phiếu Khám Bệnh");
+                messageHelper.setSubject("Bệnh viện X - Phiếu Khám Bệnh");
                 //
                 Context context = new Context();
                 context.setVariable("ticket", ticket);
