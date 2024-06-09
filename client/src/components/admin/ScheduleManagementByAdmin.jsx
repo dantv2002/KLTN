@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartmentAdmin, deleteSchedule } from "../../Api";
 import axios from "axios";
-import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker, InputNumber } from "antd";
+import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker } from "antd";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
@@ -28,8 +28,6 @@ const ScheduleManagementByAdmin = () => {
     const [date, setDate] = useState("");
     const [time, setTime] = useState("");
     const [localtion2, setLocation2] = useState("");
-    const [number, setNumber] = useState(0);
-    const [callNumber, setCallNumber] = useState(0);
     const [clinic, setClinic] = useState("");
     const [visibleUpdate, setVisibleUpdate] = useState(false);
     const [formUpdate] = Form.useForm();
@@ -309,16 +307,12 @@ const ScheduleManagementByAdmin = () => {
       setTime(schedules.Time);
       setLocation2(schedules.Location);
       setClinic(schedules.Clinic);
-      setNumber(parseInt(schedules.Number));
-      setCallNumber(parseInt(schedules.CallNumber));
       setIdDoctor(schedules.DoctorId);
       formUpdate.setFieldsValue({
         date: moment(schedules.Date, "DD/MM/YYYY"),
         time: schedules.Time,
         location: schedules.Location,
         clinic: schedules.Clinic,
-        number: parseInt(schedules.Number),
-        callnumber: parseInt(schedules.CallNumber),
       });
       setVisibleUpdate(true);     
     };
@@ -335,8 +329,6 @@ const ScheduleManagementByAdmin = () => {
           Time: time,
           Location: localtion2,
           Clinic: clinic,
-          Number: parseInt(number),
-          CallNumber: parseInt(callNumber),
           DoctorId: idDoctor,
         }];
         
@@ -518,28 +510,18 @@ const ScheduleManagementByAdmin = () => {
                 <Form.Item label="Vị trí" rules={[{ required: true, message: 'Vị trí không được để trống!' }]}>
                   <Input
                     className="w-full"
-                    placeholder="Chọn ngày khám"
+                    placeholder="Nhập vị trí khám"
                     value={schedule.location}
                     onChange={(e) => handleLocationChange(e.target.value, index)}
                   />
                 </Form.Item>
                 <Form.Item label="Phòng" rules={[{ required: true, message: 'Phòng không được để trống!' }]}>
-                  <Select
-                    className="w-96 mt-3 mr-3"
-                    placeholder="Chọn phòng khám"
-                    onChange={(value) => handleClinicChange(value, index)}
-                  >
-                    <Select.Option value="1">Phòng 1</Select.Option>
-                    <Select.Option value="2">Phòng 2</Select.Option>
-                    <Select.Option value="3">Phòng 3</Select.Option>
-                    <Select.Option value="4">Phòng 4</Select.Option>
-                    <Select.Option value="5">Phòng 5</Select.Option>
-                    <Select.Option value="6">Phòng 6</Select.Option>
-                    <Select.Option value="7">Phòng 7</Select.Option>
-                    <Select.Option value="8">Phòng 8</Select.Option>
-                    <Select.Option value="9">Phòng 9</Select.Option>
-                    <Select.Option value="10">Phòng 10</Select.Option>
-                  </Select>
+                  <Input
+                    className="w-full"                
+                    placeholder="Nhập phòng khám"
+                    value={schedule.clinic}
+                    onChange={(e) => handleClinicChange(e.target.value, index)}
+                  />
                 </Form.Item>
               </Form>
             </div>
@@ -610,39 +592,12 @@ const ScheduleManagementByAdmin = () => {
               />
             </Form.Item>
             <Form.Item name="clinic" label="Phòng" rules={[{ required: true, message: 'Phòng không được để trống!' }]}>
-              <Select
-                placeholder="Chọn phòng"
+              <Input
+                placeholder="Nhập phòng"
+                type="text"
+                className="w-full"
                 value={clinic}
-                onChange={(value) => setClinic(value)}
-              >
-                <Select.Option value="1">Phòng 1</Select.Option>
-                <Select.Option value="2">Phòng 2</Select.Option>
-                <Select.Option value="3">Phòng 3</Select.Option>
-                <Select.Option value="4">Phòng 4</Select.Option>
-                <Select.Option value="5">Phòng 5</Select.Option>
-                <Select.Option value="6">Phòng 6</Select.Option>
-                <Select.Option value="7">Phòng 7</Select.Option>
-                <Select.Option value="8">Phòng 8</Select.Option>
-                <Select.Option value="9">Phòng 9</Select.Option>
-                <Select.Option value="10">Phòng 10</Select.Option>
-              </Select>
-            </Form.Item>
-            <Form.Item name="number" label="Số thứ tự" rules={[{ required: true, message: 'Số thứ tự không được để trống!' }, { type: 'number', message: 'Vui lòng nhập một số!' }]}>
-              <InputNumber
-                type="text"
-                className="w-full"
-                placeholder="Nhập số thứ tự"
-                value={number}
-                onChange={(value) => setNumber(value)}
-              />
-            </Form.Item>
-            <Form.Item name="callnumber" label="Đã gọi tới" rules={[{ required: true, message: 'Số đã gọi không được để trống!' }, { type: 'number', message: 'Vui lòng nhập một số!' }]}>
-              <InputNumber
-                type="text"
-                className="w-full"
-                placeholder="Nhập số đã gọi"
-                value={callNumber}
-                onChange={(value) => setCallNumber(value)}
+                onChange={(e) => setClinic(e.target.value)}
               />
             </Form.Item>
           </Form>

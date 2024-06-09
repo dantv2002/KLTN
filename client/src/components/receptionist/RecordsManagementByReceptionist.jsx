@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createRecordReception, getDepartmentReceptionist, getListSchedule, getRecordReceptionist, registerNumberSchedule, updateRecordReception } from "../../Api";
 import { useLocation } from "react-router-dom";
 import Loading from "../../hook/Loading";
+import logo from "../../assets/img/logo3.png"
 
 const RecordsManagementByReceptionist = () => {
 
@@ -49,6 +50,9 @@ const RecordsManagementByReceptionist = () => {
   const [pageDepartment, setPageDepartment] = useState("0");
   const [totalItemsDepartment, setTotalItemsDepartment] = useState("0");
   const [loading, setLoading] = useState(false);
+  const [ticket, setTicket] = useState([]);
+  const [visibleTicket, setVisibleTicket] = useState(false);
+  const [nameDepartment, setNameDepartment] = useState("");
 
   // Enable/disable update
   const [editing, setEditing] = useState(false);
@@ -147,7 +151,7 @@ const RecordsManagementByReceptionist = () => {
       key: 'options',
       render: (_, deparments) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleReadSchedules(deparments.Id)}>
+          <Button type="link" onClick={() => handleReadSchedules(deparments)}>
             Xem lịch khám
           </Button>
         </Space>
@@ -371,10 +375,11 @@ const RecordsManagementByReceptionist = () => {
     setEditing(false);
   };
 
-  const handleReadSchedules = async(id) => {
+  const handleReadSchedules = async(department) => {
     try{
-      setLoading(true)
-      let response = await axios.get(getListSchedule(id),{
+      setNameDepartment(department.NameDepartment);
+      setLoading(true);
+      let response = await axios.get(getListSchedule(department.Id),{
         withCredentials: true
       })
       if (response.status === 200){
@@ -405,6 +410,8 @@ const RecordsManagementByReceptionist = () => {
         setDepartment("");
         setSearchDepartment("");
         setPageDepartment("0");
+        setTicket(response.data.Data.Schedule)
+        setVisibleTicket(true);
         message.success(response.data.Message)
       }
     }catch(error){
@@ -452,6 +459,144 @@ const RecordsManagementByReceptionist = () => {
 
   const handleChangPageDepartment = (page) => {
     setPageRecord(page-1);
+  }
+
+  const handleCancelTicket = () => {
+    setVisibleTicket(false);
+  }
+
+  const tranferTime = (value) => {
+    if (value === "MORNING"){
+      return "Buổi sáng"
+    }
+    if (value === "AFTERNOON"){
+      return "Buổi chiều"
+    }
+  }
+
+  const handlePrintTicket = () => {
+    const ticketTemplate = `
+      <!DOCTYPE html>
+      <html lang="vi">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Phiếu Đợi Khám Bệnh</title>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+              }
+              .container {
+                  width: 400px;
+                  margin: 0 auto;
+                  border: 1px solid #000;
+                  padding: 20px;
+                  text-align: center;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+              }
+              .header {
+                  font-size: 20px;
+                  font-weight: bold;
+                  margin-bottom: 10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  position: relative;
+              }
+              .header img {
+                  margin-right: 10px;
+              }
+              .underline {
+                  width: 100%;
+                  border-bottom: 2px dashed #000;
+                  position: absolute;
+                  bottom: -10px;
+                  left: 50%;
+                  transform: translateX(-50%);
+              }
+              .title {
+                  font-size: 24px;
+                  font-weight: bold;
+                  margin: 30px 0 10px;
+              }
+              .field {
+                  margin-bottom: 7px;
+                  font-size: 12px;
+              }
+              .flex-container {
+                  width: 70%;
+                  display: flex;
+                  justify-content: space-between;
+              }
+              .separator {
+                  width: 60%;
+                  align-items: center;
+                  border-top: 2px solid #000;
+                  margin: 20px auto;
+              }
+              .label {
+                  font-weight: bold;
+              }
+              .footer {
+                  margin-top: 10px;
+                  font-size: 12px;
+                  text-align: left;
+              }
+              .number {
+                  font-size: 100px;
+                  color: #007bff;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <img src="${logo}" alt="Logo" style="height: 30px;">
+                  BỆNH VIỆN X
+                  <div class="underline"></div>
+              </div>
+              <div class="title">PHIẾU ĐỢI KHÁM BỆNH</div>
+              <div class="field">
+                  <span class="label">Ngày khám:</span> ${ticket.Date}
+              </div>
+              <div class="field">
+                  <span class="label">Buổi khám:</span> ${tranferTime(ticket.Time)}
+              </div>
+              <div class="separator"></div>
+              <div class="field">
+                  <span class"label2">Số thứ tự của bạn:</span><br> <span class="number">${ticket.Number}</span>
+              </div>
+              <div class="field">
+                  <span class="label">Số thứ tự đang phục vụ:</span> ${ticket.CallNumber}
+              </div>
+              <div class="separator"></div>
+              <div class="flex-container">
+                  <div class="field">
+                      <span class="label">Khoa:</span> ${nameDepartment}
+                  </div>
+                  <div class="field">
+                      <span class="label">Tầng:</span> ${ticket.Location}
+                  </div>
+                  <div class="field">
+                      <span class="label">Phòng:</span> ${ticket.Clinic}
+                  </div>
+              </div>
+              <div class="footer">
+                  <p>Lưu ý:</p>
+                  <ul>
+                      <li>Vui lòng giữ gìn phiếu đợi để được phục vụ tốt nhất.</li>
+                      <li>Khi đến lượt, vui lòng di chuyển đến phòng khám đúng giờ.</li>
+                      <li>Nếu có bất kỳ thắc mắc nào, xin vui lòng liên hệ nhân viên y tế.</li>
+                  </ul>
+              </div>
+          </div>
+      </body>
+      </html>
+    `;
+    const newWindow = window.open(`${ticket.Id}`, '_blank');
+    newWindow.document.write(ticketTemplate);
   }
 
   return (
@@ -711,6 +856,21 @@ const RecordsManagementByReceptionist = () => {
             dataSource={dataSchedules}
             loading={{ indicator: <Loading/>, spinning: loading }}
           />
+        </Modal>
+        <Modal
+          title={<h1 className="text-2xl font-bold text-green-500 text-center mb-4">In phiếu khám</h1>}
+          visible={visibleTicket}
+          onOk={handlePrintTicket}
+          okText="In phiếu"
+          onCancel={handleCancelTicket}
+          cancelText="Thoát"
+          okButtonProps={{ className: "bg-blue-700" }}
+          cancelButtonProps={{ className: "bg-red-600" }}
+          width={700}
+        >
+          <div className="text-center">
+            <p className="text-blue-700 mb-4 text-[17px]">Hệ thống sẽ thực hiện in phiếu khám này cho bệnh nhân. Hãy nhấn in phiếu</p>
+          </div>
         </Modal>
     </div>
   )

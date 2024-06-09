@@ -210,6 +210,7 @@ const DiagnosisManagementByDoctor = () => {
 
   const handleSelectMedical = (medical) => {
     setIdMedical(medical.Id);
+    formInsert.setFieldValue({ IdMedical: medical.Id})
     setVisibleReadMedical(false);
   }
 
@@ -458,6 +459,7 @@ const DiagnosisManagementByDoctor = () => {
               listType="picture"
               onChange={handleImageUpload}
               onRemove={handleImageRemove}
+              accept=".jpg,.jpeg,.png"
             >
               <Button className="mt-3 mb-3" icon={<UploadOutlined />}>Tải ảnh lên</Button>
             </Upload>
@@ -528,16 +530,16 @@ const DiagnosisManagementByDoctor = () => {
           <Form.Item name="Method" label="Phương pháp" rules={[{ required: true, message: 'Vui lòng nhập phương pháp' }]} className="w-full">
             <Input />
           </Form.Item>
-          <Form.Item name="Content" label="Nội dung" rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]} className="w-full">
+          <Form.Item name="Content" label="Nội dung" rules={[{ required: true, message: 'Vui lòng nhập nộidung' }]} className="w-full">
             <Input />
           </Form.Item>
           <Form.Item name="Conclude" label="Chẩn đoán" rules={[{ required: true, message: 'Vui lòng nhập chẩn đoán' }]} className="w-full">
             <Input />
           </Form.Item>
-          <Form.Item name="MedicalId" label="Id bệnh án" rules={[{ required: true, message: 'Vui lòng chọn id bệnh án' }]} className="w-full">
-            <Input disabled={true} value={idMedical}/>
+          <Form.Item name="IdMedical" label="Id bệnh án" className="w-full">
+            <Input disabled={true} value={idMedical} rules={[{ required: true, message: 'Vui lòng chọn id bệnh án' }]}/>
             <Button className='mt-2 bg-cyan-400' onClick={() => handleReadMedical()}>
-              Chọn bệnh án
+                Chọn bệnh án
             </Button>
           </Form.Item>
         </Form>

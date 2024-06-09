@@ -2,7 +2,7 @@ import axios from "axios";
 import { getTicket } from "../../Api";
 import { useState, useEffect, useCallback } from "react";
 import { message, Button, Space, Select, Table, Input, TimePicker } from "antd";
-import { SearchOutlined } from "@ant-design/icons"
+import { SearchOutlined, FilterOutlined } from "@ant-design/icons"
 import Loading from "../../hook/Loading";
 import moment from "moment";
 
@@ -353,13 +353,14 @@ const Schedules = () => {
       title: 'Thời gian',
       dataIndex: 'Time',
       key: 'Time',
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div className="w-full md:w-64 p-2">
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
+        <div className="w-full md:w-40 p-2">
           <TimePicker
             format="HH:mm"
             defaultValue={selectedKeys[0] ? moment(selectedKeys[0], 'HH:mm') : null}
+            placeholder="Chọn thời gian"
             onChange={(time, timeString) => setSelectedKeys(timeString ? [timeString] : [])}
-            style={{ width: 188, marginBottom: 8, display: 'block' }}
+            style={{ width: 140, marginBottom: 8, display: 'block' }}
             okButtonProps={{ style: { backgroundColor: '#007bff' } }}
           />
           <Button
@@ -371,9 +372,6 @@ const Schedules = () => {
             style={{ width: 90, marginRight: 8 }}
           >
             Lọc
-          </Button>
-          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
-            Đặt lại
           </Button>
         </div>
       ),
@@ -488,9 +486,9 @@ const Schedules = () => {
           onClick={() => handleSearch()}
           className="bg-blue-700 text-white"
           htmlType="submit"
-          icon={<SearchOutlined />}
+          icon={<FilterOutlined />}
         >
-          Tìm kiếm
+          Lọc
         </Button>
       </div>
       <Table 

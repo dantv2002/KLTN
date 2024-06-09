@@ -31,7 +31,9 @@ const ScreenReceptionByNurse = () => {
       <div>
         {nextNumber !== 0 ? (
           <p className="text-2xl font-rubik text-center">
-            Mời bệnh nhân có số thứ tự tiếp theo là <span className="font-bold">{nextNumber}</span> vào khám bệnh
+            <p className="font-bold text-xl inline-block">Mời bệnh nhân vào khám bệnh tiếp theo có số thứ tự là</p>
+            <br/>
+            <p className="font-bold text-9xl text-amber-500 inline-block mt-6">{nextNumber}</p>
           </p>
         ) : (
           <p className="text-2xl font-rubik text-center">Bệnh nhân chờ trong giây lát để được gọi khám bệnh</p>

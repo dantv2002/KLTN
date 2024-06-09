@@ -1,7 +1,7 @@
 import axios from "axios"
 import { useState, useEffect, useCallback } from "react"
 import { message, Input, Button, Space, Table, Modal } from "antd"
-import { UserAddOutlined, SearchOutlined } from "@ant-design/icons"
+import { UserAddOutlined, SearchOutlined, FundProjectionScreenOutlined } from "@ant-design/icons"
 import { HiMiniSpeakerWave } from "react-icons/hi2";
 import { callNext, getTicketByNurse, updateTicket } from "../../Api"
 import Loading from "../../hook/Loading";
@@ -96,6 +96,7 @@ const ReceptionManagementByNurse = () => {
       })
       if (response.status === 200){
         message.success(response.data.Message);
+        fetchTicket();
       }
     }catch(error){
       message.error(error.response.data.Message);
@@ -135,6 +136,10 @@ const ReceptionManagementByNurse = () => {
     if (callNumber !== 0) {
       speakVN(`Xin mời bệnh nhân có số thứ tự tiếp theo là ${callNumber} vào khám bệnh xin nhắc lại bệnh nhân có số thứ tự tiếp theo là ${callNumber} vào khám bệnh`);
     }
+  }
+
+  const handleCallScreen = () => {
+    window.open('/call', '_blank')
   }
 
   const columns = [
@@ -195,22 +200,33 @@ const ReceptionManagementByNurse = () => {
   return (
     <div>
       <h1>Hãy nhập thông tin phòng khám và vị trí khám</h1>
-      <Input
-        className="w-96 mt-3 mr-3"
-        placeholder="Nhập phòng khám"
-        value={clinic}
-        onChange={(e) => setClinic(e.target.value)}
-      />
-      <br/>
-      <Input
-        className="w-96 mt-3 mr-3"
-        placeholder="Nhập vị trí khám"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-      />
+      <div className="flex items-center">
+        <div className="mr-10">
+          <Input
+            className="w-96 mt-3 mr-3"
+            placeholder="Nhập phòng khám"
+            value={clinic}
+            onChange={(e) => setClinic(e.target.value)}
+          />
+          <br/>
+          <Input
+            className="w-96 mt-3 mr-3"
+            placeholder="Nhập vị trí khám"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
+        </div>
+        <div className="relative w-24 h-20 border border-gray-300 bg-rose-400 rounded flex items-center justify-center">
+          <span className="absolute transform text-center top-3 font-rubik font-semibold">Đang gọi số</span>
+          <span className="absolute font-bold text-2xl mt-5 text-lime-300">
+            {callNumber}
+          </span>
+        </div>
+      </div>
       <br/>
       <Button onClick={() => handleCallPatient()} className="bg-green-500 text-white mt-3" htmlType="submit" icon={<UserAddOutlined/>} >Gọi bệnh nhân</Button>
-      <Button onClick={() => handleTextToSpeechVN()} className="bg-cyan-400 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát loa ngoài</Button>
+      <Button onClick={() => handleTextToSpeechVN()} className="bg-blue-600 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát loa ngoài</Button>
+      <Button onClick={() => handleCallScreen()} className="bg-cyan-400 text-white mt-3 ml-5" htmlType="submit" icon={<FundProjectionScreenOutlined/>} >Màn hình ngoài</Button>
       <hr className="my-8 border-gray-300"/>
       <Input
         className="w-96 mt-3 mr-3"
