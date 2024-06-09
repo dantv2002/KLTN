@@ -32,7 +32,7 @@ const Navbar = () => {
   const [idSchedule, setIdSchedule] = useState("");
   const [dataDoctors, setDataDoctors] = useState([]);
   const [keyword, setKeyword] = useState("");
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(null);
   const [department, setDepartment] = useState(null);
   const [gender, setGender] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -525,12 +525,12 @@ const Navbar = () => {
       <div className=" fixed w-full z-10 text-white">
         <div>
           <div className=" flex flex-row justify-between p-5 md:px-32 px-5 bg-blue-700 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]">
-            <div className="flex flex-row items-center cursor-pointer" onClick={() => window.location.href = '/'}>
+            <div className="flex flex-row items-center cursor-pointer bg-blue-900 bg-opacity-70 p-2 rounded-xl border-2 border-white shadow-lg hover:scale-105 hover:bg-opacity-90 hover:shadow-xl transition-all duration-300 hover:animate-pulse" onClick={() => window.location.href = '/'}>
               <div className="flex items-center relative">
-                <img className="h-auto min-w-[10px] max-w-[40px]" src={logo} alt="logo" />
+                <img className="h-auto min-w-[10px] max-w-[40px] shadow-lg hover:shadow-white" src={logo} alt="logo" />
                 <div className="ml-2 flex flex-col">
-                  <span className="text-[13px] font-rubik font-semibold text-white">Bệnh viện X</span>
-                  <span className="text-[10px] font-medium font-rubik text-white relative">
+                  <span className="text-[13px] font-rubik font-semibold text-white drop-shadow-md hover:text-yellow-500">Bệnh viện X</span>
+                  <span className="text-[10px] font-medium font-rubik text-white drop-shadow-md hover:text-yellow-500">
                     Trung tâm sức khỏe
                   </span>
                 </div>
@@ -819,17 +819,25 @@ const Navbar = () => {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
           />
-          <Input
+          <Select
             className="w-40 mt-3 mr-3"
             placeholder="Tìm theo chức danh"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+            onChange={(value) => setTitle(value)}
+            allowClear
+          >
+            <Select.Option value="Ths">Ths</Select.Option>
+            <Select.Option value="TS">TS</Select.Option>
+            <Select.Option value="BS">BS</Select.Option>
+            <Select.Option value="BSCKI">BSCKI</Select.Option>
+            <Select.Option value="BSCKII">BSCKII</Select.Option>
+          </Select>
           <Select
             className="w-40 mt-3 mr-3"
             placeholder="Chọn khoa"
             value={department}
             onChange={(value) => setDepartment(value)}
+            allowClear
           >
             {listDepartment.map((department) => (
               <Select.Option 

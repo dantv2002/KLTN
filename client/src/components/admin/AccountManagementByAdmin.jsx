@@ -153,7 +153,7 @@ const AccountManagementByAdmin = () => {
 
   const columnsAccounts = [
     {
-      title: 'Số thứ tự',
+      title: 'STT',
       dataIndex: 'sequenceNumber',
       key: 'sequenceNumber',
       render: (_, __, index) => index + 1 + page * 10,
@@ -199,12 +199,19 @@ const AccountManagementByAdmin = () => {
       sortDirections: ['ascend', 'descend'],
     },
     {
+      title: 'Loại',
+      dataIndex: 'authProvider',
+      key: 'authProvider',
+      sorter: (a, b) => a.authProvider.localeCompare(b.authProvider),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
       title: 'Tùy chọn',
       dataIndex: 'options',
       key: 'options',
       render: (_, account) => (
         <Space size="middle">
-          <Button type="link" className="renew" onClick={() => handleUpdate(account)}>
+          <Button type="link" className="renew" onClick={() => handleUpdate(account)} disabled={account.authProvider === "GOOGLE"}>
             Cấp lại MK
           </Button>
           {account.actived ? (

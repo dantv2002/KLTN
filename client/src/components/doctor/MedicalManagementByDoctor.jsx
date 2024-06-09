@@ -166,6 +166,9 @@ const MedicalManagementByDoctor = () => {
           <Button type="link" className="reup" onClick={() => handleReadUpdate(medical)}>
             Xem
           </Button>
+          <Button type="link" className="locked" disabled={medical.Locked} onClick={() => handleConfirmLocked(medical.Id)}>
+            Lưu kho
+          </Button>
           {medical.Mark === 'YES' ? (
             <Button type="link" className="mark text-green-500" onClick={() => handleMark(medical.Id)}>
               Đã đánh sao
@@ -175,9 +178,6 @@ const MedicalManagementByDoctor = () => {
               Chưa đánh sao
             </Button>
           )}
-          <Button type="link" className="locked" disabled={medical.Locked} onClick={() => handleConfirmLocked(medical.Id)}>
-            Lưu kho
-          </Button>
         </Space>
       ),
     },
@@ -843,19 +843,19 @@ const MedicalManagementByDoctor = () => {
           </Collapse>
           <Collapse className="w-full">
             <Panel header="Thông tin sinh hiệu" key="3">
-              <Form.Item name="HeartRate" label="Mạch đập" rules={[{ required: true, message: 'Vui lòng nhập mạch đập' }]} className="w-full">
+              <Form.Item name="HeartRate" label="Mạch đập (nhịp/phút)" rules={[{ required: true, message: 'Vui lòng nhập mạch đập' }]} className="w-full">
                 <Input disabled={!edittingOutpatient}/>
               </Form.Item>
-              <Form.Item name="Temperature" label="Nhiệt độ" rules={[{ required: true, message: 'Vui lòng nhập nhiệt độ' }]} className="w-full">
+              <Form.Item name="Temperature" label="Nhiệt độ (°C)" rules={[{ required: true, message: 'Vui lòng nhập nhiệt độ' }]} className="w-full">
                 <Input disabled={!edittingOutpatient}/>
               </Form.Item>
-              <Form.Item name="BloodPressure" label="Huyết áp" rules={[{ required: true, message: 'Vui lòng nhập huyết áp' }]} className="w-full">
+              <Form.Item name="BloodPressure" label="Huyết áp (mmHg)" rules={[{ required: true, message: 'Vui lòng nhập huyết áp' }]} className="w-full">
                 <Input disabled={!edittingOutpatient}/>
               </Form.Item>
-              <Form.Item name="RespiratoryRate" label="Nhịp thở" rules={[{ required: true, message: 'Vui lòng nhập nhịp thở' }]} className="w-full">
+              <Form.Item name="RespiratoryRate" label="Nhịp thở (lần/phút)" rules={[{ required: true, message: 'Vui lòng nhập nhịp thở' }]} className="w-full">
                 <Input disabled={!edittingOutpatient}/>
               </Form.Item>
-              <Form.Item name="Weight" label="Cân nặng" rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]} className="w-full">
+              <Form.Item name="Weight" label="Cân nặng (kg)" rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]} className="w-full">
                 <Input disabled={!edittingOutpatient}/>
               </Form.Item>
             </Panel>
@@ -1041,19 +1041,19 @@ const MedicalManagementByDoctor = () => {
           </Collapse>
           <Collapse className="w-full">
             <Panel header="Thông tin sinh hiệu" key="5">
-              <Form.Item name="HeartRate" label="Mạch đập" rules={[{ required: true, message: 'Vui lòng nhập mạch đập' }]} className="w-full">
+              <Form.Item name="HeartRate" label="Mạch đập (nhịp/phút)" rules={[{ required: true, message: 'Vui lòng nhập mạch đập' }]} className="w-full">
                 <Input disabled={!edittingInpatient}/>
               </Form.Item>
-              <Form.Item name="Temperature" label="Nhiệt độ" rules={[{ required: true, message: 'Vui lòng nhập nhiệt độ' }]} className="w-full">
+              <Form.Item name="Temperature" label="Nhiệt độ (°C)" rules={[{ required: true, message: 'Vui lòng nhập nhiệt độ' }]} className="w-full">
                 <Input disabled={!edittingInpatient}/>
               </Form.Item>
-              <Form.Item name="BloodPressure" label="Huyết áp" rules={[{ required: true, message: 'Vui lòng nhập huyết áp' }]} className="w-full">
+              <Form.Item name="BloodPressure" label="Huyết áp (mmHg)" rules={[{ required: true, message: 'Vui lòng nhập huyết áp' }]} className="w-full">
                 <Input disabled={!edittingInpatient}/>
               </Form.Item>
-              <Form.Item name="RespiratoryRate" label="Nhịp thở" rules={[{ required: true, message: 'Vui lòng nhập nhịp thở' }]} className="w-full">
+              <Form.Item name="RespiratoryRate" label="Nhịp thở (lần/phút)" rules={[{ required: true, message: 'Vui lòng nhập nhịp thở' }]} className="w-full">
                 <Input disabled={!edittingInpatient}/>
               </Form.Item>
-              <Form.Item name="Weight" label="Cân nặng" rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]} className="w-full">
+              <Form.Item name="Weight" label="Cân nặng (kg)" rules={[{ required: true, message: 'Vui lòng nhập cân nặng' }]} className="w-full">
                 <Input disabled={!edittingInpatient}/>
               </Form.Item>
             </Panel>
