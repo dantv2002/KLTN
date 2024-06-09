@@ -71,6 +71,7 @@ const MedicalManagementByNurse = () => {
         <div className="w-full md:w-64 p-2">
           <DatePicker
             placeholder="Chọn thời gian khám"
+            format="DD/MM/YYYY"
             value={selectedKeys[0] ? moment(selectedKeys[0], 'DD/MM/YYYY') : null}
             onChange={(date) => setSelectedKeys(date ? [date.format('DD/MM/YYYY')] : [])}
             onPressEnter={() => confirm()}
@@ -95,11 +96,13 @@ const MedicalManagementByNurse = () => {
         <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
       onFilter: (value, record) => {
-        const date = moment(record.Date, 'DD/MM/YYYY');
         const filterValue = moment(value, 'DD/MM/YYYY');
-        return date.isSame(filterValue, 'day');
+        const dateOutpatient = moment(record.Date, 'HH:mm DD/MM/YYYY', true);
+        const dateInpatient = moment(record.DateAdmission, 'HH:mm DD/MM/YYYY', true);
+        return (record.Type === 'OUTPATIENT' && dateOutpatient.isSame(filterValue, 'day')) ||
+               (record.Type === 'INPATIENT' && dateInpatient.isSame(filterValue, 'day'));
       },
-    },
+    },    
     {
       title: 'Lí do khám',
       dataIndex: 'Reason',
