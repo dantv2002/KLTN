@@ -28,4 +28,7 @@ public interface AccountRepository extends MongoRepository<Account, String> {
 
     @Query(value = "{'deleted': false}", count = true)
     int totalAccount();
+
+    @Query(value = "{ 'verify': { $exists: true }, 'verify.expireAt': { $lt: ?0 } }")
+    List<Account> findAllVerifyExpired(Date date);
 }
