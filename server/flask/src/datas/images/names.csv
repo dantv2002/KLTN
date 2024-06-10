@@ -1,10 +1,10 @@
-index,name
-0,Bacterial Pneumonia
-1,Corona Virus Disease
-2,Normal
-3,Tuberculosis
-4,Viral Pneumonia
-5,glioma
-6,meningioma
-7,no tumor
-8,pituitary
+index,name,name_VI
+0,Bacterial Pneumonia,Viêm phổi do vi khuẩn
+1,Corona Virus Disease,Viêm phổi do covid-19
+2,Normal,Bình thường
+3,Tuberculosis,Lao phổi
+4,Viral Pneumonia,Viêm phổi do virus
+5,glioma,U nguyên bào thần kinh đệm
+6,meningioma,U màng não
+7,no tumor,Không có khối u
+8,pituitary,U tuyến yên
