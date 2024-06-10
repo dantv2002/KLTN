@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
+import com.hospitalx.emr.services.AccountService;
 import com.hospitalx.emr.services.HealthcareStaffService;
 import com.hospitalx.emr.services.ScheduleService;
 
@@ -19,10 +20,12 @@ public class ScheduledTasks {
     private ScheduleService scheduleService;
     @Autowired
     private HealthcareStaffService healthcareStaffService;
+    @Autowired
+    private AccountService accountService;
 
-    @Scheduled(cron = "0 0 0 * * ?") // second, minute, hour, day, month, weekday
-    public void scheduleTask() {
-        log.info("Running schedule task");
+    @Scheduled(cron = "@midnight")
+    public void scheduleMidnightTask() {
+        log.info("Running schedule midnight task");
         List<HealthcareStaffDto> doctor = healthcareStaffService.getAllDoctorSchedule();
         doctor.stream().forEach(d -> {
             if (!scheduleService.isCheckSchedule(d.getId())) {
@@ -31,6 +34,14 @@ public class ScheduledTasks {
                 log.info("Doctor: " + d.getFullName() + ", Id: " + d.getId() + " updated isSchedule is False");
             }
         });
-        log.info("Finish schedule task");
+        accountService.deleteAllVerifyExpired();
+        log.info("Finish schedule midnight task");
+    }
+
+    @Scheduled(cron = "@monthly")
+    public void scheduleMonthlyTask() {
+        log.info("Running schedule monthly task");
+        scheduleService.deleteSchedulesBeforeMonth();
+        log.info("Finish schedule monthly task");
     }
 }

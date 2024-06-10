@@ -237,6 +237,16 @@ public class ScheduleService {
         log.info("Deleted schedule with id: " + id);
     }
 
+    public void deleteSchedulesBeforeMonth() {
+        Calendar calendar = Calendar.getInstance();
+        log.info("Deleting schedules before month: " + (calendar.get(Calendar.MONTH) + 1));
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        scheduleRepository.deleteAllByDate(calendar.getTime());
+        log.info("Deleted schedules before month: " + (calendar.get(Calendar.MONTH) + 1));
+    }
     //
     //
 

@@ -30,4 +30,7 @@ public interface ScheduleRepository extends MongoRepository<Schedule, String> {
 
     @Query(value = "{ 'doctorId' : ?0, 'date' : { $gte : ?1 } }", count = true)
     int existsByDoctorIdAndDateGreaterThanOrEqual(String doctorId, Date currentDate);
+
+    @Query(value = "{'date' : { $lt: ?0 } }", delete = true)
+    void deleteAllByDate(Date date);
 }

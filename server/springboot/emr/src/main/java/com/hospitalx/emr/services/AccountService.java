@@ -312,6 +312,21 @@ public class AccountService {
         log.info("Delete account success: " + id);
     }
 
+    public void deleteAllVerifyExpired() {
+        log.info("Delete all verify expired");
+        List<Account> accounts = accountRepository.findAllVerifyExpired(new Date()).stream().map((account -> {
+            account.setVerify(null);
+            log.info("Delete verify expired: " + account.getEmail());
+            return account;
+        })).toList();
+        if (accounts.isEmpty()) {
+            log.info("No account verify expired");
+            return;
+        }
+        accountRepository.saveAll(accounts);
+        log.info("Delete all verify expired success");
+    }
+
     //
     //
     private Account createAccountAndSendVerification(String id, String email, String fullName, String password,
