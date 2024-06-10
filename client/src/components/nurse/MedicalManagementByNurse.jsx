@@ -871,7 +871,7 @@ const MedicalManagementByNurse = () => {
         }}
       />
       <Modal
-        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Tìm bệnh án</h1>}
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Tạo bệnh án</h1>}
         visible={visibleReadRecord}
         onCancel={handleCancelReadRecord}
         cancelText="Thoát"
@@ -1036,7 +1036,7 @@ const MedicalManagementByNurse = () => {
         </Form>
       </Modal>
       <Modal 
-        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Cập nhật hồ sơ ngoại trú</h1>}
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem và cập nhật hồ sơ ngoại trú</h1>}
         visible={visibleReUpOutpatient}
         onCancel={handleCancelReupOutpatient}
         footer={[
@@ -1199,7 +1199,7 @@ const MedicalManagementByNurse = () => {
         </Form>
       </Modal>
       <Modal 
-        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Cập nhật hồ sơ nội trú</h1>}
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem và cập nhật hồ sơ nội trú</h1>}
         visible={visibleReUpInpatient}
         onCancel={handleCancelReupInpatient}
         footer={[

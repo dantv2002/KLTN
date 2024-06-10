@@ -379,7 +379,7 @@ const ReceptionistManagementByAdmin = () => {
               </Form>
             </Modal>
             <Modal 
-                title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem thông tin nhân viên tiếp nhận</h1>}
+                title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem và cập nhật thông tin</h1>}
                 visible={visibleUpdate}
                 onCancel={handleCancelUpdate}
                 footer={[
@@ -491,7 +491,7 @@ const ReceptionistManagementByAdmin = () => {
               cancelButtonProps={{ className: "bg-red-600" }}
             >
               <div className="text-center">
-                <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa tài khoản này không?</p>
+                <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa thông tin nhân viên tiếp nhận này không?</p>
               </div>
             </Modal>
         </div>

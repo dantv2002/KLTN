@@ -27,7 +27,7 @@ const DiagnosisManagementByDoctor = () => {
   const [name, setName] = useState("");
   const [visibleReadRecordMedical, setVisibleReadRecordMedical] = useState(false);
   const [keywordRecord, setKeywordRecord] = useState("");
-  const [genderRecord, setGenderRecord] = useState("");
+  const [genderRecord, setGenderRecord] = useState(null);
   const [yearRecord, setYearRecord] = useState("");
   const [searchKeywordRecord, setSearchKeywordRecord] = useState("");
   const [searchGenderRecord, setSearchGenderRecord] = useState("");
@@ -219,7 +219,7 @@ const DiagnosisManagementByDoctor = () => {
     setIdRecord(record.Id);
     setVisibleReadRecordMedical(false);
     setKeywordRecord("");
-    setGenderRecord("");
+    setGenderRecord(null);
     setYearRecord("");
     setSearchKeywordRecord("");
     setSearchGenderRecord("");
@@ -230,7 +230,7 @@ const DiagnosisManagementByDoctor = () => {
   const handleCancelReadRecordMedical = () => {
     setVisibleReadRecordMedical(false);
     setKeywordRecord("");
-    setGenderRecord("");
+    setGenderRecord(null);
     setYearRecord("");
     setSearchKeywordRecord("");
     setSearchGenderRecord("");

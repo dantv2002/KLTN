@@ -400,7 +400,7 @@ const NurseManagementByAdmin = () => {
               </Form>
             </Modal>
             <Modal 
-                title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem thông tin điều dưỡng</h1>}
+                title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem và cập nhật thông tin</h1>}
                 visible={visibleUpdate}
                 onCancel={handleCancelUpdate}
                 footer={[
@@ -423,13 +423,13 @@ const NurseManagementByAdmin = () => {
                       value={fullnameUpdate}
                       onChange={(e) => setFullNameUpdate(e.target.value)}
                       disabled={!editing}
-                      className="pl-10"
+                      className="w-full"
                     />
                 </Form.Item>
                 <Form.Item className="relative" name="reupdayofbirth" label="Ngày sinh" rules={[{ required: true, message: 'Ngày sinh không được để trống!' }]}>
                     <DatePicker
                       type="text"
-                      className="w-full pl-10"
+                      className="w-full"
                       placeholder="Chọn ngày sinh"
                       value={birthdayUpdate ? moment(birthdayUpdate, 'DD/MM/YYYY') : null}
                       onChange={(date, dateString) => setBirthdayUpdate(dateString)}
@@ -442,7 +442,7 @@ const NurseManagementByAdmin = () => {
                       value={genderUpdate}
                       onChange={(value) => setGenderUpdate(value)}
                       disabled={!editing}
-                      className="pl-10"
+                      className="w-full"
                     >
                       <Select.Option value="Nam">Nam</Select.Option>
                       <Select.Option value="Nữ">Nữ</Select.Option>
@@ -456,7 +456,7 @@ const NurseManagementByAdmin = () => {
                       value={phoneUpdate}
                       onChange={(e) => setPhoneUpdate(e.target.value)}
                       disabled={!editing}
-                      className="pl-10"
+                      className="w-full"
                     />
                 </Form.Item>
                 <Form.Item className="relative" name="reupidentity" label="CMND/CCCD" rules={[{ required: true, message: 'CMND/CCCD không được để trống!' }]}>
@@ -466,7 +466,7 @@ const NurseManagementByAdmin = () => {
                       value={identityUpdate}
                       onChange={(e) => setIdentityUpdate(e.target.value)}
                       disabled={!editing}
-                      className="pl-10"
+                      className="w-full"
                     />
                 </Form.Item>
                 <Form.Item className="relative" name="reupaddress" label="Địa chỉ" rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}>
@@ -476,7 +476,7 @@ const NurseManagementByAdmin = () => {
                       value={addressUpdate}
                       onChange={(value) => setAddressUpdate(value)}
                       disabled={!editing}
-                      className="pl-10"
+                      className="w-full"
                     />
                 </Form.Item>
                 <Form.Item className="relative" name="reuplevel" label="Cấp bậc" rules={[{ required: true, message: 'Cấp bậc không được để trống!' }]}>
@@ -485,7 +485,7 @@ const NurseManagementByAdmin = () => {
                       value={levelUpdate}
                       onChange={(value) => setLevelUpdate(value)}
                       disabled={!editing}
-                      className="pl-10"
+                      className="w-full"
                     >
                       <Select.Option value="LEVEL2">Level 2</Select.Option>
                       <Select.Option value="LEVEL3">Level 3</Select.Option>
@@ -497,7 +497,7 @@ const NurseManagementByAdmin = () => {
                       placeholder="Chọn khoa"
                       value={departmentUpdate}
                       onChange={(value) => setDepartmentUpdate(value)}
-                      className="pl-10"
+                      className="w-full"
                       disabled={!editing}
                     >
                       {listDepartment.map((department) => (

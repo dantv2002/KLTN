@@ -730,7 +730,7 @@ const RecordsManagementByReceptionist = () => {
         </Form>
       </Modal>
       <Modal 
-        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem hồ sơ</h1>}
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem và cập nhật hồ sơ</h1>}
         visible={visibleUpdate}
         onCancel={handleCancelUpdate}
         footer={[
@@ -825,7 +825,7 @@ const RecordsManagementByReceptionist = () => {
         </Form>
       </Modal>
       <Modal
-        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem phòng khám</h1>}
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem khoa khám</h1>}
         visible={visibleDepartment}
         onCancel={handleCancelDepartment}
         cancelText="Thoát"

@@ -216,7 +216,7 @@ const DepartmentManagementByAdmin = () => {
         }}
       />
       <Modal 
-        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Thêm thông tin bác sĩ</h1>}
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Thêm khoa mới</h1>}
         visible={visibleInsert}
         onOk={() => formInsert.submit()}
         okText="Tạo"
@@ -237,7 +237,7 @@ const DepartmentManagementByAdmin = () => {
         </Form>
       </Modal>
       <Modal 
-        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem thông tin khoa</h1>}
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem và cập nhật thông tin khoa</h1>}
         visible={visibleUpdate}
         onCancel={handleCancelReadUpdate}
         footer={[

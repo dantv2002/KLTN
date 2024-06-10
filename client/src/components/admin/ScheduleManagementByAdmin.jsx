@@ -552,7 +552,7 @@ const ScheduleManagementByAdmin = () => {
           />
         </Modal>
         <Modal 
-          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Tạo lịch khám</h1>}
+          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Cập nhật lịch khám</h1>}
           visible={visibleUpdate}
           onOk={() => formUpdate.submit()}
           okText="Cập nhật"

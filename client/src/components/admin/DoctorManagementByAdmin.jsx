@@ -437,7 +437,7 @@ const DoctorManagementByAdmin = () => {
               </Form>
             </Modal>
             <Modal 
-                title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem thông tin bác sĩ</h1>}
+                title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xem và cập nhật thông tin</h1>}
                 visible={visibleUpdate}
                 onCancel={handleCancelUpdate}
                 footer={[
