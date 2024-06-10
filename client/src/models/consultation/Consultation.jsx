@@ -105,7 +105,7 @@ const Consultation = ({ visible, hideModal }) => {
             >
                 {Object.keys(result).map(key => (
                     <p key={key} className="font-rubik">
-                        Dựa vào các triệu chứng mà bạn cung cấp, hệ thống cho ra kết quả là bệnh <strong className="font-bold text-red-500">{key}</strong> với độ chính xác <strong className="font-bold text-green-600">{result[key]}%</strong>.
+                        Dựa vào các triệu chứng mà bạn cung cấp, hệ thống cho ra kết quả là bệnh <strong className="font-bold text-red-500">{key}</strong> với tỷ lệ <strong className="font-bold text-green-600">{result[key]}%</strong>.
                     </p>
                 ))}
             </Modal>

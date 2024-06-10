@@ -26,12 +26,12 @@ class imagesModels:
         with open(path + 'images/names.csv', newline='') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                self.labels[int(row['index'])] = row['name']
+                self.labels[int(row['index'])] = row['name_VI']
                 # print(self.labels[int(row['index'])])
                 # print(row['index'])
         # print(self.labels)
                 
-        file_id = '1baaiaH9q2L9qGEJijjtTWZFO0ptFUNnk'
+        file_id = '1iqvUhEnCw7PUQI8C2NfK4mqvgQaUd9F7'
         url = f'https://drive.google.com/uc?id={file_id}'
         file_name = 'models/model_weights.h5'
         if not os.path.exists(path+file_name):
