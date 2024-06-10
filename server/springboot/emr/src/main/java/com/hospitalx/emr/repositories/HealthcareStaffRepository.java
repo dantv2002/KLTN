@@ -38,14 +38,17 @@ public interface HealthcareStaffRepository extends MongoRepository<HealthcareSta
                         String departmentId,
                         String gender, Pageable pageable);
 
-        @Query(value = "{ 'staffType' : ?0, 'fullName' : { $regex: ?1, $options: 'i' }, 'title' : { $regex: ?2, $options: 'i' }, 'departmentId' : { $regex: ?3 }, 'gender': { $regex: ?4, $options: 'i' }, 'schedules': { $exists: true }, 'deleted' : false}")
+        @Query(value = "{ 'staffType' : ?0, 'fullName' : { $regex: ?1, $options: 'i' }, 'title' : { $regex: ?2, $options: 'i' }, 'departmentId': {$in: ?3}, 'gender': { $regex: ?4, $options: 'i' } ,'isSchedule': true, 'deleted' : false}")
         public Page<HealthcareStaff> findByDoctorForPatient(StaffType staffType, String fullName, String title,
-                        String departmentId,
+                        List<String> departmentId,
                         String gender, Pageable pageable);
 
-        @Query(value = "{'departmentId': ?0, 'deleted': false, 'staffType': 'DOCTOR', 'schedules': { $exists: true }}")
+        @Query(value = "{'departmentId': ?0, 'deleted': false, 'staffType': 'DOCTOR', 'isSchedule': true}")
         public List<HealthcareStaff> findAllByDepartmentId(String departmentId);
 
         @Query(value = "{ 'accountId' : ?0, 'deleted' : false}")
         public HealthcareStaff findByAccountId(String accountId);
+
+        @Query(value = "{'deleted': false, 'staffType': 'DOCTOR', 'isSchedule': true}")
+        public List<HealthcareStaff> findByAllDoctorSchedule();
 }

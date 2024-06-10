@@ -1,5 +1,6 @@
 package com.hospitalx.emr.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -106,15 +107,23 @@ public class HealthcareStaffService {
 
     public Page<HealthcareStaffDto> getAll(String keyword, String type, Pageable pageable) {
         String[] parts = keyword.split("_", -1);
-        parts[2] = parts[2].isEmpty() ? parts[2] : "^" + parts[2] + "$";
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         if (role.equals(("ROLE_PATIENT"))) {
+            List<String> idDepartments = null;
+            if (parts[2].isEmpty()) {
+                idDepartments = departmentService.getAll("", "", Pageable.unpaged()).stream()
+                .map(department -> department.getId()).toList();
+            }else{
+                idDepartments = new ArrayList<String>();
+                idDepartments.add(parts[2]);
+            }
             Page<HealthcareStaff> entities = healthcareStaffRepository.findByDoctorForPatient(StaffType.DOCTOR,
-                    parts[0], parts[1], parts[2],
+                    parts[0], parts[1], idDepartments,
                     parts[3], pageable);
             return entities.map(entity -> {
                 HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
-                String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false).getNameDepartment();
+                String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false)
+                        .getNameDepartment();
                 healthcareStaffDto.setDepartmentName(departmentName);
                 return healthcareStaffDto;
             });
@@ -142,7 +151,8 @@ public class HealthcareStaffService {
         log.info("Get all healthcare staffs success with total staffs: " + entities.getTotalElements());
         return entities.map(entity -> {
             HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
-            String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false).getNameDepartment();
+            String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false)
+                    .getNameDepartment();
             healthcareStaffDto.setDepartmentName(departmentName);
             return healthcareStaffDto;
         });
@@ -213,5 +223,12 @@ public class HealthcareStaffService {
                 log.error("Staff type is invalid");
                 throw new CustomException("Loại nhân viên không hợp lệ", HttpStatus.BAD_REQUEST.value());
         }
+    }
+
+    public List<HealthcareStaffDto> getAllDoctorSchedule() {
+        log.info("Get all doctor schedule");
+        List<HealthcareStaff> entities = healthcareStaffRepository.findByAllDoctorSchedule();
+        log.info("Get all doctor schedule success with total staffs: " + entities.size());
+        return entities.stream().map(entity -> modelMapper.map(entity, HealthcareStaffDto.class)).toList();
     }
 }

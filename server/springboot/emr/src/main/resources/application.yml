@@ -40,13 +40,16 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: laptrinhwinform2@gmail.com
-    password: tgjixkqeibkdunhx
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
   profiles:
-    active: dev
+    active: prod

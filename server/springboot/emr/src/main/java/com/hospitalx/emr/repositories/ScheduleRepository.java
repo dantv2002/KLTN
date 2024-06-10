@@ -14,17 +14,20 @@ import com.hospitalx.emr.models.entitys.Schedule;
 
 @Repository
 public interface ScheduleRepository extends MongoRepository<Schedule, String> {
-    @Query("{ 'doctorId' : ?0, 'date' : { $gt : ?1 } }")
+    @Query(value = "{ 'doctorId' : ?0, 'date' : { $gt : ?1 } }")
     Page<Schedule> findByAllDoctorId(String doctorId, Date currentDate, Pageable pageable); // Lấy tất cả lịch khám của
                                                                                             // bác sĩ sau ngày hiện tại
 
-    @Query("{'date' : ?0, 'time': ?1, 'clinic': ?2}")
+    @Query(value = "{'date' : ?0, 'time': ?1, 'clinic': ?2}")
     List<Schedule> findByAllOfDate(Date date, ScheduleTime time, String clinic); // Lấy tất cả lịch khám của một ngày,
                                                                                  // một buổi, một phòng
 
-    @Query("{ 'date' : { $gt : ?0 } }")
+    @Query(value = "{ 'date' : { $gt : ?0 } }")
     List<Schedule> findAll(Date currentDate);
 
-    @Query("{ 'doctorId' : ?0, 'date' : { $gte : ?1, $lte : ?2 } }")
+    @Query(value = "{ 'doctorId' : ?0, 'date' : { $gte : ?1, $lte : ?2 } }")
     List<Schedule> findAllTimeDoctor(String doctorId, Date startDate, Date endDate);
+
+    @Query(value = "{ 'doctorId' : ?0, 'date' : { $gte : ?1 } }", count = true)
+    int existsByDoctorIdAndDateGreaterThanOrEqual(String doctorId, Date currentDate);
 }

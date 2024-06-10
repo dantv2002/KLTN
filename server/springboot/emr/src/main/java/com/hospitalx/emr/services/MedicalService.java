@@ -194,9 +194,6 @@ public class MedicalService {
 
     public MedicalDto save(MedicalDto t) {
         log.info("Save medical: " + t.toString());
-        if (t.getType().equals(MedicalType.INPATIENT)) {
-            inpatientValidate(t);
-        }
         t.setId(null);
         recordService.get(t.getRecordId());
         medicalValidate(t);
@@ -257,6 +254,9 @@ public class MedicalService {
             t.setDaysTreatment(
                     (int) ((t.getDateDischarge().getTime() - t.getDateAdmission().getTime())
                             / (1000 * 60 * 60 * 24)) + 1);
+        }
+        if (t.getType().equals(MedicalType.INPATIENT)) {
+            inpatientValidate(t);
         }
         medicalRepository.save(modelMapper.map(t, Medical.class));
         log.info("Update medical success with ID: " + t.getId());
@@ -325,6 +325,9 @@ public class MedicalService {
     private void inpatientValidate(MedicalDto medical) {
         departmentService.get(medical.getDepartmentAdmission(), true);
         if (medical.getDateTransfer() != null) {
+            if(medical.getDepartmentTransfer().equals(medical.getDepartmentAdmission())){
+                throw new CustomException("Khoa chuyển không được trùng với khoa vào viện!", HttpStatus.BAD_REQUEST.value());
+            }
             departmentService.get(medical.getDepartmentTransfer(), true);
             if (medical.getDateTransfer().before(medical.getDateAdmission())) {
                 log.error("Medical date transfer is before date admission");
