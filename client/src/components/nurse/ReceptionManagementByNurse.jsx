@@ -27,7 +27,6 @@ const ReceptionManagementByNurse = () => {
 
   const handleCallPatient = async() => {
     try {
-      setLoading(true);
       let response = await axios.get(callNext(clinic, location), {
         withCredentials: true,
       })
@@ -40,13 +39,12 @@ const ReceptionManagementByNurse = () => {
       }
     }catch(error){
       message.error(error.response.data.Message);
-    } finally {
-      setLoading(false)
     }
   }
 
   const fetchTicket = useCallback(async() => {
     try {
+      setLoading(true);
       let response = await axios.get(getTicketByNurse(searchKeyword, page), {
         withCredentials: true
       })
@@ -57,6 +55,8 @@ const ReceptionManagementByNurse = () => {
       }
     } catch(error) {
       message.error(error.response.data.Message)
+    } finally {
+      setLoading(false)
     }
   },[searchKeyword, page]);
 
@@ -103,8 +103,9 @@ const ReceptionManagementByNurse = () => {
     }
   }
 
+  const apiKey = import.meta.env.VITE_APIKEY_GOOGLECLOUD;
+
   const speakVN = async (text) => {
-    const apiKey = 'AIzaSyCxE5hnFq4PyUadpmniiY1mPjN4I9lrBbU';
     const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
 
     const data = {

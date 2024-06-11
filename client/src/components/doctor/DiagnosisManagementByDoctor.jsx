@@ -449,6 +449,9 @@ const DiagnosisManagementByDoctor = () => {
     wrapperCol: { span: 16 },
   };
 
+  const uploadPreset = import.meta.env.VITE_UPLOAD_PRESET;
+  const cloudName = import.meta.env.VITE_CLOUD_NAME;
+
   return (
     <div className="container mx-auto">
       <div className="flex flex-wrap -mx-3">
@@ -457,8 +460,8 @@ const DiagnosisManagementByDoctor = () => {
             <Upload
               className="mt-3 mb-3"
               name="file"
-              action="https://api.cloudinary.com/v1_1/successntd/image/upload"
-              data={{ upload_preset: 'projectemr', cloud_name: 'successntd' }}
+              action={`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`}
+              data={{ upload_preset: uploadPreset, cloud_name: cloudName }}
               listType="picture"
               onChange={handleImageUpload}
               onRemove={handleImageRemove}
