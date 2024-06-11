@@ -530,7 +530,7 @@ const RecordsManagementByReceptionist = () => {
                   font-size: 12px;
               }
               .flex-container {
-                  width: 70%;
+                  width: 100%;
                   display: flex;
                   justify-content: space-between;
               }
