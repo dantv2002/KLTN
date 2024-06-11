@@ -868,7 +868,7 @@ const RecordsManagementByReceptionist = () => {
           />
         </Modal>
         <Modal
-          title={<h1 className="text-2xl font-bold text-green-500 text-center mb-4">In phiếu khám</h1>}
+          title={<h1 className="text-2xl font-bold text-green-500 text-center mb-4">In phiếu đợi khám bệnh</h1>}
           visible={visibleTicket}
           onOk={handlePrintTicket}
           okText="In phiếu"
@@ -879,7 +879,7 @@ const RecordsManagementByReceptionist = () => {
           width={700}
         >
           <div className="text-center">
-            <p className="text-blue-700 mb-4 text-[17px]">Hệ thống sẽ thực hiện in phiếu khám này cho bệnh nhân. Hãy nhấn in phiếu</p>
+            <p className="text-blue-700 mb-4 text-[17px]">Hệ thống sẽ thực hiện in phiếu đợi khám bệnh này cho bệnh nhân. Hãy nhấn in phiếu</p>
           </div>
         </Modal>
     </div>
