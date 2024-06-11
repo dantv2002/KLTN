@@ -1,5 +1,6 @@
 package com.hospitalx.emr.controllers;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.hospitalx.emr.common.BaseResponse;
 import com.hospitalx.emr.component.AuthManager;
@@ -142,10 +144,10 @@ public class AccountController {
     @GetMapping("/logout")
     public ResponseEntity<BaseResponse> logout(HttpServletResponse response) {
         String id = authManager.getAuthentication().getName();
-        this.setCookie(response, "Token", null, 0, true);
-        this.setCookie(response, "FullName", null, 0, false);
-        this.setCookie(response, "Email", null, 0, false);
-        this.setCookie(response, "Role", null, 0, false);
+        this.setCookie(response, "Token", null, 0, true, false);
+        this.setCookie(response, "FullName", null, 0, false, false);
+        this.setCookie(response, "Email", null, 0, false, false);
+        this.setCookie(response, "Role", null, 0, false, false);
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setMessage("Đăng xuất thành công");
@@ -218,11 +220,11 @@ public class AccountController {
         AccountDto account = accountService.loginAccount(login.get("Email"), login.get("Password"));
 
         this.setCookie(response, "Token", tokenService.createToken(account), appConfig.getExpiresTime(),
-                true);
+                true, true);
         this.setCookie(response, "FullName", encoder.encode(account.getFullName()),
-                appConfig.getExpiresTime(), false);
-        this.setCookie(response, "Email", account.getEmail(), appConfig.getExpiresTime(), false);
-        this.setCookie(response, "Role", account.getRole(), appConfig.getExpiresTime(), false);
+                appConfig.getExpiresTime(), false, false);
+        this.setCookie(response, "Email", account.getEmail(), appConfig.getExpiresTime(), false, false);
+        this.setCookie(response, "Role", account.getRole(), appConfig.getExpiresTime(), false, false);
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setMessage("Đăng nhập thành công");
@@ -234,11 +236,37 @@ public class AccountController {
 
     // Set cookie
     private void setCookie(HttpServletResponse response, String name, String value, int maxAge,
-            boolean httpOnly) {
+            boolean httpOnly, boolean sameSite) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(httpOnly);
         cookie.setMaxAge(maxAge * 24 * 60 * 60);
         response.addCookie(cookie);
+        if (sameSite) {
+            String cookieHeader = response.getHeader("Set-Cookie") + "; " + "SameSite=Strict";
+            response.setHeader("Set-Cookie", cookieHeader);
+        }
+    }
+
+    @GetMapping("/oauth2/redirect")
+    public void oauth2Redirect(@RequestParam(name = "status", required = true) String status,
+            @RequestParam(name = "message", required = true) String message,
+            @RequestParam(name = "token", required = false) String token,
+            @RequestParam(name = "fullname", required = false) String fullName,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "role", required = false) String role, HttpServletResponse response)
+            throws IOException {
+        if (status.equals("200")) {
+            this.setCookie(response, "Token", token, appConfig.getExpiresTime(), true, true);
+            this.setCookie(response, "FullName", encoder.encode(fullName), appConfig.getExpiresTime(), false, false);
+            this.setCookie(response, "Email", email, appConfig.getExpiresTime(), false, false);
+            this.setCookie(response, "Role", role, appConfig.getExpiresTime(), false, false);
+        }
+        String targetUrl = appConfig.getClientUrl() + "/oauth2/redirect";
+        targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
+                .queryParam("status", status)
+                .queryParam("message", encoder.encode(message))
+                .build().toUriString();
+        response.sendRedirect(targetUrl);
     }
 }

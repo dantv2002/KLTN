@@ -66,7 +66,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/oauth2/**", "/api/auth/**").permitAll();
+                    auth.requestMatchers("/oauth2/**", "api/oauth2/**", "/api/auth/**").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .oauth2Login(auth -> {

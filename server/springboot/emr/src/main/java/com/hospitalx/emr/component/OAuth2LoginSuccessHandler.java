@@ -12,13 +12,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.hospitalx.emr.common.AuthProvider;
-import com.hospitalx.emr.configs.AppConfig;
 import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.services.AccountService;
 import com.hospitalx.emr.services.TokenService;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +30,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     @Autowired
     private TokenService tokenService;
     @Autowired
-    private AppConfig appConfig;
-    @Autowired
     private Encoder encoder;
 
     private AccountDto accountdDto = null;
@@ -42,7 +38,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws ServletException, IOException {
-        String targetUrl = appConfig.getClientUrl() + "/oauth2/redirect";
+        String targetUrl = "/emr/api/oauth2/redirect";
         DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
 
         Map<String, Object> attributes = principal.getAttributes();
@@ -66,14 +62,13 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         });
         message = encoder.encode(message);
         if (accountdDto != null) {
-            this.setCookie(response, "Token", tokenService.createToken(accountdDto), appConfig.getExpiresTime(), true);
-            this.setCookie(response, "FullName", encoder.encode(accountdDto.getFullName()), appConfig.getExpiresTime(),
-                    false);
-            this.setCookie(response, "Email", accountdDto.getEmail(), appConfig.getExpiresTime(), false);
-            this.setCookie(response, "Role", accountdDto.getRole(), appConfig.getExpiresTime(), false);
             targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
                     .queryParam("status", HttpStatus.OK.value())
                     .queryParam("message", message)
+                    .queryParam("token", tokenService.createToken(accountdDto))
+                    .queryParam("fullname", encoder.encode(accountdDto.getFullName()))
+                    .queryParam("email", accountdDto.getEmail())
+                    .queryParam("role", accountdDto.getRole())
                     .build().toUriString();
             log.info("Login account success: " + email);
         } else {
@@ -92,13 +87,5 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         accountdDto.setEmail(email);
         accountdDto.setAuthProvider(AuthProvider.GOOGLE);
         accountdDto = accountService.save(accountdDto);
-    }
-
-    private void setCookie(HttpServletResponse response, String name, String value, int maxAge, boolean httpOnly) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setPath("/");
-        cookie.setHttpOnly(httpOnly);
-        cookie.setMaxAge(maxAge * 24 * 60 * 60);
-        response.addCookie(cookie);
     }
 }
