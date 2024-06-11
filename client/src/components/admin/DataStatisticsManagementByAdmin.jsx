@@ -267,7 +267,7 @@ const DataStatisticsManagementByAdmin = () => {
           <div className="flex items-center mt-6 mb-5 bg-emerald-600 p-4 rounded w-auto mr-2">
             <BsFileEarmarkLock className="text-2xl mr-2 text-white" />
             <div className="flex flex-col">
-              <h2 className="text-xs font-medium text-white">Số bệnh án đã khóa: <span className="font-bold">{lockedMedical}</span></h2>
+              <h2 className="text-xs font-medium text-white">Số bệnh án đã lưu kho: <span className="font-bold">{lockedMedical}</span></h2>
               <p className="text-[10px] text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
             </div>
           </div>
@@ -276,7 +276,7 @@ const DataStatisticsManagementByAdmin = () => {
           <div className="flex items-center mt-6 mb-5 bg-rose-600 p-4 rounded w-auto">
             <LuFileX className="text-2xl mr-2 text-white" />
             <div className="flex flex-col">
-              <h2 className="text-xs font-medium text-white">Số bệnh án hết hạn: <span className="font-bold">{expiredMedical}</span></h2>
+              <h2 className="text-xs font-medium text-white">Số bệnh án cần thanh lý: <span className="font-bold">{expiredMedical}</span></h2>
               <p className="text-[10px] text-white">Cập nhật: <span className="font-medium">{dayupdated}</span></p>
             </div>
           </div>
