@@ -329,6 +329,7 @@ const DoctorManagementByAdmin = () => {
               <Select.Option value="Khác">Khác</Select.Option>
             </Select>
             <Button onClick={() => handleSearch()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+            <br/>
             <Button onClick={handleInsert} className="bg-cyan-400 text-black mt-6 mb-3" htmlType="submit" icon={<PlusOutlined />} >Tạo thông tin bác sĩ</Button>
             <Table 
                 columns={columnsDoctors} 
