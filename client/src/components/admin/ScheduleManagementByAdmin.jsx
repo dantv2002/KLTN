@@ -79,7 +79,7 @@ const ScheduleManagementByAdmin = () => {
                 Xem lịch
               </Button>
               <Button type="link" onClick={() => handleInsert(doctor.Id)}>
-                Đặt lịch
+                Tạo lịch
               </Button>
             </Space>
           ),
