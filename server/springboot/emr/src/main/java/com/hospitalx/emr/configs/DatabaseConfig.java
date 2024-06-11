@@ -19,10 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @Slf4j
 public class DatabaseConfig extends AbstractMongoClientConfiguration {
-
     @Value("${spring.data.mongodb.uri}")
     private String uri;
-
     @Value("${spring.data.mongodb.database}")
     private String database;
 
@@ -46,5 +44,4 @@ public class DatabaseConfig extends AbstractMongoClientConfiguration {
         }
         return client;
     }
-
 }

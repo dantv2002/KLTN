@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.BaseResponse;
+import com.hospitalx.emr.component.AuthManager;
 import com.hospitalx.emr.component.Encoder;
 import com.hospitalx.emr.configs.AppConfig;
 import com.hospitalx.emr.models.dtos.AccountDto;

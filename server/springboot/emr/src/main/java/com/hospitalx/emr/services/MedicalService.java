@@ -15,9 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.hospitalx.emr.common.AuthManager;
 import com.hospitalx.emr.common.MedicalResult;
 import com.hospitalx.emr.common.MedicalType;
+import com.hospitalx.emr.component.AuthManager;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
