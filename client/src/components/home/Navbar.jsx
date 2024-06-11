@@ -36,9 +36,9 @@ const Navbar = () => {
   const [department, setDepartment] = useState(null);
   const [gender, setGender] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [searchTitle, setSearchTitle] = useState("");
-  const [searchDepartment, setSearchDepartment] = useState("");
-  const [searchGender, setSearchGender] = useState("");
+  const [searchTitle, setSearchTitle] = useState(null);
+  const [searchDepartment, setSearchDepartment] = useState(null);
+  const [searchGender, setSearchGender] = useState(null);
   const [time, setTime] = useState("");
   const [visibleDoctor, setVisibleDoctor] = useState(false);
   const [dataSchedules, setDataSchedules] = useState([]);
@@ -412,13 +412,13 @@ const Navbar = () => {
   const handleCancelDoctor = () => {
     setVisibleDoctor(false);
     setKeyword("");
-    setTitle("");
-    setDepartment("");
-    setGender("");
-    setSearchKeyword("");
-    setSearchTitle("");
-    setSearchDepartment("");
-    setSearchGender("");
+    setTitle(null);
+    setDepartment(null);
+    setGender(null);
+    setSearchKeyword(null);
+    setSearchTitle(null);
+    setSearchDepartment(null);
+    setSearchGender(null);
   }
 
   const handleReadSchedules = async(id) => {
