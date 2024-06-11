@@ -178,7 +178,7 @@ public class AccountController {
             @PathVariable("id") String id) {
         BaseResponse response = new BaseResponse();
         accountService.verifyAccount(id, verificationCodeDto.getCode(), 1);
-        response.setMessage("Tài khoản đã được xác minh");
+        response.setMessage("Đã đăng ký tài khoản thành công");
         response.setStatus(HttpStatus.OK.value());
         response.setData(null);
         return ResponseEntity.status(response.getStatus()).body(response);
