@@ -13,7 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.hospitalx.emr.common.AuthManager;
+import com.hospitalx.emr.component.AuthManager;
 import com.hospitalx.emr.models.dtos.DiagnosticImageDto;
 import com.hospitalx.emr.models.entitys.DiagnosticImage;
 import com.hospitalx.emr.repositories.DiagnosticImageRepository;
