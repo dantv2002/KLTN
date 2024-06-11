@@ -354,9 +354,10 @@ const Navbar = () => {
     if (name) {
       try {
         setLoading(true);
+        const titleSearch = searchTitle || ""
         const departmentSearch = searchDepartment || "";
         const genderSearch = searchGender || "";
-        let response = await axios.get(getDoctorPatient(searchKeyword, searchTitle, departmentSearch, genderSearch, pageDoctor), {
+        let response = await axios.get(getDoctorPatient(searchKeyword, titleSearch, departmentSearch, genderSearch, pageDoctor), {
           withCredentials: true
         });
         if (response.status === 200) {
@@ -415,7 +416,7 @@ const Navbar = () => {
     setTitle(null);
     setDepartment(null);
     setGender(null);
-    setSearchKeyword(null);
+    setSearchKeyword("");
     setSearchTitle(null);
     setSearchDepartment(null);
     setSearchGender(null);
