@@ -36,9 +36,9 @@ const Navbar = () => {
   const [department, setDepartment] = useState(null);
   const [gender, setGender] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [searchTitle, setSearchTitle] = useState("");
-  const [searchDepartment, setSearchDepartment] = useState("");
-  const [searchGender, setSearchGender] = useState("");
+  const [searchTitle, setSearchTitle] = useState(null);
+  const [searchDepartment, setSearchDepartment] = useState(null);
+  const [searchGender, setSearchGender] = useState(null);
   const [time, setTime] = useState("");
   const [visibleDoctor, setVisibleDoctor] = useState(false);
   const [dataSchedules, setDataSchedules] = useState([]);
@@ -354,9 +354,10 @@ const Navbar = () => {
     if (name) {
       try {
         setLoading(true);
+        const titleSearch = searchTitle || ""
         const departmentSearch = searchDepartment || "";
         const genderSearch = searchGender || "";
-        let response = await axios.get(getDoctorPatient(searchKeyword, searchTitle, departmentSearch, genderSearch, pageDoctor), {
+        let response = await axios.get(getDoctorPatient(searchKeyword, titleSearch, departmentSearch, genderSearch, pageDoctor), {
           withCredentials: true
         });
         if (response.status === 200) {
@@ -412,13 +413,13 @@ const Navbar = () => {
   const handleCancelDoctor = () => {
     setVisibleDoctor(false);
     setKeyword("");
-    setTitle("");
-    setDepartment("");
-    setGender("");
+    setTitle(null);
+    setDepartment(null);
+    setGender(null);
     setSearchKeyword("");
-    setSearchTitle("");
-    setSearchDepartment("");
-    setSearchGender("");
+    setSearchTitle(null);
+    setSearchDepartment(null);
+    setSearchGender(null);
   }
 
   const handleReadSchedules = async(id) => {
