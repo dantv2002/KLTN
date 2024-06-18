@@ -94,6 +94,9 @@ export const callNext = (clinic, location) => `${host}/api/nurse/call-next?numbe
 export const getTicketByNurse = (keyword, page) => `${host}/api/nurse/tickets?keyword=${keyword}&page=${page}&sortDir=desc`
 //Update status by nurse
 export const updateTicket = `${host}/api/nurse/ticket`
+//Delete all schedule before month by admin
+export const deleteAllSchedule = `${host}/api/admin/schedule/all/before-month`
+
 
 //Ticker
 //Create ticker by patient
