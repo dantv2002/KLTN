@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartmentAdmin, deleteSchedule } from "../../Api";
+import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartmentAdmin, deleteSchedule, deleteAllSchedule } from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker } from "antd";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
+import { PlusOutlined, SearchOutlined, CloseSquareOutlined } from "@ant-design/icons"
 import Loading from "../../hook/Loading";
 
 const ScheduleManagementByAdmin = () => {
@@ -40,6 +40,7 @@ const ScheduleManagementByAdmin = () => {
     const [totalItemsSchedule, setTotalItemsSchedule] = useState("0");
     const [loading, setLoading] = useState(false);
     const [visibleDelete, setVisibleDelete] = useState(false);
+    const [visibleDeleteAll, setVisibleDeleteAll] = useState(false);
 
     const columnsDoctors = [
         {
@@ -417,9 +418,31 @@ const ScheduleManagementByAdmin = () => {
           setShouldReloadFormRead(true);
           setPageSchedule("0");
         }
-    }catch(error){
-      message.error(error.response.data.Message);
+      }catch(error){
+        message.error(error.response.data.Message);
+      }
     }
+
+    const handleConfirmDeleteAll = () => {
+      setVisibleDeleteAll(true);
+    }
+
+    const handleCancelDeleteAll = () => {
+      setVisibleDeleteAll(false);
+    }
+
+    const handleDeleteAll = async() => {
+      try {
+        let response = await axios.delete(deleteAllSchedule,{
+          withCredentials: true,
+        })
+        if (response.status === 200){
+          message.success(response.data.Message);
+          setVisibleDeleteAll(false);
+        }
+      }catch(error){
+        message.error(error.response.data.Message);
+      }
     }
 
     return (
@@ -539,6 +562,7 @@ const ScheduleManagementByAdmin = () => {
           cancelButtonProps={{ className: "bg-red-600" }}
           width={900}
         >
+          <Button onClick={() => handleConfirmDeleteAll()} className="bg-red-600 text-white mt-4 mb-3" htmlType="submit" icon={<CloseSquareOutlined />} >Xóa tất cả lịch khám các tháng trước</Button>
           <Table 
             columns={columnsSchedules} 
             dataSource={dataSchedules}
@@ -614,6 +638,20 @@ const ScheduleManagementByAdmin = () => {
         >
           <div className="text-center">
             <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa lịch khám này không?</p>
+          </div>
+        </Modal>
+        <Modal
+          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận xóa tất cả lịch khám</h1>}
+          visible={visibleDeleteAll}
+          onOk={() => handleDeleteAll()}
+          okText="Xác nhận"
+          onCancel={handleCancelDeleteAll}
+          cancelText="Thoát"
+          okButtonProps={{ className: "bg-blue-700" }}
+          cancelButtonProps={{ className: "bg-red-600" }}
+        >
+          <div className="text-center">
+            <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn xóa tất cả lịch khám các tháng trước không?</p>
           </div>
         </Modal>
       </div>

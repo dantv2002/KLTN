@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
-import { message, Space, Button, Table, Input, Modal, Form } from "antd";
+import { message, Space, Button, Table, Input, Modal, Form, Select } from "antd";
 import axios from "axios";
 import { createDepartment, deleteDepartment, getDepartmentAdmin, updateDepartment } from "../../Api";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
@@ -8,9 +8,11 @@ import Loading from "../../hook/Loading";
 const DepartmentManagementByAdmin = () => {
 
   const [nameInsert, setNameInsert] = useState("");
+  const [allowInsert, setAllowInsert] = useState(null);
   const [idUpdate, setIdUpdate] = useState("");
   const [deletedUpdate, setDeletedUpdate] = useState();
   const [nameUpdate, setNameUpdate] = useState("");
+  const [allowUpdate, setAllowUpdate] = useState(null);
   const [keyword, setKeyword] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [page, setPage] = useState("0");
@@ -118,6 +120,7 @@ const DepartmentManagementByAdmin = () => {
       try{
         let response = await axios.post(createDepartment, {
           NameDepartment: nameInsert,
+          AllowBooking: allowInsert,
         }, {
           withCredentials: true
         })
@@ -151,10 +154,11 @@ const DepartmentManagementByAdmin = () => {
     setIdUpdate(department.Id);
     setNameUpdate(department.NameDepartment);
     setDeletedUpdate(department.deleted);
+    setAllowUpdate(department.AllowBooking);
     formUpdate.setFieldsValue({
       reupid: department.Id,
       reupname: department.NameDepartment,
-      reupdeleted: department.deleted,
+      reupallow: department.AllowBooking,
     });
     setVisibleUpdate(true);
   }; 
@@ -174,6 +178,7 @@ const DepartmentManagementByAdmin = () => {
         deleted: deletedUpdate,
         Id: idUpdate,
         NameDepartment: nameUpdate,
+        AllowBooking: allowUpdate,
       }, {
         withCredentials: true
       })
@@ -234,6 +239,16 @@ const DepartmentManagementByAdmin = () => {
                 onChange={(e) => setNameInsert(e.target.value)}
               />
           </Form.Item>
+          <Form.Item name="insertallow" label="Đặt lịch" rules={[{ required: true, message: 'Cho phép đặt lịch hay không!' }]}>
+              <Select 
+                placeholder="Cho phép đặt lịch"
+                value={allowInsert}
+                onChange={(value) => setAllowInsert(value)}
+              >
+                <Select.Option value={true}>Cho phép</Select.Option>
+                <Select.Option value={false}>Không cho phép</Select.Option>
+              </Select>
+          </Form.Item>
         </Form>
       </Modal>
       <Modal 
@@ -270,6 +285,17 @@ const DepartmentManagementByAdmin = () => {
               onChange={(e) => setNameUpdate(e.target.value)}
               disabled={!editing}
             />
+          </Form.Item>
+          <Form.Item className="relative" name="reupallow" label="Đặt lịch" rules={[{ required: true, message: 'Cho phép đặt lịch hay không!' }]}>
+              <Select 
+                placeholder="Cho phép đặt lịch"
+                value={allowUpdate}
+                onChange={(value) => setAllowUpdate(value)}
+                disabled={!editing}
+              >
+                <Select.Option value={true}>Cho phép</Select.Option>
+                <Select.Option value={false}>Không cho phép</Select.Option>
+              </Select>
           </Form.Item>
         </Form>
       </Modal>
