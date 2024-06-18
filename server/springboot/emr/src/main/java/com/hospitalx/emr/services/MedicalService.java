@@ -185,11 +185,11 @@ public class MedicalService {
     public Boolean markMedical(String id) {
         log.info("Change mark medical with ID: " + id);
         MedicalDto medical = this.get(id);
-        Boolean mark = medical.getMark() ? false : true;
+        String mark = medical.getMark().equalsIgnoreCase("YES") ? "NO" : "YES";
         medical.setMark(mark);
         medicalRepository.save(modelMapper.map(medical, Medical.class));
         log.info("Mark medical success with ID: " + id + " as " + mark);
-        return mark;
+        return mark.equalsIgnoreCase("YES");
     }
 
     public MedicalDto save(MedicalDto t) {
@@ -325,9 +325,8 @@ public class MedicalService {
     private void inpatientValidate(MedicalDto medical) {
         departmentService.get(medical.getDepartmentAdmission(), true);
         if (medical.getDateTransfer() != null) {
-            if (medical.getDepartmentTransfer().equals(medical.getDepartmentAdmission())) {
-                throw new CustomException("Khoa chuyển không được trùng với khoa vào viện!",
-                        HttpStatus.BAD_REQUEST.value());
+            if(medical.getDepartmentTransfer().equals(medical.getDepartmentAdmission())){
+                throw new CustomException("Khoa chuyển không được trùng với khoa vào viện!", HttpStatus.BAD_REQUEST.value());
             }
             departmentService.get(medical.getDepartmentTransfer(), true);
             if (medical.getDateTransfer().before(medical.getDateAdmission())) {

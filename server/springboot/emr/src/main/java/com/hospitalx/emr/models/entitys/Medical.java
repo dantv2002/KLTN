@@ -29,7 +29,7 @@ public class Medical {
     private Date dueDate; // Ngày đến hạn thanh lý
     private MedicalType type; // Loại bệnh án
     private Date createdAt; // Ngày tạo
-    private Boolean mark; // Đánh dấu
+    private String mark; // Đánh dấu
     // Ngoại trú
     private Date date;// Thời gian đến khám
     private String initialDiagnosis; // Chẩn đoán ban đầu

@@ -131,7 +131,7 @@ public class ScheduleService {
 
     public void deleteSchedule(String idDoctor, String idSchedule) {
         log.info("Deleting schedule");
-        HealthcareStaffDto doctor = healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        healthcareStaffService.get(idDoctor, true); // Check doctor exists
         ScheduleDto scheduleDto = this.get(idSchedule);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
