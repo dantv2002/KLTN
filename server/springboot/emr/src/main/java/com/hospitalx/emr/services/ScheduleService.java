@@ -76,9 +76,8 @@ public class ScheduleService {
         departmentService.get(departmentId, true); // Check department exists
         List<HealthcareStaffDto> doctors = healthcareStaffService.getAllByDepartmentId(departmentId);
         List<ScheduleDto> schedules = new ArrayList<>();
-        Date date = new Date();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
+        calendar.setTime(new Date());
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -151,16 +150,12 @@ public class ScheduleService {
                     HttpStatus.BAD_REQUEST.value());
         }
         this.delete(idSchedule); // Delete schedule
-        if (!this.isCheckSchedule(idDoctor)) {
-            doctor.setIsSchedule(false);
-            healthcareStaffService.update(doctor);
-        }
         log.info("Deleted schedule");
     }
 
     public void updateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Updating schedule");
-        HealthcareStaffDto doctor = healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        healthcareStaffService.get(idDoctor, true); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
@@ -174,18 +169,11 @@ public class ScheduleService {
             }
             this.save(scheduleDto);
         }
-        if (doctor.getIsSchedule() == null) {
-            doctor.setIsSchedule(true);
-            healthcareStaffService.update(doctor);
-        } else if (!doctor.getIsSchedule()) {
-            doctor.setIsSchedule(true);
-            healthcareStaffService.update(doctor);
-        }
     }
 
     public void createSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Creating schedule for doctor: {}", idDoctor);
-        HealthcareStaffDto doctor = healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        healthcareStaffService.get(idDoctor, true); // Check doctor exists
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
@@ -196,13 +184,6 @@ public class ScheduleService {
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             scheduleDto.setDoctorId(idDoctor);
             this.save(scheduleDto);
-        }
-        if (doctor.getIsSchedule() == null) {
-            doctor.setIsSchedule(true);
-            healthcareStaffService.update(doctor);
-        } else if (!doctor.getIsSchedule()) {
-            doctor.setIsSchedule(true);
-            healthcareStaffService.update(doctor);
         }
     }
 
@@ -323,13 +304,21 @@ public class ScheduleService {
                 });
     }
 
-    public Boolean isCheckSchedule(String idDoctor) {
-        log.info("Check schedule of doctor: {}", idDoctor);
+    public Set<String> getAllDoctorIdSchedule(Boolean isEqual) {
+        log.info("Get all doctor id schedule");
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        return scheduleRepository.existsByDoctorIdAndDateGreaterThanOrEqual(idDoctor, calendar.getTime()) > 0;
+        if (isEqual) {
+            return scheduleRepository.getAllDoctorIdByDateGreaterThanOrEqual(calendar.getTime()).stream()
+                    .map(item -> item.getDoctorId())
+                    .collect(Collectors.toSet());
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, 7);
+        return scheduleRepository.getAllDoctorIdByDateGreaterThan(calendar.getTime()).stream()
+                .map(item -> item.getDoctorId())
+                .collect(Collectors.toSet());
     }
 }

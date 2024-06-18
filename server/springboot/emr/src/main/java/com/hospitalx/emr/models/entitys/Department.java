@@ -12,5 +12,6 @@ public class Department {
     @Id
     private String id;
     private String nameDepartment;
+    private Boolean allowBooking;
     private Boolean deleted = false;
 }

@@ -52,4 +52,4 @@ spring:
     mongodb:
       uri: ${MONGODB_URI}
   profiles:
-    active: prod
+    active: dev

@@ -2,10 +2,14 @@ package com.hospitalx.emr.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,9 @@ public class HealthcareStaffService {
     private HealthcareStaffRepository healthcareStaffRepository;
     @Autowired
     private DepartmentService departmentService;
+    @Lazy
+    @Autowired
+    private ScheduleService scheduleService;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -45,7 +52,9 @@ public class HealthcareStaffService {
 
     public List<HealthcareStaffDto> getAllByDepartmentId(String departmentId) {
         log.info("Get all healthcare staffs by department ID: " + departmentId);
+        Set<String> idDoctors = scheduleService.getAllDoctorIdSchedule(true);
         List<HealthcareStaff> entities = healthcareStaffRepository.findAllByDepartmentId(departmentId);
+        entities = entities.stream().filter(entity -> idDoctors.contains(entity.getId())).collect(Collectors.toList());
         log.info("Get all healthcare staffs success with total staffs: " + entities.size());
         return entities.stream().map(entity -> modelMapper.map(entity, HealthcareStaffDto.class)).toList();
     }
@@ -112,15 +121,22 @@ public class HealthcareStaffService {
             List<String> idDepartments = null;
             if (parts[2].isEmpty()) {
                 idDepartments = departmentService.getAll("", "", Pageable.unpaged()).stream()
-                .map(department -> department.getId()).toList();
-            }else{
+                        .map(department -> department.getId()).toList();
+            } else {
                 idDepartments = new ArrayList<String>();
                 idDepartments.add(parts[2]);
             }
-            Page<HealthcareStaff> entities = healthcareStaffRepository.findByDoctorForPatient(StaffType.DOCTOR,
+            Set<String> idDoctors = scheduleService.getAllDoctorIdSchedule(false);
+            List<HealthcareStaff> entities = healthcareStaffRepository.findByDoctorForPatient(StaffType.DOCTOR,
                     parts[0], parts[1], idDepartments,
-                    parts[3], pageable);
-            return entities.map(entity -> {
+                    parts[3]);
+            entities = entities.stream().filter(entity -> idDoctors.contains(entity.getId()))
+                    .collect(Collectors.toList());
+            if (entities.size() == 0) {
+                return Page.empty();
+            }
+            Page<HealthcareStaff> entitiesPage = new PageImpl<>(entities, pageable, entities.size());
+            return entitiesPage.map(entity -> {
                 HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
                 String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false)
                         .getNameDepartment();
@@ -223,12 +239,5 @@ public class HealthcareStaffService {
                 log.error("Staff type is invalid");
                 throw new CustomException("Loại nhân viên không hợp lệ", HttpStatus.BAD_REQUEST.value());
         }
-    }
-
-    public List<HealthcareStaffDto> getAllDoctorSchedule() {
-        log.info("Get all doctor schedule");
-        List<HealthcareStaff> entities = healthcareStaffRepository.findByAllDoctorSchedule();
-        log.info("Get all doctor schedule success with total staffs: " + entities.size());
-        return entities.stream().map(entity -> modelMapper.map(entity, HealthcareStaffDto.class)).toList();
     }
 }

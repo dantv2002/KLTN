@@ -60,7 +60,7 @@ public class MedicalDto {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date createdAt; // Ngày tạo
     @JsonProperty("Mark")
-    private String mark = "NO"; // Đánh dấu
+    private Boolean mark = false; // Đánh dấu
 
     @NotNull(message = "Vui lòng nhập loại bệnh án")
     @JsonProperty("Type")

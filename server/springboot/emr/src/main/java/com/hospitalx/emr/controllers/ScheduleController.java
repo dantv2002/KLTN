@@ -113,6 +113,17 @@ public class ScheduleController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/admin/schedule/all/before-month")
+    public ResponseEntity<BaseResponse> deleteAll() {
+        scheduleService.deleteSchedulesBeforeMonth();
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Xóa tất cả lịch khám của các tháng trước thành công");
+        response.setStatus(HttpStatus.OK.value());
+        response.setData(null);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     // Register clinic
     @PreAuthorize("hasRole('ROLE_RECEPTIONIST')")
     @GetMapping("/receptionist/register-clinic/{id}")

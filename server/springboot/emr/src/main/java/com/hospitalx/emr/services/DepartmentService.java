@@ -47,10 +47,7 @@ public class DepartmentService {
         if (role.equals("ROLE_ADMIN") || role.equals("ROLE_RECEPTIONIST")) {
             departments = departmentRepository.findByNameDepartment(keyword, pageable);
         } else if (role.equals("ROLE_PATIENT")) {
-            List<String> nameDepartments = new ArrayList<>();
-            nameDepartments.add("Khoa chẩn đoán hình ảnh");
-            nameDepartments.add("Khoa khám bệnh cấp cứu");
-            departments = departmentRepository.findByAll(nameDepartments, Pageable.unpaged());
+            departments = departmentRepository.findByAll(true, Pageable.unpaged());
         } else {
             departments = departmentRepository.findByAll(Pageable.unpaged());
         }

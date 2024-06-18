@@ -29,7 +29,7 @@ public class Medical {
     private Date dueDate; // Ngày đến hạn thanh lý
     private MedicalType type; // Loại bệnh án
     private Date createdAt; // Ngày tạo
-    private String mark = "NO"; // Đánh dấu
+    private Boolean mark; // Đánh dấu
     // Ngoại trú
     private Date date;// Thời gian đến khám
     private String initialDiagnosis; // Chẩn đoán ban đầu
@@ -46,6 +46,6 @@ public class Medical {
     private Date dateDischarge; // Thời gian ra viện
     private Integer daysTreatment; // Số ngày điều trị
     //
-    private String doctorIdTreatment="";// Bác sĩ điều trị
+    private String doctorIdTreatment = "";// Bác sĩ điều trị
     private String recordId; // Mã hồ sơ bệnh nhân
 }

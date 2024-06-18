@@ -54,8 +54,6 @@ public class HealthcareStaffDto {
     @JsonProperty("Title")
     @Pattern(regexp = "Ths|TS|BS|BSCKI|BSCKII", message = "Chức danh phải là Ths, TS, BS, BSCKI hoặc BSCKII")
     private String title;
-    @JsonProperty("IsSchedule")
-    private Boolean isSchedule; 
     // Nurse
     @JsonProperty("Level")
     private NurseLevel level;
