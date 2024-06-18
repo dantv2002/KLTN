@@ -34,6 +34,6 @@ public interface ScheduleRepository extends MongoRepository<Schedule, String> {
     @Query(value = "{'date' : { $gt : ?0 } }")
     List<Schedule> getAllDoctorIdByDateGreaterThan(Date date);
 
-    @Query(value = "{'date' : { $lt: ?0 } }", delete = true)
-    void deleteAllByDate(Date date);
+    @Query(value = "{'date' : { $lt: ?0 } }")
+    List<Schedule> getAllByDateLessThan(Date date);
 }

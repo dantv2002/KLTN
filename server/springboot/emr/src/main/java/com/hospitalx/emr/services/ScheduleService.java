@@ -225,7 +225,14 @@ public class ScheduleService {
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        scheduleRepository.deleteAllByDate(calendar.getTime());
+        List<String> scheduleIds = scheduleRepository.getAllByDateLessThan(calendar.getTime()).stream()
+                .map(item -> item.getId())
+                .collect(Collectors.toList());
+        if(scheduleIds.size() == 0) {
+            log.info("No schedule to delete");
+            throw new CustomException("Không có lịch khám để xóa", HttpStatus.NOT_FOUND.value());
+        }
+        scheduleRepository.deleteAllById(scheduleIds);
         log.info("Deleted schedules before month: " + (calendar.get(Calendar.MONTH) + 1));
     }
     //
