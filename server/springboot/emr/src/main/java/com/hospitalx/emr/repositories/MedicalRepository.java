@@ -34,9 +34,6 @@ public interface MedicalRepository extends MongoRepository<Medical, String> {
     @Query(value = " { 'createdAt': {$gte: ?0, $lt: ?1} } ")
     List<Medical> findAllByDateBetween(Date startDate, Date endDate);
 
-    @Query(value = "{}", count = true)
-    int totalMedical();
-
     @Query(value = "{ 'locked': false }", count = true)
     int totalMedicalNew();
 

@@ -51,10 +51,6 @@ public class MedicalService {
         return medicalRepository.findAllByDateBetween(startDate, endDate);
     }
 
-    public int totalMedical() {
-        return medicalRepository.totalMedical();
-    }
-
     public int totalMedicalNew() {
         return medicalRepository.totalMedicalNew();
     }

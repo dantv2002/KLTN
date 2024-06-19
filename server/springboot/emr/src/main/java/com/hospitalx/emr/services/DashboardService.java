@@ -47,9 +47,9 @@ public class DashboardService {
         List<Account> accounts = accountService.getDashboard(startDate, endDate);
         List<Ticket> tickets = ticketService.getDashboard(startDate, endDate);
         int totalRecord = recordService.totalRecord();
-        int totalMedical = medicalService.totalMedical();
         int totalMedicalNew = medicalService.totalMedicalNew();
         int totalMedicalLocked = medicalService.totalMedicalLocked();
+        int totalMedical = totalMedicalNew + totalMedicalLocked;
         int totalMedicalExpired = medicalService.totalMedicalExpired();
         int totalAccount = accountService.totalAccount();
         int totalTicket = ticketService.totalTicket();
