@@ -187,7 +187,7 @@ public class ScheduleService {
         }
     }
 
-    public ScheduleDto save(ScheduleDto t) {
+    private ScheduleDto save(ScheduleDto t) {
         log.info("Saving schedule: {}", t);
         Schedule schedule = scheduleRepository.save(modelMapper.map(t, Schedule.class));
         log.info("Saved schedule: {}", schedule);
@@ -212,7 +212,7 @@ public class ScheduleService {
         log.info("Updated schedule: {}", schedule);
     }
 
-    public void delete(String id) {
+    private void delete(String id) {
         log.info("Deleting schedule with id: " + id);
         scheduleRepository.deleteById(id);
         log.info("Deleted schedule with id: " + id);

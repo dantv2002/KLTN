@@ -263,8 +263,6 @@ public class AccountService {
         return modelMapper.map(account, AccountDto.class);
     }
 
-    // Override methods
-
     public AccountDto save(AccountDto t) {
         log.info("Save account: " + t.toString());
         Account account = modelMapper.map(t, Account.class);

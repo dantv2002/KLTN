@@ -37,7 +37,7 @@ public class DepartmentController {
     @PostMapping("/admin/department/new")
     public ResponseEntity<BaseResponse> create(@RequestBody @Valid DepartmentDto departmentDto) {
         departmentDto.setNameDepartment(departmentDto.getNameDepartment().trim().replaceAll("\\s+", " "));
-        departmentService.create(departmentDto);
+        departmentService.save(departmentDto);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tạo khoa mới thành công");
         response.setStatus(HttpStatus.OK.value());

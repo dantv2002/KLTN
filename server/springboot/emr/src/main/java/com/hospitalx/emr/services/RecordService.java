@@ -57,8 +57,6 @@ public class RecordService {
         return recordRepository.totalRecord();
     }
 
-    // Override methods
-
     public RecordDto save(RecordDto t) {
         checkExistRecord(t.getIdentityCard(), null);
         log.info("Save record: " + t.toString());

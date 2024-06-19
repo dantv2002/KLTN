@@ -25,12 +25,8 @@ public class DepartmentService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public void create(DepartmentDto departmentDto) {
-        this.checkDepartmentExist(departmentDto.getNameDepartment());
-        this.save(departmentDto);
-    }
-
     public DepartmentDto save(DepartmentDto t) {
+        this.checkDepartmentExist(t.getNameDepartment());
         log.info("Create new department with name: {}", t.getNameDepartment());
         Department department = modelMapper.map(t, Department.class);
         department = departmentRepository.save(department);

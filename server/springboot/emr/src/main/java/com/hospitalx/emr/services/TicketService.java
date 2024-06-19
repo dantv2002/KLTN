@@ -93,7 +93,7 @@ public class TicketService {
         log.info("Create ticket success with ID: " + ticketBooking.getId());
     }
 
-    public TicketDto save(TicketDto t) {
+    private TicketDto save(TicketDto t) {
         log.info("Save ticket: " + t);
         return modelMapper.map(ticketRepository.save(modelMapper.map(t, Ticket.class)), TicketDto.class);
     }
