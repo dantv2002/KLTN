@@ -26,4 +26,10 @@ public class CloudinaryService {
             throw new CustomException("Có lỗi không thể xóa ảnh", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
+
+    public void deleteByURL(String url) {
+        String[] parts = url.split("/");
+        String publicId = parts[parts.length - 1].split("\\.")[0];
+        delete(publicId);
+    }
 }

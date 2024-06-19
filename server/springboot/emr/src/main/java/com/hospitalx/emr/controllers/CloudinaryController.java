@@ -20,7 +20,7 @@ public class CloudinaryController {
 
     @PreAuthorize("hasRole('ROLE_DOCTOR')")
     @DeleteMapping("/doctor/delete-image/{id}")
-    public ResponseEntity<BaseResponse> upload(@PathVariable("id") String id) {
+    public ResponseEntity<BaseResponse> delete(@PathVariable("id") String id) {
         cloudinaryService.delete(id);
         BaseResponse response = new BaseResponse();
         response.setMessage("Xóa ảnh thành công");

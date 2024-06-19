@@ -45,6 +45,8 @@ public class MedicalService {
     @Autowired
     private DiagnosticService diagnosticService;
     @Autowired
+    private CloudinaryService cloudinaryService;
+    @Autowired
     private ModelMapper modelMapper;
 
     public List<Medical> getDashboard(Date startDate, Date endDate) {
@@ -282,6 +284,7 @@ public class MedicalService {
         }
         //
         diagnosticService.getAll(medical.getId(), "", Pageable.unpaged()).stream().forEach(diaImageDto -> {
+            cloudinaryService.deleteByURL(diaImageDto.getUrlImage());
             diagnosticService.delete(diaImageDto.getId());
         });
         log.info("Delete medical success with ID: " + id);
@@ -321,8 +324,9 @@ public class MedicalService {
     private void inpatientValidate(MedicalDto medical) {
         departmentService.get(medical.getDepartmentAdmission(), true);
         if (medical.getDateTransfer() != null) {
-            if(medical.getDepartmentTransfer().equals(medical.getDepartmentAdmission())){
-                throw new CustomException("Khoa chuyển không được trùng với khoa vào viện!", HttpStatus.BAD_REQUEST.value());
+            if (medical.getDepartmentTransfer().equals(medical.getDepartmentAdmission())) {
+                throw new CustomException("Khoa chuyển không được trùng với khoa vào viện!",
+                        HttpStatus.BAD_REQUEST.value());
             }
             departmentService.get(medical.getDepartmentTransfer(), true);
             if (medical.getDateTransfer().before(medical.getDateAdmission())) {
