@@ -24,7 +24,7 @@ public class DiagnosticController {
     @Autowired
     private DiagnosticService diagnosticService;
 
-    @PreAuthorize("hasRole('ROLE_DOCTOR')")
+    @PreAuthorize("hasRole('ROLE_DOCTOR_DIAGNOSTIC_IMAGING')")
     @PostMapping("/doctor/diagnostic-image/run")
     public ResponseEntity<BaseResponse> predict(@RequestBody Map<String, String> request) {
         String urlImage = request.get("Image");
@@ -38,7 +38,7 @@ public class DiagnosticController {
         return ResponseEntity.status(200).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_DOCTOR')")
+    @PreAuthorize("hasRole('ROLE_DOCTOR_DIAGNOSTIC_IMAGING')")
     @PostMapping("/doctor/diagnostic-image/save")
     public ResponseEntity<BaseResponse> create(@RequestBody @Valid DiagnosticImageDto body) {
         diagnosticService.save(body);

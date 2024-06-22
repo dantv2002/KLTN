@@ -44,7 +44,7 @@ public class RecordController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_RECEPTIONIST')")
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_DOCTOR_DIAGNOSTIC_IMAGING', 'ROLE_RECEPTIONIST')")
     @GetMapping({ "/patient/records", "/nurse-doctor/records", "/receptionist/records" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,

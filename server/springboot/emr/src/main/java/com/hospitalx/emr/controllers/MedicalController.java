@@ -46,7 +46,7 @@ public class MedicalController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_PATIENT')")
+    @PreAuthorize("hasAnyRole('ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_PATIENT', 'ROLE_DOCTOR_DIAGNOSTIC_IMAGING')")
     @GetMapping({ "/nurse-doctor/medicals", "/patient/medicals" })
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,

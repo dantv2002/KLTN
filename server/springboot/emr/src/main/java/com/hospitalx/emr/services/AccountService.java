@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.hospitalx.emr.common.AuthProvider;
+import com.hospitalx.emr.common.StaffType;
 import com.hospitalx.emr.component.AuthManager;
 import com.hospitalx.emr.exception.CustomException;
 import com.hospitalx.emr.models.dtos.AccountDto;
@@ -38,6 +39,8 @@ public class AccountService {
     private EmailService emailService;
     @Autowired
     private HealthcareStaffService healthcareStaffService;
+    @Autowired
+    private DepartmentService departmentService;
     @Autowired
     private AuthManager authManager;
 
@@ -87,6 +90,7 @@ public class AccountService {
 
     public void createAccount(AccountDto accountDto, String id_healthcare_staff) {
         HealthcareStaffDto healthcareStaffDto = healthcareStaffService.checkExistsAccount(id_healthcare_staff);
+        String role = healthcareStaffDto.getStaffType().toString();
         Account account = accountRepository.findByEmailAndAuthProvider(accountDto.getEmail(), AuthProvider.LOCAL)
                 .orElse(null);
         if (account != null) {
@@ -99,7 +103,14 @@ public class AccountService {
         }
         log.info("Create account: " + accountDto.getEmail());
         accountDto.setEmailVerified(true);
-        accountDto.setRole(healthcareStaffDto.getStaffType().toString());
+        if (role.equals(StaffType.DOCTOR.toString())) {
+            String nameDepartment = departmentService.get(healthcareStaffDto.getDepartmentId(), true)
+                    .getNameDepartment();
+            if (nameDepartment.equalsIgnoreCase("Khoa chẩn đoán hình ảnh")) {
+                role = role + "_DIAGNOSTIC_IMAGING";
+            }
+        }
+        accountDto.setRole(role);
         accountDto.setPassword(BCrypt.hashpw(accountDto.getPassword(), BCrypt.gensalt(10)));
         accountDto.setCreatedAt(new Date());
         account = accountRepository.save(modelMapper.map(accountDto, Account.class));
