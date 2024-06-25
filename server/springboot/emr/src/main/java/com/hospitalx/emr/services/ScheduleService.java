@@ -78,6 +78,7 @@ public class ScheduleService {
         List<ScheduleDto> schedules = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
+        ScheduleTime time = calendar.get(Calendar.HOUR_OF_DAY) < 12 ? ScheduleTime.MORNING : ScheduleTime.AFTERNOON;
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -89,8 +90,10 @@ public class ScheduleService {
         List<String> listDoctorId = doctors.stream().map(item -> item.getId()).collect(Collectors.toList());
         listDoctorId.stream().forEach(doctorId -> {
             scheduleRepository.findAllTimeDoctor(doctorId, startDate, endDate).forEach(schedule -> {
-                ScheduleDto scheduleDto = modelMapper.map(schedule, ScheduleDto.class);
-                schedules.add(scheduleDto);
+                if (schedule.getTime().equals(time)) {
+                    ScheduleDto scheduleDto = modelMapper.map(schedule, ScheduleDto.class);
+                    schedules.add(scheduleDto);
+                }
             });
         });
         return schedules;
@@ -228,7 +231,7 @@ public class ScheduleService {
         List<String> scheduleIds = scheduleRepository.getAllByDateLessThan(calendar.getTime()).stream()
                 .map(item -> item.getId())
                 .collect(Collectors.toList());
-        if(scheduleIds.size() == 0) {
+        if (scheduleIds.size() == 0) {
             log.info("No schedule to delete");
             throw new CustomException("Không có lịch khám để xóa", HttpStatus.NOT_FOUND.value());
         }
