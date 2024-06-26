@@ -216,7 +216,10 @@ public class MedicalService {
         if (role.equals("ROLE_PATIENT"))
             return medicalRepository.findAllByKeyword(parts[0], parts[1], pageable)
                     .map(medical -> this.addInfo(modelMapper.map(medical, MedicalDto.class)));
-
+        if (role.equals("ROLE_DOCTOR_DIAGNOSTIC_IMAGING")) {
+            return medicalRepository.findAllByKeyword(parts[0], parts[1], false, pageable)
+                    .map(medical -> this.addInfo(modelMapper.map(medical, MedicalDto.class)));
+        }
         Boolean isLocked = parts[3].equalsIgnoreCase("true");
         if (isLocked) {
             return medicalRepository.findAllByKeyword(parts[0], type, parts[1], doctorId, pageable)
