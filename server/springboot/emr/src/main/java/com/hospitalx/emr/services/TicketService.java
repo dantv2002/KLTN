@@ -118,7 +118,9 @@ public class TicketService {
             log.error("Clinic is empty");
             throw new CustomException("Vui lòng nhập phòng khám!", HttpStatus.BAD_REQUEST.value());
         }
-        LocalTime noon = LocalTime.parse("12:00");
+        String timeString = "12:00";
+        Boolean isNoon = LocalTime.now().isAfter(LocalTime.parse(timeString));
+        LocalTime noon = LocalTime.parse(timeString);
         parts[1] = "^" + parts[1] + "$";
         List<TicketDto> tickets = ticketRepository
                 .nurseFindByAll(keyword, "waiting", new SimpleDateFormat("dd/MM/yyyy").format(new Date()), parts[1],
@@ -126,7 +128,7 @@ public class TicketService {
                 .stream()
                 .filter(ticket -> {
                     LocalTime time = LocalTime.parse(ticket.getTime());
-                    return time.isBefore(noon) || time.equals(noon);
+                    return isNoon ? time.isAfter(noon) : time.isBefore(noon);
                 })
                 .map(ticket -> modelMapper.map(ticket, TicketDto.class))
                 .collect(Collectors.toList());
