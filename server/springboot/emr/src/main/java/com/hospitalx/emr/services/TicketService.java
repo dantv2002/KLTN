@@ -5,10 +5,12 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -100,18 +102,34 @@ public class TicketService {
 
     public Page<TicketDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all tickets");
+        String[] parts = type.split("_", -1);
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         if (role.equals("ROLE_PATIENT")) {
             String accountId = authManager.getAuthentication().getName();
-            type = type.isEmpty() ? type : "^" + type + "$";
-            return ticketRepository.findAllByIdAndStatus(accountId, type, pageable)
+            parts[0] = parts[0].isEmpty() ? parts[0] : "^" + parts[0] + "$";
+            return ticketRepository.findAllByIdAndStatus(accountId, parts[0], pageable)
                     .map(ticket -> modelMapper.map(ticket, TicketDto.class));
         }
-
-        return ticketRepository
-                .findAllByIdRegex(keyword, "waiting", new SimpleDateFormat("dd/MM/yyyy").format(new Date()),
-                        Pageable.unpaged())
-                .map(ticket -> modelMapper.map(ticket, TicketDto.class));
+        if (parts[1].isEmpty()) {
+            log.error("Location is empty");
+            throw new CustomException("Vui lòng nhập khu vực khám!", HttpStatus.BAD_REQUEST.value());
+        }
+        if (parts[2].isEmpty()) {
+            log.error("Clinic is empty");
+            throw new CustomException("Vui lòng nhập phòng khám!", HttpStatus.BAD_REQUEST.value());
+        }
+        LocalTime noon = LocalTime.parse("12:00");
+        List<TicketDto> tickets = ticketRepository
+                .nurseFindByAll(keyword, "waiting", new SimpleDateFormat("dd/MM/yyyy").format(new Date()), parts[1],
+                        parts[2], Pageable.unpaged())
+                .stream()
+                .filter(ticket -> {
+                    LocalTime time = LocalTime.parse(ticket.getTime());
+                    return time.isBefore(noon) || time.equals(noon);
+                })
+                .map(ticket -> modelMapper.map(ticket, TicketDto.class))
+                .collect(Collectors.toList());
+        return new PageImpl<>(tickets, Pageable.unpaged(), tickets.size());
     }
 
     public TicketDto get(String id) {

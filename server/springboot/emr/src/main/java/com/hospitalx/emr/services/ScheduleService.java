@@ -45,6 +45,14 @@ public class ScheduleService {
     private Date endDate = null;
 
     public int callNext(String numberClinic, String location) {
+        if (location.isEmpty()) {
+            log.error("Location is empty");
+            throw new CustomException("Vui lòng nhập khu vực khám!", HttpStatus.BAD_REQUEST.value());
+        }
+        if (numberClinic.isEmpty()) {
+            log.error("Number clinic is empty");
+            throw new CustomException("Vui lòng nhập phòng khám!", HttpStatus.BAD_REQUEST.value());
+        }
         log.info("Call next number of clinic: {}", numberClinic);
         String accountId = authManager.getAuthentication().getName();
         HealthcareStaffDto nurse = healthcareStaffService.getByAccountId(accountId);
