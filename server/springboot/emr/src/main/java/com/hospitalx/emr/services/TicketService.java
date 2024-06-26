@@ -119,6 +119,7 @@ public class TicketService {
             throw new CustomException("Vui lòng nhập phòng khám!", HttpStatus.BAD_REQUEST.value());
         }
         LocalTime noon = LocalTime.parse("12:00");
+        parts[1] = "^" + parts[1] + "$";
         List<TicketDto> tickets = ticketRepository
                 .nurseFindByAll(keyword, "waiting", new SimpleDateFormat("dd/MM/yyyy").format(new Date()), parts[1],
                         parts[2], Pageable.unpaged())
