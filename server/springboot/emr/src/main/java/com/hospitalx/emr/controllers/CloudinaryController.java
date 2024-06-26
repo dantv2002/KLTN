@@ -18,7 +18,7 @@ public class CloudinaryController {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    @PreAuthorize("hasRole('ROLE_DOCTOR')")
+    @PreAuthorize("hasRole('ROLE_DOCTOR_DIAGNOSTIC_IMAGING')")
     @DeleteMapping("/doctor/delete-image/{id}")
     public ResponseEntity<BaseResponse> delete(@PathVariable("id") String id) {
         cloudinaryService.delete(id);

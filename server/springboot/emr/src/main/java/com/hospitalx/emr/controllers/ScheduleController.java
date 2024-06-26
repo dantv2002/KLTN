@@ -159,9 +159,8 @@ public class ScheduleController {
     @PreAuthorize("hasRole('ROLE_NURSE')")
     @GetMapping("/nurse/call-next")
     public ResponseEntity<BaseResponse> getNumberWaiting(
-            @RequestParam(name = "numberClinic", required = true) String numberClinic,
-            @RequestParam(name = "location", required = true) String location) {
-        int result = scheduleService.callNext(numberClinic, location);
+            @RequestParam(name = "numberClinic", required = true) String numberClinic) {
+        int result = scheduleService.callNext(numberClinic);
         BaseResponse response = new BaseResponse();
         response.setMessage("Gọi bệnh nhân tiếp theo thành công");
         response.setStatus(HttpStatus.OK.value());

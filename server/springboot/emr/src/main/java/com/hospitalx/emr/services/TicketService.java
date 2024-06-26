@@ -73,7 +73,7 @@ public class TicketService {
         TicketDto ticketDto = new TicketDto();
         scheduleDto.setNumber(scheduleDto.getNumber() + 1); // Update number of patients
         ticketDto.setNumber(scheduleDto.getNumber()); // STT
-        ticketDto.setArea(scheduleDto.getLocation()); // Khu vực khám
+        ticketDto.setArea(departmentDto.getLocation()); // Khu vực khám
         ticketDto.setClinic(scheduleDto.getClinic()); // Phòng khám
         ticketDto.setDepartment(departmentDto.getNameDepartment()); // Khoa khám
         ticketDto.setDate(new SimpleDateFormat("dd/MM/yyyy").format(scheduleDto.getDate())); // Ngày khám
@@ -103,9 +103,9 @@ public class TicketService {
     public Page<TicketDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all tickets");
         String[] parts = type.split("_", -1);
+        String accountId = authManager.getAuthentication().getName();
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         if (role.equals("ROLE_PATIENT")) {
-            String accountId = authManager.getAuthentication().getName();
             parts[0] = parts[0].isEmpty() ? parts[0] : "^" + parts[0] + "$";
             return ticketRepository.findAllByIdAndStatus(accountId, parts[0], pageable)
                     .map(ticket -> modelMapper.map(ticket, TicketDto.class));
@@ -114,17 +114,20 @@ public class TicketService {
             log.error("Location is empty");
             throw new CustomException("Vui lòng nhập khu vực khám!", HttpStatus.BAD_REQUEST.value());
         }
-        if (parts[2].isEmpty()) {
-            log.error("Clinic is empty");
-            throw new CustomException("Vui lòng nhập phòng khám!", HttpStatus.BAD_REQUEST.value());
+        HealthcareStaffDto nurse = healthcareStaffService.getByAccountId(accountId);
+        DepartmentDto departmentDto = departmentService.get(nurse.getDepartmentId(), true);
+        if (!departmentDto.getClinics().contains(parts[1])) {
+            log.error("Clinic is invalid");
+            throw new CustomException(departmentDto.getNameDepartment() + " không có phòng: " + parts[1],
+                    HttpStatus.BAD_REQUEST.value());
         }
+        String location = departmentDto.getLocation();
         String timeString = "12:00";
         Boolean isNoon = LocalTime.now().isAfter(LocalTime.parse(timeString));
         LocalTime noon = LocalTime.parse(timeString);
-        parts[1] = "^" + parts[1] + "$";
         List<TicketDto> tickets = ticketRepository
-                .nurseFindByAll(keyword, "waiting", new SimpleDateFormat("dd/MM/yyyy").format(new Date()), parts[1],
-                        parts[2], Pageable.unpaged())
+                .nurseFindByAll(keyword, "waiting", new SimpleDateFormat("dd/MM/yyyy").format(new Date()), location,
+                        parts[1], Pageable.unpaged())
                 .stream()
                 .filter(ticket -> {
                     LocalTime time = LocalTime.parse(ticket.getTime());

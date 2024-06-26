@@ -39,6 +39,13 @@ public class HealthcareStaffService {
     @Autowired
     private AuthManager authManager;
 
+    public List<HealthcareStaffDto> getAllDoctorByDepartmentId(String departmentId) {
+        log.info("Get all doctors by department ID: " + departmentId);
+        List<HealthcareStaff> doctors = healthcareStaffRepository.findAllByDepartmentId(departmentId);
+        return doctors.stream().map(doctor -> modelMapper.map(doctor, HealthcareStaffDto.class))
+                .collect(Collectors.toList());
+    }
+
     public HealthcareStaffDto getByAccountId(String accountId) {
         log.info("Get healthcare staff by account ID: " + accountId);
         HealthcareStaff entity = healthcareStaffRepository.findByAccountId(accountId);

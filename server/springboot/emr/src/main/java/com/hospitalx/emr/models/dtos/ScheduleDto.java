@@ -26,10 +26,6 @@ public class ScheduleDto {
     @JsonProperty("Time")
     private ScheduleTime time;
 
-    @NotEmpty(message = "Vui lòng nhập vị trí khám")
-    @JsonProperty("Location")
-    private String location;
-
     @NotEmpty(message = "Vui lòng nhập phòng khám")
     @JsonProperty("Clinic")
     private String clinic;

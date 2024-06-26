@@ -2,7 +2,6 @@ package com.hospitalx.emr.services;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.hospitalx.emr.common.ScheduleTime;
 import com.hospitalx.emr.component.AuthManager;
 import com.hospitalx.emr.exception.CustomException;
+import com.hospitalx.emr.models.dtos.DepartmentDto;
 import com.hospitalx.emr.models.dtos.HealthcareStaffDto;
 import com.hospitalx.emr.models.dtos.ScheduleDto;
 import com.hospitalx.emr.models.entitys.Schedule;
@@ -44,11 +44,7 @@ public class ScheduleService {
     private Date startDate = null;
     private Date endDate = null;
 
-    public int callNext(String numberClinic, String location) {
-        if (location.isEmpty()) {
-            log.error("Location is empty");
-            throw new CustomException("Vui lòng nhập khu vực khám!", HttpStatus.BAD_REQUEST.value());
-        }
+    public int callNext(String numberClinic) {
         if (numberClinic.isEmpty()) {
             log.error("Number clinic is empty");
             throw new CustomException("Vui lòng nhập phòng khám!", HttpStatus.BAD_REQUEST.value());
@@ -56,6 +52,12 @@ public class ScheduleService {
         log.info("Call next number of clinic: {}", numberClinic);
         String accountId = authManager.getAuthentication().getName();
         HealthcareStaffDto nurse = healthcareStaffService.getByAccountId(accountId);
+        DepartmentDto department = departmentService.get(nurse.getDepartmentId(), true);
+        if (!department.getClinics().contains(numberClinic)) {
+            log.error("Clinic is invalid");
+            throw new CustomException(department.getNameDepartment() + " không có phòng: " + numberClinic,
+                    HttpStatus.BAD_REQUEST.value());
+        }
         List<ScheduleDto> scheduleDtos = this.getSchedule(nurse.getDepartmentId());
         if (scheduleDtos == null || scheduleDtos.isEmpty()) {
             log.error("Schedule is empty");
@@ -64,8 +66,7 @@ public class ScheduleService {
         ZonedDateTime now = ZonedDateTime.now();
         ScheduleTime time = now.getHour() < 12 ? ScheduleTime.MORNING : ScheduleTime.AFTERNOON;
         ScheduleDto scheduleDto = scheduleDtos.stream()
-                .filter(item -> item.getLocation().equalsIgnoreCase(location) && item.getClinic().equals(numberClinic)
-                        && item.getTime().equals(time))
+                .filter(item -> item.getClinic().equals(numberClinic) && item.getTime().equals(time))
                 .findFirst()
                 .orElseThrow(() -> new CustomException("Không tìm thấy lịch khám", HttpStatus.NOT_FOUND.value()));
         if (scheduleDto.getCallNumber() < scheduleDto.getNumber()) {
@@ -83,7 +84,6 @@ public class ScheduleService {
         log.info("Get schedule of department: {}", departmentId);
         departmentService.get(departmentId, true); // Check department exists
         List<HealthcareStaffDto> doctors = healthcareStaffService.getAllByDepartmentId(departmentId);
-        List<ScheduleDto> schedules = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         ScheduleTime time = calendar.get(Calendar.HOUR_OF_DAY) < 12 ? ScheduleTime.MORNING : ScheduleTime.AFTERNOON;
@@ -95,16 +95,10 @@ public class ScheduleService {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         endDate = calendar.getTime();
-        List<String> listDoctorId = doctors.stream().map(item -> item.getId()).collect(Collectors.toList());
-        listDoctorId.stream().forEach(doctorId -> {
-            scheduleRepository.findAllTimeDoctor(doctorId, startDate, endDate).forEach(schedule -> {
-                if (schedule.getTime().equals(time)) {
-                    ScheduleDto scheduleDto = modelMapper.map(schedule, ScheduleDto.class);
-                    schedules.add(scheduleDto);
-                }
-            });
-        });
-        return schedules;
+        List<String> doctorIds = doctors.stream().map(item -> item.getId()).collect(Collectors.toList());
+        return scheduleRepository.findAllTimeDoctor(doctorIds, time, startDate, endDate).stream()
+                .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
+                .collect(Collectors.toList());
     }
 
     public List<ScheduleDto> getTime(String doctorId, String time) {
@@ -166,14 +160,15 @@ public class ScheduleService {
 
     public void updateSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Updating schedule");
-        healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        HealthcareStaffDto doctor = healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        DepartmentDto department = departmentService.get(doctor.getDepartmentId(), true);
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
                 throw new CustomException("Ngày khám phải sau ngày hiện tại", HttpStatus.BAD_REQUEST.value());
             }
         }
-        this.checkSchedule(scheduleDtoList);
+        this.checkSchedule(scheduleDtoList, department);
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDoctorId() == null) {
                 scheduleDto.setDoctorId(idDoctor);
@@ -184,14 +179,15 @@ public class ScheduleService {
 
     public void createSchedule(String idDoctor, List<ScheduleDto> scheduleDtoList) {
         log.info("Creating schedule for doctor: {}", idDoctor);
-        healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        HealthcareStaffDto doctor = healthcareStaffService.get(idDoctor, true); // Check doctor exists
+        DepartmentDto department = departmentService.get(doctor.getDepartmentId(), true);
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             if (scheduleDto.getDate().before(new Date())) {
                 log.error("Date is invalid");
                 throw new CustomException("Ngày khám phải sau ngày hiện tại", HttpStatus.BAD_REQUEST.value());
             }
         }
-        this.checkSchedule(scheduleDtoList);
+        this.checkSchedule(scheduleDtoList, department);
         for (ScheduleDto scheduleDto : scheduleDtoList) {
             scheduleDto.setDoctorId(idDoctor);
             this.save(scheduleDto);
@@ -249,13 +245,29 @@ public class ScheduleService {
     //
     //
 
-    private void checkSchedule(List<ScheduleDto> scheduleDtoList) {
+    private void checkSchedule(List<ScheduleDto> scheduleDtoList, DepartmentDto department) {
+        String idDepartment = department.getId();
+        String nameDepartment = department.getNameDepartment();
+        String location = department.getLocation();
+        // check clinic
+        scheduleDtoList.stream()
+                .forEach(schedule -> {
+                    if (!department.getClinics().contains(schedule.getClinic())) {
+                        log.error("Clinic is invalid");
+                        throw new CustomException("Phòng " + schedule.getClinic() + " của "
+                                + department.getNameDepartment() + " không tồn tại", HttpStatus.BAD_REQUEST.value());
+                    }
+                });
+        //
+        List<String> doctorIds = healthcareStaffService.getAllDoctorByDepartmentId(idDepartment).stream()
+                .map(item -> item.getId())
+                .collect(Collectors.toList());
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         // check duplicate
         Map<String, Long> map = scheduleDtoList.stream()
                 .map(item -> {
                     String formattedDate = formatter.format(item.getDate());
-                    return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                    return formattedDate + "_" + item.getClinic() + "_"
                             + item.getTime().toString();
                 })
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
@@ -264,11 +276,11 @@ public class ScheduleService {
             throw new CustomException("Có lịch khám trùng nhau", HttpStatus.BAD_REQUEST.value());
         }
         // check in database
-        List<Schedule> schedules = scheduleRepository.findAll(new Date());
+        List<Schedule> schedules = scheduleRepository.findAll(new Date(), doctorIds);
         Set<String> scheduleSet = schedules.stream()
                 .map(item -> {
                     String formattedDate = formatter.format(item.getDate());
-                    return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                    return formattedDate + "_" + item.getClinic() + "_"
                             + item.getTime().toString();
                 })
                 .collect(Collectors.toSet());
@@ -276,7 +288,7 @@ public class ScheduleService {
                 .filter(item -> item.getId() == null)
                 .map(item -> {
                     String formattedDate = formatter.format(item.getDate());
-                    return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                    return formattedDate + "_" + item.getClinic() + "_"
                             + item.getTime().toString();
                 })
                 .filter(scheduleSet::contains)
@@ -285,23 +297,25 @@ public class ScheduleService {
                     log.error("Schedule is invalid");
                     String[] split = item.split("_", -1);
                     throw new CustomException(
-                            "Lịch khám: ngày " + split[0] + ", vị trí " + split[1] + ", phòng " + split[2] + ", buổi "
-                                    + (split[3].equals("MORNING")
+                            "Lịch khám: ngày " + split[0] + ", " + nameDepartment + " - " + location + ", phòng "
+                                    + split[1] + ", buổi "
+                                    + (split[2].equals("MORNING")
                                             ? "sáng"
                                             : "chiều")
                                     + " đã tồn tại",
                             HttpStatus.BAD_REQUEST.value());
                 });
+
         Map<String, String> scheduleMap = scheduleDtoList.stream()
                 .filter(item -> item.getId() != null)
                 .collect(Collectors.toMap(item -> item.getId(), item -> {
                     String formattedDate = formatter.format(item.getDate());
-                    return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+                    return formattedDate + "_" + item.getClinic() + "_"
                             + item.getTime().toString();
                 }));
         Map<String, String> scheduleDBMap = schedules.stream().collect(Collectors.toMap(item -> item.getId(), item -> {
             String formattedDate = formatter.format(item.getDate());
-            return formattedDate + "_" + item.getLocation() + "_" + item.getClinic() + "_"
+            return formattedDate + "_" + item.getClinic() + "_"
                     + item.getTime().toString();
         }));
         scheduleMap.entrySet().stream()
@@ -313,8 +327,9 @@ public class ScheduleService {
                     log.error("Schedule is invalid");
                     String[] split = item.getValue().split("_", -1);
                     throw new CustomException(
-                            "Lịch khám: ngày " + split[0] + ", vị trí " + split[1] + ", phòng " + split[2] + ", buổi "
-                                    + (split[3].equals("MORNING")
+                            "Lịch khám: ngày " + split[0] + ", khoa " + nameDepartment + " - " + location + ", phòng "
+                                    + split[1] + ", buổi "
+                                    + (split[2].equals("MORNING")
                                             ? "sáng"
                                             : "chiều")
                                     + " đã tồn tại",

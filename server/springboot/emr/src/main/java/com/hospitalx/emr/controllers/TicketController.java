@@ -49,7 +49,6 @@ public class TicketController {
     public ResponseEntity<BaseResponse> getAll(
             @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword,
             @RequestParam(name = "status", defaultValue = "", required = false) String status,
-            @RequestParam(name = "location", defaultValue = "", required = false) String location,
             @RequestParam(name = "numberClinic", defaultValue = "", required = false) String numberClinic,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
@@ -58,7 +57,7 @@ public class TicketController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        status = status + "_" + location + "_" + numberClinic;
+        status = status + "_" + numberClinic;
         Page<TicketDto> tickets = ticketService.getAll(keyword, status, pageable);
         BaseResponse response = new BaseResponse();
         response.setMessage("Tải danh sách phiếu khám thành công");

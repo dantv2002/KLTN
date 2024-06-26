@@ -1,5 +1,7 @@
 package com.hospitalx.emr.services;
 
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,9 +26,11 @@ public class DepartmentService {
     private AuthManager authManager;
     @Autowired
     private ModelMapper modelMapper;
+    private List<Department> departments;
 
     public DepartmentDto save(DepartmentDto t) {
         this.checkDepartmentExist(t.getNameDepartment());
+        this.checkClinicDepartment(t, true);
         log.info("Create new department with name: {}", t.getNameDepartment());
         Department department = modelMapper.map(t, Department.class);
         department = departmentRepository.save(department);
@@ -62,6 +66,7 @@ public class DepartmentService {
     public void update(DepartmentDto t) {
         log.info("Update department with id: {}", t.getId());
         this.checkDepartmentExist(t.getId(), t.getNameDepartment());
+        this.checkClinicDepartment(t, false);
         Department department = modelMapper.map(t, Department.class);
         departmentRepository.save(department);
     }
@@ -85,6 +90,26 @@ public class DepartmentService {
             log.error("Department is existed");
             throw new CustomException("Khoa đã tồn tại", HttpStatus.BAD_REQUEST.value());
         });
+    }
+
+    private void checkClinicDepartment(DepartmentDto departmentDto, boolean isSave) {
+        if (isSave) {
+            departments = departmentRepository.findAllByLocation(departmentDto.getLocation());
+        } else {
+            departments = departmentRepository.findAllByNotIdAndLocation(departmentDto.getId(),
+                    departmentDto.getLocation());
+        }
+
+        departmentDto.getClinics().stream().forEach(clinic -> {
+            departments.stream().forEach(department -> {
+                if (department.getClinics().contains(clinic)) {
+                    throw new CustomException(
+                            "Phòng " + clinic + " hiện tại là của " + department.getNameDepartment(),
+                            HttpStatus.BAD_REQUEST.value());
+                }
+            });
+        });
+
     }
 
 }

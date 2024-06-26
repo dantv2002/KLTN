@@ -22,8 +22,11 @@ public interface ScheduleRepository extends MongoRepository<Schedule, String> {
     List<Schedule> findByAllOfDate(Date date, ScheduleTime time, String clinic); // Lấy tất cả lịch khám của một ngày,
                                                                                  // một buổi, một phòng
 
-    @Query(value = "{ 'date' : { $gt : ?0 } }")
-    List<Schedule> findAll(Date currentDate);
+    @Query(value = "{ 'date' : { $gt : ?0 }, 'doctorId' : { $in: ?1 } }")
+    List<Schedule> findAll(Date currentDate, List<String> doctorIds);
+
+    @Query(value = "{ 'doctorId' : { $in: ?0 }, 'time': ?1, 'date' : { $gte : ?2, $lte : ?3 } }")
+    List<Schedule> findAllTimeDoctor(List<String> doctorIds, ScheduleTime time, Date startDate, Date endDate);
 
     @Query(value = "{ 'doctorId' : ?0, 'date' : { $gte : ?1, $lte : ?2 } }")
     List<Schedule> findAllTimeDoctor(String doctorId, Date startDate, Date endDate);
