@@ -41,8 +41,11 @@ public class DepartmentService {
         log.info("Get all departments");
         String role = authManager.getAuthentication().getAuthorities().toArray()[0].toString();
         Page<Department> departments = null;
-        if (role.equals("ROLE_ADMIN") || role.equals("ROLE_RECEPTIONIST")) {
+        if (role.equals("ROLE_ADMIN")) {
             departments = departmentRepository.findByNameDepartment(keyword, pageable);
+        } else if (role.equals("ROLE_RECEPTIONIST")) {
+            String name = "chẩn đoán hình ảnh";
+            departments = departmentRepository.findByNameDepartmentAndNot(keyword, name, pageable);
         } else if (role.equals("ROLE_PATIENT")) {
             departments = departmentRepository.findByAll(true, Pageable.unpaged());
         } else {
