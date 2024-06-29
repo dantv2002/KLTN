@@ -106,12 +106,19 @@ public class MedicalService {
 
     public Page<MedicalDto> getAllExpired(String keyword, String type, Pageable pageable) {
         log.info("Get all medicals delete");
-        if (!type.equalsIgnoreCase(MedicalResult.DEATH.toString())
-                && !type.equalsIgnoreCase(MedicalResult.ACCIDENT.toString())) {
-            return medicalRepository.findAllByDueDate(keyword, new Date(), pageable)
+        if (type.isEmpty()) {
+            return medicalRepository.findAllByDueDate(keyword, type, new Date(), pageable)
                     .map(medical -> modelMapper.map(medical, MedicalDto.class));
         }
-
+        if (!type.equalsIgnoreCase(MedicalResult.DEATH.toString())
+                && !type.equalsIgnoreCase("ACCIDENT")) {
+            return medicalRepository.findAllByDueDate(keyword, new Date(), "tai nạn", pageable)
+                    .map(medical -> modelMapper.map(medical, MedicalDto.class));
+        }
+        if (type.equalsIgnoreCase("ACCIDENT")) {
+            return medicalRepository.findAllByDueDateForAccident(keyword, new Date(), "tai nạn", pageable)
+                    .map(medical -> modelMapper.map(medical, MedicalDto.class));
+        }
         return medicalRepository.findAllByDueDate(keyword, type, new Date(), pageable)
                 .map(medical -> modelMapper.map(medical, MedicalDto.class));
     }
@@ -164,7 +171,7 @@ public class MedicalService {
         int yearsToAdd = 10;
         if (medical.getResult() == MedicalResult.DEATH) {
             yearsToAdd = 20;
-        } else if (medical.getResult() == MedicalResult.ACCIDENT) {
+        } else if (medical.getReason().toLowerCase().contains("tai nạn")) {
             yearsToAdd = 15;
         }
         Calendar calendar = Calendar.getInstance();

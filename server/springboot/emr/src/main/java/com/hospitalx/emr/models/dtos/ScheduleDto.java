@@ -38,4 +38,7 @@ public class ScheduleDto {
 
     @JsonProperty("DoctorId")
     private String doctorId;
+
+    @JsonProperty("Location")
+    private String location;
 }

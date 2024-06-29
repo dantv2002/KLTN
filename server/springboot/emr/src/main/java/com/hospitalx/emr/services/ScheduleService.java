@@ -82,7 +82,7 @@ public class ScheduleService {
 
     public List<ScheduleDto> getSchedule(String departmentId) {
         log.info("Get schedule of department: {}", departmentId);
-        departmentService.get(departmentId, true); // Check department exists
+        DepartmentDto department = departmentService.get(departmentId, true); // Check department exists
         List<HealthcareStaffDto> doctors = healthcareStaffService.getAllByDepartmentId(departmentId);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -97,11 +97,17 @@ public class ScheduleService {
         endDate = calendar.getTime();
         List<String> doctorIds = doctors.stream().map(item -> item.getId()).collect(Collectors.toList());
         return scheduleRepository.findAllTimeDoctor(doctorIds, time, startDate, endDate).stream()
-                .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
+                .map(schedule -> {
+                    ScheduleDto scheduleDto = modelMapper.map(schedule, ScheduleDto.class);
+                    scheduleDto.setLocation(department.getLocation());
+                    return scheduleDto;
+                })
                 .collect(Collectors.toList());
     }
 
     public List<ScheduleDto> getTime(String doctorId, String time) {
+        HealthcareStaffDto doctor = healthcareStaffService.get(doctorId, true); // Check doctor exists
+        DepartmentDto department = departmentService.get(doctor.getDepartmentId(), true);
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         Date date = null;
         try {
@@ -122,7 +128,11 @@ public class ScheduleService {
         }
         log.info("Get time of doctor: {}", doctorId);
         return scheduleRepository.findAllTimeDoctor(doctorId, startDate, endDate).stream()
-                .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
+                .map(schedule -> {
+                    ScheduleDto scheduleDto = modelMapper.map(schedule, ScheduleDto.class);
+                    scheduleDto.setLocation(department.getLocation());
+                    return scheduleDto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -203,8 +213,14 @@ public class ScheduleService {
 
     public Page<ScheduleDto> getAll(String keyword, String type, Pageable pageable) {
         log.info("Get all schedules with doctorId: " + keyword);
+        HealthcareStaffDto doctor = healthcareStaffService.get(keyword, true); // Check doctor exists
+        DepartmentDto department = departmentService.get(doctor.getDepartmentId(), true);
         return scheduleRepository.findByAllDoctorId(keyword, new Date(), pageable)
-                .map(schedule -> modelMapper.map(schedule, ScheduleDto.class));
+                .map(schedule -> {
+                    ScheduleDto scheduleDto = modelMapper.map(schedule, ScheduleDto.class);
+                    scheduleDto.setLocation(department.getLocation());
+                    return scheduleDto;
+                });
     }
 
     public ScheduleDto get(String id) {
