@@ -20,8 +20,8 @@ public interface MedicalRepository extends MongoRepository<Medical, String> {
     @Query(value = " { $or: [{'diagnosisDischarge': {$regex: ?0, $options: 'i'}}, {'reason': {$regex: ?0, $options: 'i'}}], 'mark': {$regex: ?1, $options: 'i'}, 'recordId': {$regex: ?2}, 'doctorIdTreatment': {$regex: ?3} } ")
     Page<Medical> findAllByKeyword(String keyword, String mark, String recordId, String doctorId, Pageable pageable);
 
-    @Query(value = " { 'reason': {$regex: ?0, $options: 'i'}, 'recordId': {$regex: ?1}, 'locked': ?2 } ")
-    Page<Medical> findAllByKeyword(String keyword, String recordId, Boolean isLocked, Pageable pageable);
+    @Query(value = " { 'reason': {$regex: ?0, $options: 'i'}, 'mark': {$regex: ?1, $options: 'i'}, 'recordId': {$regex: ?2}, 'locked': ?3 } ")
+    Page<Medical> findAllByKeyword(String keyword, String mark, String recordId, Boolean isLocked, Pageable pageable);
 
     @Query(value = " {'diagnosisDischarge': {$regex: ?0, $options: 'i'}, 'result': {$regex: ?1, $options: 'i'}, 'dueDate': {$lt: ?2 } } ")
     Page<Medical> findAllByDueDate(String keyword, String type, Date date, Pageable pageable);
