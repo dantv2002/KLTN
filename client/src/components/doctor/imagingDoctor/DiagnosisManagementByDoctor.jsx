@@ -3,9 +3,9 @@ import { Image, Transformation, CloudinaryContext } from 'cloudinary-react';
 import { Upload, Button, message, Modal, Form, Input, Table, Select, Space, DatePicker } from 'antd';
 import { UploadOutlined, SearchOutlined } from '@ant-design/icons';
 import axios from 'axios';
-import { deleteImage, diagnosticByDoctor, getMedicalNurDoc, getRecordNurDoc, saveDiagnostic } from '../../Api';
+import { deleteImage, diagnosticByDoctor, getMedicalNurDoc, getRecordNurDoc, saveDiagnostic } from '../../../Api';
 import moment from 'moment';
-import Loading from '../../hook/Loading';
+import Loading from '../../../hook/Loading';
 
 const DiagnosisManagementByDoctor = () => {
   const [image, setImage] = useState("");
@@ -39,17 +39,16 @@ const DiagnosisManagementByDoctor = () => {
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingConsultan, setLoadingConsultan] = useState(false);
-
+  
   const handleImageUpload = (info) => {
     setIsLoading(true);
     if (info.file.status === 'done') {
       console.log('Upload success:', info.file.response);
+      handleDiagnostic(info.file.response.secure_url);
       setImage(info.file.response.secure_url);
       setPublicId(info.file.response.public_id);
-      message.success("Tải ảnh lên thành công")
     } else if (info.file.status === 'error') {
       console.error('Upload error:', info.file.error);
-      message.error("Tải ảnh lên thất bại")
     }
   };
 
@@ -57,18 +56,18 @@ const DiagnosisManagementByDoctor = () => {
     if (isLoading) {
       const timer = setTimeout(() => {
         setIsLoading(false); 
-      }, 2000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
 
   const handleImageRemove = async() => {
+    setIsLoading(true);
     try {
       let response = await axios.delete(deleteImage(publicId),{
         withCredentials: true,
       })
       if (response.status === 200){
-        message.success(response.data.Message);
         setImage("");
         setPublicId("");
         setResult("");
@@ -78,7 +77,7 @@ const DiagnosisManagementByDoctor = () => {
     }
   }
 
-  const handleDiagnostic = async() => {
+  const handleDiagnostic = async(image) => {
     try{
       setLoadingConsultan(true)
       let response = await axios.post(diagnosticByDoctor, {
@@ -171,7 +170,7 @@ const DiagnosisManagementByDoctor = () => {
       message.error(error.response.data.Message);
     }
   }
-
+  
   const handleReadMedical = () => {
     setVisibleReadMedical(true);
   }
@@ -261,6 +260,13 @@ const DiagnosisManagementByDoctor = () => {
       render: (_, __, index) => index + 1 + pageMedical * 10,
     },
     {
+      title: 'ID bệnh án',
+      dataIndex: 'Id',
+      key: 'Id',
+      sorter: (a, b) => a.Id.localeCompare(b.Id),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
       title: 'Thời gian khám/nhập viện',
       key: 'Date',
       render: (text, record) => {
@@ -313,22 +319,6 @@ const DiagnosisManagementByDoctor = () => {
       dataIndex: 'Reason',
       key: 'Reason',
       sorter: (a, b) => a.Reason.localeCompare(b.Reason),
-      sortDirections: ['ascend', 'descend'],
-    },
-    {
-      title: 'Đánh dấu sao',
-      dataIndex: 'Mark',
-      key: 'Mark',
-      render: (text) => {
-        if (text === 'YES') return 'Có';
-        if (text === 'NO') return 'Không';
-        return text;
-      },
-      sorter: (a, b) => {
-        const textA = a.Mark === 'YES' ? 'Có' : (a.Mark === 'NO' ? 'Không' : a.Mark);
-        const textB = b.Mark === 'YES' ? 'Có' : (b.Mark === 'NO' ? 'Không' : b.Mark);
-        return textA.localeCompare(textB);
-      },
       sortDirections: ['ascend', 'descend'],
     },
     {
@@ -424,7 +414,7 @@ const DiagnosisManagementByDoctor = () => {
       },
     },
     {
-      title: 'CMND/CCCD',
+      title: 'CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',
       sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
@@ -481,9 +471,6 @@ const DiagnosisManagementByDoctor = () => {
                         <Transformation width="500" crop="scale" />
                       </Image>
                     </CloudinaryContext>
-                    <Button className="mt-3 mb-3 bg-green-600 text-white" onClick={handleDiagnostic}>
-                      Chẩn đoán
-                    </Button>
                   </div>
                 )}
               </div>
@@ -529,7 +516,17 @@ const DiagnosisManagementByDoctor = () => {
         okButtonProps={{ className: "bg-blue-700" }}
         cancelButtonProps={{ className: "bg-red-600" }}
       >
-        <Form {...formLayout} form={formInsert} onFinish={handleSaveDiagnostic} className="space-y-4">
+        <Form 
+          {...formLayout} 
+          form={formInsert} 
+          onFinish={handleSaveDiagnostic} 
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formInsert.submit();
+            }
+          }}
+        >
           <Form.Item name="UrlImage" label="Hình ảnh" className="w-full">
             <img src={image} alt="Image" style={{ width: '100%', height: 'auto' }} />
           </Form.Item>
@@ -561,7 +558,7 @@ const DiagnosisManagementByDoctor = () => {
       >
         <Input
           className="w-52 mt-3 mr-3"
-          placeholder="Tìm theo chẩn đoán"
+          placeholder="Tìm theo lý do khám"
           value={keywordMedical}
           onChange={(e) => setKeywordMedical(e.target.value)}
         />
@@ -571,8 +568,8 @@ const DiagnosisManagementByDoctor = () => {
           onChange={(value) => setMarkMedical(value)}
           allowClear
         >
-          <Select.Option value="YES">Có</Select.Option>
-          <Select.Option value="NO">Không</Select.Option>
+          <Select.Option value="YES">Có đánh sao</Select.Option>
+          <Select.Option value="NO">Không đánh sao</Select.Option>
         </Select>
         <Input
           className="w-52 mt-3 mr-3"

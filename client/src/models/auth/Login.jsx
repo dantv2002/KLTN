@@ -40,6 +40,8 @@ const Login = ({ closeFormLogin, openFormRegister, openFormReset }) => {
           navigate("/receptionist/records");
         } else if (role === "DOCTOR") {
           navigate("/doctor/medical");
+        } else if (role === "DOCTOR_DIAGNOSTIC_IMAGING") {
+          navigate("/doctor/diagnosis");
         } else if (role === "ADMIN") {
           navigate("/admin/statistic");
         }       

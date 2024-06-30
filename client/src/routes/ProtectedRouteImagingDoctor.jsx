@@ -2,18 +2,18 @@ import Cookies from "js-cookie";
 import { Navigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
-const ProtectedRouteAdmin = ({ children }) => {
+const ProtectedRouteImagingDoctor = ({ children }) => {
   
     const role = Cookies.get("Role")
 
-    if (role === "ADMIN") {
+    if (role === "DOCTOR_DIAGNOSTIC_IMAGING") {
         return children
     }
-    if (role === "DOCTOR"){
+    if (role === "DOCTOR") {
         return <Navigate to='/doctor/medical' replace />
     }
-    if (role === "DOCTOR_DIAGNOSTIC_IMAGING") {
-        return <Navigate to='/doctor/diagnosis' replace />
+    if (role === "ADMIN"){
+        return <Navigate to='/admin/statistic' replace />
     }
     if (role === "NURSE"){
         return <Navigate to='/nurse/medical' replace />
@@ -24,12 +24,8 @@ const ProtectedRouteAdmin = ({ children }) => {
     return <Navigate to='/' replace />
 }
 
-export default ProtectedRouteAdmin
+export default ProtectedRouteImagingDoctor
 
-ProtectedRouteAdmin.propTypes = {
+ProtectedRouteImagingDoctor.propTypes = {
     children: PropTypes.node.isRequired,
 };
-
-
-
-

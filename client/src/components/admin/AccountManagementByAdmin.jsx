@@ -278,7 +278,16 @@ const AccountManagementByAdmin = () => {
         okButtonProps={{className: "bg-blue-700" }}
         cancelButtonProps={{ className: "bg-red-600" }}
       >
-        <Form {...formLayout} form={formUpdate} onFinish={handleRenewPassword}>
+        <Form 
+          {...formLayout} 
+          form={formUpdate} 
+          onFinish={handleRenewPassword}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formUpdate.submit();
+            }
+          }}
+        >
           <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Email không được để trống!' }]}>
             <Input 
               type="text"

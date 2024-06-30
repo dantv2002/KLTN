@@ -339,7 +339,7 @@ const Medicals = () => {
       },
     },
     {
-      title: 'CMND/CCCD',
+      title: 'CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',
       sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),

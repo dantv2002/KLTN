@@ -15,6 +15,9 @@ const ProtectedRouteReceptionist = ({ children }) => {
     if (role === "DOCTOR"){
         return <Navigate to='/doctor/medical' replace />
     }
+    if (role === "DOCTOR_DIAGNOSTIC_IMAGING") {
+        return <Navigate to='/doctor/diagnosis' replace />
+    }
     if (role === "NURSE"){
         return <Navigate to='/nurse/medical' replace />
     }

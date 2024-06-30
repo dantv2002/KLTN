@@ -2,9 +2,10 @@ import axios from "axios";
 import moment from "moment";
 import { useState, useEffect, useCallback } from "react";
 import { message, Table, Input, Space, Button, Modal, Select, DatePicker, Form, Collapse, InputNumber } from "antd";
-import { getMedicalNurDoc, getRecordNurDoc, getDepartmentNurDoc, getMark, updateMedical, lockedMedical } from "../../Api";
-import { SearchOutlined } from '@ant-design/icons';
-import Loading from "../../hook/Loading";
+import { getMedicalNurDoc, getRecordNurDoc, getDepartmentNurDoc, getMark, updateMedical, lockedMedical } from "../../../Api";
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import Loading from "../../../hook/Loading";
+import logo from "../../../assets/img/logo3.png"
 
 const { Panel } = Collapse;
 
@@ -39,6 +40,18 @@ const MedicalManagementByDoctor = () => {
   const [loading2, setLoading2] = useState(false);
   const [visibleLocked, setVisibleLocked] = useState(false);
   const [idLocked, setIdLocked] = useState("");
+  const [visibleTicket, setVisibleTicket] = useState(false);
+  const [nameTicket, setNameTicket] = useState("");
+  const [cccdTicket, setCccdTicket] = useState("");
+  const [birthdayTicket, setBirthdayTicket] = useState("");
+  const [genderTicket, setGenderTicket] = useState("");
+  const [addressTicket, setAddressTicket] = useState("");
+  const [phoneTicket, setPhoneTicket] = useState("");
+  const [currentDay, setCurrentDay] = useState("");
+  const [visibleIdentificationCard, setVisibleIdentificationCard] = useState(false);
+  const [method, setMethod] = useState("");
+  const [content, setContent] = useState("");
+  const [formCreateTicket] = Form.useForm();
   
   const [edittingOutpatient, setEdittingOutpatient] = useState(false);
   const [edittingInpatient, setEdittingInpatient] = useState(false);
@@ -49,6 +62,13 @@ const MedicalManagementByDoctor = () => {
       dataIndex: 'sequenceNumber',
       key: 'sequenceNumber',
       render: (_, __, index) => index + 1 + pageMedical * 10,
+    },
+    {
+      title: 'ID bệnh án',
+      dataIndex: 'Id',
+      key: 'Id',
+      sorter: (a, b) => a.Id.localeCompare(b.Id),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Thời gian khám/nhập viện',
@@ -98,40 +118,6 @@ const MedicalManagementByDoctor = () => {
                (record.Type === 'INPATIENT' && dateInpatient.isSame(filterValue, 'day'));
       },
     },    
-    {
-      title: 'Lưu kho',
-      dataIndex: 'Locked',
-      key: 'Locked',
-      render: (text, record) => (record.Locked ? 'Đã lưu' : 'Chưa lưu'),
-      sorter: (a, b) => {
-        if (a.Locked === b.Locked) {
-          return 0;
-        }
-        if (a.Locked) {
-          return -1;
-        }
-        if (b.Locked) {
-          return 1;
-        }
-        return 0;
-      },
-    },
-    {
-      title: 'Đánh dấu sao',
-      dataIndex: 'Mark',
-      key: 'Mark',
-      render: (text) => {
-        if (text === 'YES') return 'Có';
-        if (text === 'NO') return 'Không';
-        return text;
-      },
-      sorter: (a, b) => {
-        const textA = a.Mark === 'YES' ? 'Có' : (a.Mark === 'NO' ? 'Không' : a.Mark);
-        const textB = b.Mark === 'YES' ? 'Có' : (b.Mark === 'NO' ? 'Không' : b.Mark);
-        return textA.localeCompare(textB);
-      },
-      sortDirections: ['ascend', 'descend'],
-    },
     {
       title: 'Kết quả xuất viện',
       dataIndex: 'DiagnosisDischarge',
@@ -237,7 +223,7 @@ const MedicalManagementByDoctor = () => {
       },
     },
     {
-      title: 'CMND/CCCD',
+      title: 'CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',      
       sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
@@ -250,6 +236,77 @@ const MedicalManagementByDoctor = () => {
       render: (_, record) => (
         <Space size="middle">
           <Button type="link" className="outpatient" onClick={() => handleSelectRecord(record)}>
+            Chọn hồ sơ
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const columnsRecordsTicket = [
+    {
+      title: 'Số thứ tự',
+      dataIndex: 'sequenceNumber',
+      key: 'sequenceNumber',
+      render: (_, __, index) => index + 1 + pageRecord * 10,
+    },
+    {
+      title: 'Họ tên',
+      dataIndex: 'FullName',
+      key: 'FullName',
+      sorter: (a, b) => a.FullName.localeCompare(b.FullName),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
+      title: 'Ngày sinh',
+      dataIndex: 'DateOfBirth',
+      key: 'DateOfBirth',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="w-full md:w-64 p-2">
+          <Input
+            placeholder="Nhập năm sinh"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            className="bg-blue-700"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Lọc
+          </Button>
+          <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+            Đặt lại
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const yearOfBirth = moment(record.DateOfBirth, 'DD/MM/YYYY').year();
+        return yearOfBirth.toString() === value;
+      },
+    },
+    {
+      title: 'CCCD',
+      dataIndex: 'IdentityCard',
+      key: 'IdentityCard',      
+      sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
+      title: 'Tùy chọn',
+      dataIndex: 'options',
+      key: 'options',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button type="link" className="outpatient" onClick={() => handleSelectTicket(record)}>
             Chọn hồ sơ
           </Button>
         </Space>
@@ -369,6 +426,35 @@ const MedicalManagementByDoctor = () => {
     setSearchYearRecord("");
     setPageRecord("0");
   }
+
+  const handleSelectTicket = (record) => {
+    setNameTicket(record.FullName);
+    setCccdTicket(record.IdentityCard);
+    setBirthdayTicket(record.DateOfBirth);
+    setGenderTicket(record.Gender);
+    setAddressTicket(record.Address);
+    setPhoneTicket(record.NumberPhone);
+    setVisibleIdentificationCard(true);
+    setKeywordRecord("");
+    setGenderRecord(null);
+    setYearRecord("");
+    setSearchKeywordRecord("");
+    setSearchGenderRecord("");
+    setSearchYearRecord("");
+    setPageRecord("0");
+  }
+  
+  const handleCancelTicket = () => {
+    setVisibleTicket(false);
+    setKeywordRecord("");
+    setGenderRecord(null);
+    setYearRecord("");
+    setSearchKeywordRecord("");
+    setSearchGenderRecord("");
+    setSearchYearRecord("");
+    setPageRecord("0");
+  }
+
 
   const handleClearRecordMedical = () => {
     setName("");
@@ -659,6 +745,176 @@ const MedicalManagementByDoctor = () => {
     }
   }
 
+  const handleCreateTicket = () => {
+    setVisibleTicket(true);
+
+    const currentDate = new Date();
+    const day = currentDate.getDate();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+    setCurrentDay(`${day}/${month}/${year}`);
+  }
+
+  const handleCancelCard = () => {
+    setVisibleIdentificationCard(false);
+    formCreateTicket.resetFields();
+    setMethod("");
+    setContent("");
+  }
+
+  const handleCreateCard = () => {
+    const ticketTemplate = `
+      <!DOCTYPE html>
+      <html lang="vi">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Phiếu Chỉ Định Khám Bệnh</title>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 20px;
+                  box-sizing: border-box;
+              }
+              .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  padding: 20px;
+                  border: 1px solid #000;
+                  border-radius: 5px;
+              }
+              .header {
+                  text-align: center;
+                  margin-bottom: 20px;
+              }
+              .header h1 {
+                  margin: 0;
+                  font-size: 24px;
+              }
+              .header p {
+                  text-align: center;
+                  margin-top: 10px;
+                  font-size: 16px;
+                  font-weight: bold;
+                  text-transform: uppercase;
+              }
+              .header p span {
+                  font-weight: normal;
+                  text-transform: lowercase;
+              } 
+              .section {
+                  margin-bottom: 20px;
+              }
+              .section h2 {
+                  margin: 0;
+                  margin-bottom: 10px;
+                  font-size: 20px;
+                  text-decoration: underline;
+              }
+              .section p {
+                  margin: 5px 0;
+              }
+              .footer {
+                  text-align: center;
+                  margin-top: 20px;
+              }
+              .footer p {
+                  margin: 0;
+                  font-size: 16px;
+              }
+              .field {
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 10px;
+              }
+              .field label {
+                  width: 30%;
+                  font-weight: bold;
+              }
+              .field div {
+                  width: 70%;
+              }
+              .signature {
+                  margin-top: 50px;
+                  margin-bottom: 70px;
+                  text-align: right;
+              }
+              .signature p {
+                  margin: 5px 0;
+                  font-size: 14px;
+                  padding-right: 20px;
+              }
+              .signature .doctor {
+                  text-transform: uppercase;
+                  font-size: 17px;
+                  font-weight: bold;
+                  padding-right: 10px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h1>PHIẾU CHỈ ĐỊNH KHÁM BỆNH</h1>
+                  <img src="${logo}" alt="Logo" style="height: 30px;">
+                  BỆNH VIỆN X
+                  <p>Ngày lập phiếu: <span>${currentDay}</span></p>
+              </div>
+              <div class="section">
+                  <h2>Thông Tin Bệnh Nhân</h2>
+                  <div class="field">
+                      <label>Họ và Tên:</label>
+                      <div id="patient_name">${nameTicket}</div>
+                  </div>
+                  <div class="field">
+                      <label>CCCD:</label>
+                      <div id="patient_cccd">${cccdTicket}</div>
+                  </div>
+                  <div class="field">
+                      <label>Ngày Sinh:</label>
+                      <div id="patient_dob">${birthdayTicket}</div>
+                  </div>
+                  <div class="field">
+                      <label>Giới Tính:</label>
+                      <div id="patient_gender">${genderTicket}</div>
+                  </div>
+                  <div class="field">
+                      <label>Địa Chỉ:</label>
+                      <div id="patient_address">${addressTicket}</div>
+                  </div>
+                  <div class="field">
+                      <label>Số Điện Thoại:</label>
+                      <div id="patient_phone">${phoneTicket}</div>
+                  </div>
+              </div>
+
+              <div class="section">
+                  <h2>Phương Pháp Chẩn Đoán Hình Ảnh</h2>
+                  <div class="field">
+                      <label>Nội dung:</label>
+                      <div id="xray_instructions">${content}</div>
+                  </div>
+                  <div class="field">
+                      <label>Phương pháp:</label>
+                      <div id="ultrasound_instructions">${method}</div>
+                  </div>
+              </div>
+
+              <div class="footer">
+                  <div class="signature">
+                      <p class="doctor">Bác sĩ chỉ định</p>
+                      <p>(Ký, ghi rõ họ tên)</p>
+                  </div>
+              </div>
+          </div>
+      </body>
+      </html>
+    `;
+    const newWindow = window.open(`${nameTicket}`, '_blank');
+    newWindow.document.write(ticketTemplate);
+  }
+
   const formLayout = {
     labelCol: { span: 6 },
     wrapperCol: { span: 16 },
@@ -668,7 +924,7 @@ const MedicalManagementByDoctor = () => {
     <div>
       <Input
         className="w-60 mt-3 mr-3"
-        placeholder="Tìm theo chẩn đoán"
+        placeholder="Tìm theo lý do khám, chẩn đoán"
         value={keywordMedical}
         onChange={(e) => setKeywordMedical(e.target.value)}
       />
@@ -678,8 +934,8 @@ const MedicalManagementByDoctor = () => {
         onChange={(value) => setMarkMedical(value)}
         allowClear
       >
-        <Select.Option value="YES">Có</Select.Option>
-        <Select.Option value="NO">Không</Select.Option>
+        <Select.Option value="YES">Có đánh sao</Select.Option>
+        <Select.Option value="NO">Không đánh sao</Select.Option>
       </Select>
       <Input
         className="w-60 mt-3 mr-3"
@@ -691,6 +947,8 @@ const MedicalManagementByDoctor = () => {
       <Button onClick={() => handleReadRecordMedical()} className="bg-blue-700 text-white" htmlType="submit">Chọn hồ sơ</Button>
       <br/>
       <Button onClick={() => handleSearchMedical()} className="bg-blue-700 text-white mt-4" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+      <br/>
+      <Button onClick={() => handleCreateTicket()} className="bg-cyan-500 text-white mt-4" htmlType="submit" icon={<PlusOutlined />} >Tạo phiếu chỉ định</Button>
       <Table 
         columns={columnsMedicals} 
         dataSource={dataMedical}
@@ -719,7 +977,17 @@ const MedicalManagementByDoctor = () => {
         ]}
         width={800}
       >
-        <Form {...formLayout} form={formUpdateOutpatient} onFinish={handleUpdateOutpatient} className="space-y-4">
+        <Form 
+          {...formLayout} 
+          form={formUpdateOutpatient} 
+          onFinish={handleUpdateOutpatient} 
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formUpdateOutpatient.submit();
+            }
+          }}
+        >
           <Collapse className="w-full">
             <Panel header="Thông tin chung" key="1">
               <Form.Item name="Id" label="Id bệnh án" className="w-full">
@@ -836,7 +1104,7 @@ const MedicalManagementByDoctor = () => {
                     </div>
                   ))}
                   <Form.Item name="Summary" label="Kết luận cuối cùng" className="w-full">
-                    <Input />
+                    <Input disabled={!edittingOutpatient}/>
                   </Form.Item>
                 </>
               ) : (
@@ -882,7 +1150,17 @@ const MedicalManagementByDoctor = () => {
         ]}
         width={850}
       >
-        <Form {...formLayout} form={formUpdateInpatient} onFinish={handleUpdateInpatient} className="space-y-4">
+        <Form 
+          {...formLayout} 
+          form={formUpdateInpatient} 
+          onFinish={handleUpdateInpatient} 
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formUpdateInpatient.submit();
+            }
+          }}
+        >
           <Collapse className="w-full">
             <Panel header="Thông tin chung" key="1">
               <Form.Item name="Id" label="Id bệnh án" className="w-full">
@@ -1034,7 +1312,7 @@ const MedicalManagementByDoctor = () => {
                     </div>
                   ))}
                   <Form.Item name="Summary" label="Kết luận cuối cùng" className="w-full">
-                    <Input />
+                    <Input disabled={!edittingInpatient}/>
                   </Form.Item>
                 </>
               ) : (
@@ -1109,6 +1387,51 @@ const MedicalManagementByDoctor = () => {
         />
       </Modal>
       <Modal
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Chọn hồ sơ bệnh nhân</h1>}
+        visible={visibleTicket}
+        onCancel={handleCancelTicket}
+        cancelText="Thoát"
+        okButtonProps={{ hidden: true }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+        width={900}
+      >
+        <Select
+        className="w-48 mt-3 mr-3"
+        placeholder="Tìm theo giới tính"
+        value={genderRecord}
+        onChange={(value) => setGenderRecord(value)}
+        allowClear
+        >
+          <Select.Option value="Nam">Nam</Select.Option>
+          <Select.Option value="Nữ">Nữ</Select.Option>
+          <Select.Option value="Khác">Khác</Select.Option>
+        </Select>
+        <Input
+          className="w-48 mt-3 mr-3"
+          placeholder="Tìm theo tên"
+          value={keywordRecord}
+          onChange={(e) => setKeywordRecord(e.target.value)}
+        />
+        <DatePicker
+          className="w-48 mt-3 mr-3"
+          placeholder="Tìm theo năm sinh"
+          picker="year"
+          onChange={(date, dateString) => setYearRecord(dateString)}
+        />
+        <Button onClick={() => handleSearchRecord()} className="bg-blue-700 text-white" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+        <Table 
+          columns={columnsRecordsTicket} 
+          dataSource={dataRecord}
+          loading={{ indicator: <Loading/>, spinning: loading2 }}
+          pagination={{
+            total: totalItemsRecord,
+            pageSize: 10,
+            current: pageRecord + 1,
+            onChange: handleChangPageRecord,
+          }}
+        />
+      </Modal>
+      <Modal
         title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận lưu kho</h1>}
         visible={visibleLocked}
         onOk={() => handleLockedMedical()}
@@ -1121,6 +1444,44 @@ const MedicalManagementByDoctor = () => {
         <div className="text-center">
           <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn lưu kho bệnh án này không?</p>
         </div>
+      </Modal>
+      <Modal
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Tạo phiếu chỉ định</h1>}
+        visible={visibleIdentificationCard}
+        onOk={() => formCreateTicket.submit()}
+        okText="In phiếu"
+        onCancel={handleCancelCard}
+        cancelText="Thoát"
+        okButtonProps={{ className: "bg-blue-700" }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+      >
+        <Form 
+          {...formLayout} 
+          form={formCreateTicket}
+          onFinish={handleCreateCard}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formCreateTicket.submit();
+            }
+          }}
+        >
+          <Form.Item className="relative" name="content" label="Nôi dung" rules={[{ required: true, message: 'Nội dung không được để trống!' }]}>
+              <Input
+                type="text"
+                placeholder="Nhập nội dung"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+              />
+          </Form.Item>
+          <Form.Item className="relative" name="method" label="Phương pháp" rules={[{ required: true, message: 'Phương pháp không được để trống!' }]}>
+              <Input 
+                type="text"
+                placeholder="Nhập phương pháp"
+                value={method}
+                onChange={(e) => setMethod(e.target.value)}
+              />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   )

@@ -6,19 +6,18 @@ import {
     CopyOutlined,
     LogoutOutlined,
     DownOutlined,
-    BulbOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Avatar, Dropdown, message } from 'antd';
 const { Header, Sider, Content } = Layout;
 import { Outlet, useNavigate } from 'react-router-dom';
-import { logoutApi } from '../../Api';
+import { logoutApi } from '../../../Api';
 import axios from 'axios';
-import ChangePassword from '../../models/ChangePassword';
+import ChangePassword from '../../../models/ChangePassword';
 import Cookies from "js-cookie"
-import replacePlusWithSpace from '../../hook/ReplacePlusWithSpace';
+import replacePlusWithSpace from '../../../hook/ReplacePlusWithSpace';
 import { useLocation } from 'react-router-dom';
 
-const DashboardDoctor = () => {
+const DashboardDoctorTreatment = () => {
 
     const location = useLocation();
     const [selectedMenuKey, setSelectedMenuKey] = useState("0");
@@ -59,7 +58,7 @@ const DashboardDoctor = () => {
                     <UserOutlined className="w-6 h-6 mr-4" /> Đổi mật khẩu
                 </span>
             ),
-            key: '2',
+            key: '1',
         },
         {
             label: (
@@ -67,7 +66,7 @@ const DashboardDoctor = () => {
                     <LogoutOutlined className="w-6 h-6 mr-4" /> Đăng xuất
                 </span>
             ),
-            key: '3',
+            key: '2',
         },
     ];
 
@@ -76,10 +75,6 @@ const DashboardDoctor = () => {
             case '/doctor/medical':
                 setheaderTitle('Quản lý bệnh án');
                 setSelectedMenuKey('0');
-                break;
-            case '/doctor/diagnosis':
-                setheaderTitle('Chẩn đoán');
-                setSelectedMenuKey('1');
                 break;
             default:
                 break;
@@ -91,10 +86,6 @@ const DashboardDoctor = () => {
             case '0':
                 navigate('/doctor/medical')
                 setheaderTitle('Quản lý hồ sơ bệnh án')
-                break;
-            case '1':
-                navigate('/doctor/diagnosis')
-                setheaderTitle('Chẩn đoán')
                 break;
             default:
             break;
@@ -117,11 +108,6 @@ const DashboardDoctor = () => {
                         key: '0',
                         icon: <CopyOutlined className="w-6 h-6"/>,
                         label: 'Hồ sơ bệnh án',
-                    },
-                    {
-                        key: '1',
-                        icon: <BulbOutlined className="w-6 h-6"/>,
-                        label: 'Chẩn đoán',
                     },
                 ]}
             />
@@ -183,4 +169,4 @@ const DashboardDoctor = () => {
     );
 }
 
-export default DashboardDoctor;
+export default DashboardDoctorTreatment;

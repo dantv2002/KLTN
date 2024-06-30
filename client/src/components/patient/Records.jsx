@@ -299,7 +299,7 @@ const Records = () => {
       },
     },
     {
-      title: 'CMND/CCCD',
+      title: 'CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',
       sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
@@ -347,7 +347,16 @@ const Records = () => {
         okButtonProps={{ className: "bg-blue-700" }}
         cancelButtonProps={{ className: "bg-red-600" }}
       >
-        <Form {...formLayout} form={formInsert} onFinish={handleNewRecord}>
+        <Form 
+          {...formLayout} 
+          form={formInsert} 
+          onFinish={handleNewRecord}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formInsert.submit();
+            }
+          }}
+        >
           <Form.Item name="insteremail" label="Email" rules={[{ required: true, message: 'Email không được để trống!' }]}>
             <Input 
               type="text"
@@ -392,10 +401,10 @@ const Records = () => {
               onChange={(e) => setInsertPhone(e.target.value)}
             />
           </Form.Item>
-          <Form.Item name="insertidentity" label="CMND/CCCD" rules={[{ required: true, message: 'CMND/CCCD không được để trống!' }]}>
+          <Form.Item name="insertidentity" label="CCCD" rules={[{ required: true, message: 'CCCD không được để trống!' }]}>
             <Input
               type="text"
-              placeholder="Nhập CCCD/CMND"
+              placeholder="Nhập CMND"
               value={insertIdentity}
               onChange={(e) => setInsertIdentity(e.target.value)}
             />
@@ -434,7 +443,16 @@ const Records = () => {
           </Button>
         ]}
       >
-        <Form {...formLayout} form={formUpdate} onFinish={handleReadUpdateRecord}>
+        <Form 
+          {...formLayout} 
+          form={formUpdate} 
+          onFinish={handleReadUpdateRecord}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formUpdate.submit();
+            }
+          }}
+        >
           <Form.Item className="relative" name="reupemail" label="Email" rules={[{ required: true, message: 'Email không được để trống!' }]}>
             <Input 
               type="text"
@@ -485,10 +503,10 @@ const Records = () => {
               disabled={!editing}
             />
           </Form.Item>
-          <Form.Item className="relative" name="reupidentity" label="CMND/CCCD" rules={[{ required: true, message: 'CMND/CCCD không được để trống!' }]}>
+          <Form.Item className="relative" name="reupidentity" label="CCCD" rules={[{ required: true, message: 'CCCD không được để trống!' }]}>
             <Input
               type="text"
-              placeholder="Nhập CCCD/CMND"
+              placeholder="Nhập CCCD"
               value={updateIdentity}
               onChange={(e) => setUpdateIdentity(e.target.value)}
               disabled={!editing}

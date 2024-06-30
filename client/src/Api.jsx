@@ -89,9 +89,9 @@ export const getSchedulePatient = (id, page) => `${host}/api/patient/schedules/$
 //Get schedule option by patient
 export const getScheduleOption = (id, time) => `${host}/api/patient/schedule/get-time/${id}/${time}?sortDir=desc`
 //Call next by nurse
-export const callNext = (clinic, location) => `${host}/api/nurse/call-next?numberClinic=${clinic}&location=${location}`
+export const callNext = (clinic) => `${host}/api/nurse/call-next?numberClinic=${clinic}`
 //Get ticket by nurse
-export const getTicketByNurse = (keyword, page) => `${host}/api/nurse/tickets?keyword=${keyword}&page=${page}&sortDir=desc`
+export const getTicketByNurse = (keyword, clinic, page) => `${host}/api/nurse/tickets?keyword=${keyword}&numberClinic=${clinic}&page=${page}&sortDir=desc`
 //Update status by nurse
 export const updateTicket = `${host}/api/nurse/ticket`
 //Delete all schedule before month by admin

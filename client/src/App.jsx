@@ -4,7 +4,6 @@ import Home from "./pages/Home";
 import RecordsManagement from "./pages/patient/RecordsManagement";
 import GoogleLogin from "./models/auth/GoogleLogin";
 import DashboardNurse from "./pages/nurse/DashboardNurse";
-import DashboardDoctor from "./pages/doctor/DashboardDoctor";
 import DashboardReceptionist from "./pages/receptionist/DashboardReceptionist";
 import RecordsManagementByReceptionist from "./components/receptionist/RecordsManagementByReceptionist";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
@@ -23,16 +22,19 @@ import MedicalManagement from "./pages/patient/MedicalManagement";
 import DepartmentManagementByAdmin from "./components/admin/DepartmentManagementByAdmin";
 import MedicalManagementByNurse from "./components/nurse/MedicalManagementByNurse";
 import ReceptionManagementByNurse from "./components/nurse/ReceptionManagementByNurse";
-import MedicalManagementByDoctor from "./components/doctor/MedicalManagementByDoctor";
-import DiagnosisManagementByDoctor from "./components/doctor/DiagnosisManagementByDoctor";
+import MedicalManagementByDoctor from "./components/doctor/doctorTreatment/MedicalManagementByDoctor";
+import DiagnosisManagementByDoctor from "./components/doctor/imagingDoctor/DiagnosisManagementByDoctor";
 import ScreenReceptionByNurse from "./components/nurse/ScreenReceptionByNurse";
 import ProtectedRoutePatient from "./routes/ProtectedRoutePatient";
 import ProtectedRouteNurse from "./routes/ProtectedRouteNurse";
 import ProtectedRouteReceptionist from "./routes/ProtectedRouteReceptionist";
-import ProtectedRouteDoctor from "./routes/ProtectedRouteDoctor";
 import ProtectedRouteAdmin from "./routes/ProtectedRouteAdmin";
 import ProtectedRouteGuess from "./routes/ProtectedRouteGuess";
 import ProtectedRoutePatientAndGuess from "./routes/ProtectedRoutePatientAndGuess";
+import ProtectedRouteDoctorTreatment from "./routes/ProtectedRouteDoctorTreatment";
+import ProtectedRouteImagingDoctor from "./routes/ProtectedRouteImagingDoctor";
+import DashboardDoctorTreatment from "./pages/doctor/doctorTreatment/DashboardDoctorTreatment";
+import DashboardImagingDoctor from "./pages/doctor/imagingDoctor/DashboardImagingDoctor";
 
 const App = () => {
 
@@ -121,19 +123,26 @@ const App = () => {
       }/>
 
       <Route element={
-        <ProtectedRouteDoctor>
-          <DashboardDoctor/>
-        </ProtectedRouteDoctor>
+        <ProtectedRouteDoctorTreatment>
+          <DashboardDoctorTreatment/>
+        </ProtectedRouteDoctorTreatment>
       }>
         <Route path='/doctor/medical' element={
-          <ProtectedRouteDoctor>
+          <ProtectedRouteDoctorTreatment>
             <MedicalManagementByDoctor/>
-          </ProtectedRouteDoctor>
+          </ProtectedRouteDoctorTreatment>
         }/>
+      </Route>
+
+      <Route element={
+        <ProtectedRouteImagingDoctor>
+          <DashboardImagingDoctor/>
+        </ProtectedRouteImagingDoctor>
+      }>
         <Route path='/doctor/diagnosis' element={
-          <ProtectedRouteDoctor>
+          <ProtectedRouteImagingDoctor>
             <DiagnosisManagementByDoctor/>
-          </ProtectedRouteDoctor>
+          </ProtectedRouteImagingDoctor>
         }/>
       </Route>
 

@@ -56,6 +56,13 @@ const MedicalManagementByNurse = () => {
       render: (_, __, index) => index + 1 + pageMedical * 10,
     },
     {
+      title: 'ID bệnh án',
+      dataIndex: 'Id',
+      key: 'Id',
+      sorter: (a, b) => a.Id.localeCompare(b.Id),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
       title: 'Thời gian khám/nhập viện',
       key: 'Date',
       render: (text, record) => {
@@ -108,22 +115,6 @@ const MedicalManagementByNurse = () => {
       dataIndex: 'Reason',
       key: 'Reason',
       sorter: (a, b) => a.Reason.localeCompare(b.Reason),
-      sortDirections: ['ascend', 'descend'],
-    },
-    {
-      title: 'Đánh dấu sao',
-      dataIndex: 'Mark',
-      key: 'Mark',
-      render: (text) => {
-        if (text === 'YES') return 'Có';
-        if (text === 'NO') return 'Không';
-        return text;
-      },
-      sorter: (a, b) => {
-        const textA = a.Mark === 'YES' ? 'Có' : (a.Mark === 'NO' ? 'Không' : a.Mark);
-        const textB = b.Mark === 'YES' ? 'Có' : (b.Mark === 'NO' ? 'Không' : b.Mark);
-        return textA.localeCompare(textB);
-      },
       sortDirections: ['ascend', 'descend'],
     },
     {
@@ -228,7 +219,7 @@ const MedicalManagementByNurse = () => {
       },
     },
     {
-      title: 'CMND/CCCD',
+      title: 'CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',
       sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
@@ -302,7 +293,7 @@ const MedicalManagementByNurse = () => {
       },
     },
     {
-      title: 'CMND/CCCD',
+      title: 'CCCD',
       dataIndex: 'IdentityCard',
       key: 'IdentityCard',
       sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
@@ -834,7 +825,7 @@ const MedicalManagementByNurse = () => {
     <div>
       <Input
         className="w-60 mt-3 mr-3"
-        placeholder="Tìm theo chẩn đoán"
+        placeholder="Tìm theo lý do khám, chẩn đoán"
         value={keywordMedical}
         onChange={(e) => setKeywordMedical(e.target.value)}
       />
@@ -844,8 +835,8 @@ const MedicalManagementByNurse = () => {
         onChange={(value) => setMarkMedical(value)}
         allowClear
       >
-        <Select.Option value="YES">Có</Select.Option>
-        <Select.Option value="NO">Không</Select.Option>
+        <Select.Option value="YES">Có đánh sao</Select.Option>
+        <Select.Option value="NO">Không đánh sao</Select.Option>
       </Select>
       <Input
         className="w-60 mt-3 mr-3"
@@ -926,7 +917,17 @@ const MedicalManagementByNurse = () => {
         cancelButtonProps={{ className: "bg-red-600" }}
         width={700}
       >
-        <Form {...formLayout} form={formInsertOutpatient} onFinish={handleCreateOutpatient} className="space-y-4">
+        <Form 
+          {...formLayout} 
+          form={formInsertOutpatient} 
+          onFinish={handleCreateOutpatient} 
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formInsertOutpatient.submit();
+            }
+          }}
+        >
           <Collapse className="w-full">
             <Panel header="Thông tin chung" key="1">
               <Form.Item name="Reason" label="Lý do khám" rules={[{ required: true, message: 'Vui lòng nhập lý do khám' }]} className="w-full">
@@ -978,7 +979,17 @@ const MedicalManagementByNurse = () => {
         cancelButtonProps={{ className: "bg-red-600" }}
         width={700}
       >
-        <Form {...formLayout} form={formInsertInpatient} onFinish={handleCreateInpatient} className="space-y-4">    
+        <Form 
+          {...formLayout} 
+          form={formInsertInpatient} 
+          onFinish={handleCreateInpatient} 
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formInsertInpatient.submit();
+            }
+          }}
+        >    
           <Collapse className="w-full">
             <Panel header="Thông tin chung" key="1">
               <Form.Item name="Reason" label="Lý do nhập viện" rules={[{ required: true, message: 'Vui lòng nhập lý do nhập viện' }]} className="w-full">
@@ -1052,7 +1063,17 @@ const MedicalManagementByNurse = () => {
         ]}
         width={800}
       >
-        <Form {...formLayout} form={formUpdateOutpatient} onFinish={handleUpdateOutpatient} className="space-y-4">
+        <Form 
+          {...formLayout} 
+          form={formUpdateOutpatient} 
+          onFinish={handleUpdateOutpatient} 
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formUpdateOutpatient.submit();
+            }
+          }}
+        >
           <Collapse className="w-full">
             <Panel header="Thông tin chung" key="1">
               <Form.Item name="Id" label="Id bệnh án" className="w-full">
@@ -1169,7 +1190,7 @@ const MedicalManagementByNurse = () => {
                     </div>
                   ))}
                   <Form.Item name="Summary" label="Kết luận cuối cùng" className="w-full">
-                    <Input />
+                    <Input disabled={!edittingOutpatient}/>
                   </Form.Item>
                 </>
               ) : (
@@ -1215,7 +1236,17 @@ const MedicalManagementByNurse = () => {
         ]}
         width={850}
       >
-        <Form {...formLayout} form={formUpdateInpatient} onFinish={handleUpdateInpatient} className="space-y-4">
+        <Form 
+          {...formLayout} 
+          form={formUpdateInpatient} 
+          onFinish={handleUpdateInpatient} 
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formUpdateInpatient.submit();
+            }
+          }}
+        >
           <Collapse className="w-full">
             <Panel header="Thông tin chung" key="1">
               <Form.Item name="Id" label="Id bệnh án" className="w-full">
@@ -1367,7 +1398,7 @@ const MedicalManagementByNurse = () => {
                     </div>
                   ))}
                   <Form.Item name="Summary" label="Kết luận cuối cùng" className="w-full">
-                    <Input />
+                    <Input disabled={!edittingInpatient}/>
                   </Form.Item>
                 </>
               ) : (

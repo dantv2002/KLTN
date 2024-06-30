@@ -9,10 +9,11 @@ const { Option } = Select;
 
 const Consultation = ({ visible, hideModal }) => {
     const [categories, setCategories] = useState({});
-    const [selectedFeatures, setSelectedFeatures] = useState([]);
+    const [selectedFeatures, setSelectedFeatures] = useState({});
     const [result, setResult] = useState("");
     const [visibleResult, setVisibleResult] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     useEffect(() => {
         const categorizedFeatures = features.reduce((acc, feature) => {
@@ -32,10 +33,15 @@ const Consultation = ({ visible, hideModal }) => {
             .filter(f => value.includes(f.feature_VI))
             .map(f => f.feature_EN);
 
-        setSelectedFeatures(prev => ({
-            ...prev,
-            [category]: selectedEN
-        }));
+        setSelectedFeatures(prev => {
+            const newSelectedFeatures = {
+                ...prev,
+                [category]: selectedEN
+            };
+            const hasSelectedFeatures = Object.values(newSelectedFeatures).some(arr => arr.length > 0);
+            setIsSubmitDisabled(!hasSelectedFeatures);
+            return newSelectedFeatures;
+        });
     };
 
     const handleSubmit = async() => {
@@ -52,7 +58,7 @@ const Consultation = ({ visible, hideModal }) => {
                 setResult(response.data.Data);
                 setVisibleResult(true);
             }
-        }catch(error){
+        } catch (error) {
             message.error(error.response.data.Message)
         } finally {
             setLoading(false);
@@ -73,7 +79,7 @@ const Consultation = ({ visible, hideModal }) => {
                 onOk={handleSubmit}
                 okText="Xem kết quả"
                 cancelText="Thoát"
-                okButtonProps={{ className: "bg-blue-700", loading: loading }}
+                okButtonProps={{ className: "bg-blue-700", loading: loading, disabled: isSubmitDisabled }}
                 cancelButtonProps={{ className: "bg-red-600" }}
                 width={600}
             >

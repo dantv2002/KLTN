@@ -9,10 +9,14 @@ const DepartmentManagementByAdmin = () => {
 
   const [nameInsert, setNameInsert] = useState("");
   const [allowInsert, setAllowInsert] = useState(null);
+  const [locationInsert, setLocationInsert] = useState("");
+  const [clinicsInsert, setClinicsInsert] = useState([]);
   const [idUpdate, setIdUpdate] = useState("");
   const [deletedUpdate, setDeletedUpdate] = useState();
   const [nameUpdate, setNameUpdate] = useState("");
   const [allowUpdate, setAllowUpdate] = useState(null);
+  const [locationUpdate, setLocationUpdate] = useState("");
+  const [clinicsUpdate, setClinicsUpdate] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [page, setPage] = useState("0");
@@ -37,17 +41,25 @@ const DepartmentManagementByAdmin = () => {
       render: (_, __, index) => index + 1 + page * 10,
     },
     {
-      title: 'ID khoa',
-      dataIndex: 'Id',
-      key: 'Id',
-      sorter: (a, b) => a.Id.localeCompare(b.Id),
-      sortDirections: ['ascend', 'descend'],
-    },
-    {
       title: 'Tên khoa',
       dataIndex: 'NameDepartment',
       key: 'NameDepartment',
       sorter: (a, b) => a.NameDepartment.localeCompare(b.NameDepartment),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
+      title: 'Vị trí',
+      dataIndex: 'Location',
+      key: 'Location',
+      sorter: (a, b) => a.Location.localeCompare(b.Location),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
+      title: 'Các phòng',
+      dataIndex: 'Clinics',
+      key: 'Clinics',
+      render: clinics => clinics.join(', '),
+      sorter: (a, b) => a.Clinics[0].localeCompare(b.Clinics[0]),
       sortDirections: ['ascend', 'descend'],
     },
     {
@@ -121,6 +133,8 @@ const DepartmentManagementByAdmin = () => {
         let response = await axios.post(createDepartment, {
           NameDepartment: nameInsert,
           AllowBooking: allowInsert,
+          Location: locationInsert,
+          Clinics: clinicsInsert,
         }, {
           withCredentials: true
         })
@@ -155,10 +169,14 @@ const DepartmentManagementByAdmin = () => {
     setNameUpdate(department.NameDepartment);
     setDeletedUpdate(department.deleted);
     setAllowUpdate(department.AllowBooking);
+    setLocationUpdate(department.Location);
+    setClinicsUpdate(department.Clinics);
     formUpdate.setFieldsValue({
       reupid: department.Id,
       reupname: department.NameDepartment,
       reupallow: department.AllowBooking,
+      reuplocation: department.Location,
+      reupclinics: department.Clinics,
     });
     setVisibleUpdate(true);
   }; 
@@ -178,6 +196,8 @@ const DepartmentManagementByAdmin = () => {
         deleted: deletedUpdate,
         Id: idUpdate,
         NameDepartment: nameUpdate,
+        Location: locationUpdate,
+        Clinics: clinicsUpdate,
         AllowBooking: allowUpdate,
       }, {
         withCredentials: true
@@ -230,7 +250,16 @@ const DepartmentManagementByAdmin = () => {
         okButtonProps={{ className: "bg-blue-700" }}
         cancelButtonProps={{ className: "bg-red-600" }}
       >
-        <Form {...formLayout} form={formInsert} onFinish={handleCreateDepartment}>
+        <Form 
+          {...formLayout} 
+          form={formInsert} 
+          onFinish={handleCreateDepartment}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formInsert.submit();
+            }
+          }}
+        >
           <Form.Item name="insertname" label="Tên khoa" rules={[{ required: true, message: 'Tên khoa không được để trống!' }]}>
               <Input 
                 type="text"
@@ -248,6 +277,26 @@ const DepartmentManagementByAdmin = () => {
                 <Select.Option value={true}>Cho phép</Select.Option>
                 <Select.Option value={false}>Không cho phép</Select.Option>
               </Select>
+          </Form.Item>
+          <Form.Item name="insertlocation" label="Vị trí" rules={[{ required: true, message: 'Vị trí không được để trống!' }]}>
+            <Input 
+              type="text"
+              placeholder="Nhập vị trí"
+              value={locationInsert}
+              onChange={(e) => setLocationInsert(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item name="insertclinics" label="Phòng khám" rules={[{ required: true, message: 'Phòng khám không được để trống!' }]}>
+            <Select 
+              mode="multiple"
+              placeholder="Chọn phòng khám"
+              value={clinicsInsert}
+              onChange={(value) => setClinicsInsert(value)}
+            >
+              {Array.from({ length: 20 }, (_, index) => (
+                <Select.Option key={index + 1} value={`${index + 1}`}>Phòng {index + 1}</Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </Modal>
@@ -267,7 +316,16 @@ const DepartmentManagementByAdmin = () => {
           </Button>
         ]}
       >
-        <Form {...formLayout} form={formUpdate} onFinish={handleUpdateDepartment}>
+        <Form 
+          {...formLayout} 
+          form={formUpdate} 
+          onFinish={handleUpdateDepartment}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formUpdate.submit();
+            }
+          }}
+        >
           <Form.Item className="relative" name="reupid" label="ID khoa" rules={[{ required: true, message: 'Id khoa không được để trống!' }]}>
             <Input 
               type="text"
@@ -296,6 +354,28 @@ const DepartmentManagementByAdmin = () => {
                 <Select.Option value={true}>Cho phép</Select.Option>
                 <Select.Option value={false}>Không cho phép</Select.Option>
               </Select>
+          </Form.Item>
+          <Form.Item className="relative" name="reuplocation" label="Vị trí" rules={[{ required: true, message: 'Vị trí không được để trống!' }]}>
+            <Input 
+              type="text"
+              placeholder="Nhập vị trí"
+              value={locationUpdate}
+              onChange={(e) => setLocationUpdate(e.target.value)}
+              disabled={!editing}
+            />
+          </Form.Item>
+          <Form.Item className="relative" name="reupclinics" label="Phòng khám">
+            <Select 
+              mode="multiple"
+              placeholder="Chọn phòng khám"
+              value={clinicsUpdate}
+              onChange={(value) => setClinicsUpdate(value)}
+              disabled={!editing}
+            >
+              {Array.from({ length: 20 }, (_, index) => (
+                <Select.Option key={index + 1} value={`${index + 1}`}>Phòng {index + 1}</Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

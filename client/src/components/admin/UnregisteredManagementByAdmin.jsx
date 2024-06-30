@@ -111,6 +111,13 @@ const UnregisteredManagementByAdmin = () => {
       sortDirections: ['ascend', 'descend'],
     },
     {
+      title: 'CCCD',
+      dataIndex: 'IdentityCard',
+      key: 'IdentityCard',      
+      sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
       title: 'Ngày sinh',
       dataIndex: 'DateOfBirth',
       key: 'DateOfBirth',
@@ -230,7 +237,16 @@ const UnregisteredManagementByAdmin = () => {
         okButtonProps={{className: "bg-blue-700" }}
         cancelButtonProps={{ className: "bg-red-600" }}
       >
-        <Form {...formLayout} form={formInsert} onFinish={handleCreateAccount}>
+        <Form 
+          {...formLayout} 
+          form={formInsert} 
+          onFinish={handleCreateAccount}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formInsert.submit();
+            }
+          }}
+        >
           <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Email không được để trống!' }]}>
             <Input 
               type="text"

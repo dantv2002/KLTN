@@ -9,7 +9,7 @@ import Loading from "../../hook/Loading";
 const ReceptionManagementByNurse = () => {
 
   const [clinic, setClinic] = useState("");
-  const [location, setLocation] = useState("");
+  const [getClinic, setGetClinic] = useState("");
   const [keyword, setKeyword] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [data, setData] = useState([]);
@@ -26,8 +26,9 @@ const ReceptionManagementByNurse = () => {
   const [loading, setLoading] = useState(false);
 
   const handleCallPatient = async() => {
+    setGetClinic(clinic);
     try {
-      let response = await axios.get(callNext(clinic, location), {
+      let response = await axios.get(callNext(clinic), {
         withCredentials: true,
       })
       if (response.status === 200){
@@ -43,22 +44,24 @@ const ReceptionManagementByNurse = () => {
   }
 
   const fetchTicket = useCallback(async() => {
-    try {
-      setLoading(true);
-      let response = await axios.get(getTicketByNurse(searchKeyword, page), {
-        withCredentials: true
-      })
-      if (response.status === 200) {
-        message.success(response.data.Message)
-        setTotalItems(response.data.Data.TotalItems);
-        setData(response.data.Data.Tickets);
+    if (getClinic !== "") {
+      try {
+        setLoading(true);
+        let response = await axios.get(getTicketByNurse(searchKeyword, getClinic, page), {
+          withCredentials: true
+        })
+        if (response.status === 200) {
+          message.success(response.data.Message)
+          setTotalItems(response.data.Data.TotalItems);
+          setData(response.data.Data.Tickets);
+        }
+      } catch(error) {
+        message.error(error.response.data.Message)
+      } finally {
+        setLoading(false)
       }
-    } catch(error) {
-      message.error(error.response.data.Message)
-    } finally {
-      setLoading(false)
     }
-  },[searchKeyword, page]);
+  },[searchKeyword, getClinic, page]);
 
   useEffect(() => {
     fetchTicket();
@@ -210,12 +213,6 @@ const ReceptionManagementByNurse = () => {
             onChange={(e) => setClinic(e.target.value)}
           />
           <br/>
-          <Input
-            className="w-96 mt-3 mr-3"
-            placeholder="Nhập vị trí khám"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
         </div>
         <div className="relative w-24 h-20 border border-gray-300 bg-rose-400 rounded flex items-center justify-center">
           <span className="absolute transform text-center top-3 font-rubik font-semibold">Đang gọi số</span>

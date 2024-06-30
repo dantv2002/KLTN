@@ -57,6 +57,13 @@ const ScheduleManagementByAdmin = () => {
           sortDirections: ['ascend', 'descend'],
         },
         {
+          title: 'CCCD',
+          dataIndex: 'IdentityCard',
+          key: 'IdentityCard',      
+          sorter: (a, b) => a.IdentityCard.localeCompare(b.IdentityCard),
+          sortDirections: ['ascend', 'descend'],
+        },
+        {
           title: 'Chức danh',
           dataIndex: 'Title',
           key: 'Title',
@@ -585,7 +592,16 @@ const ScheduleManagementByAdmin = () => {
           okButtonProps={{ className: "bg-blue-700" }}
           cancelButtonProps={{ className: "bg-red-600" }}
         >
-          <Form {...formLayout} form={formUpdate} onFinish={handleUpdateSchedule}>
+          <Form 
+            {...formLayout} 
+            form={formUpdate} 
+            onFinish={handleUpdateSchedule}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                formUpdate.submit();
+              }
+            }}
+          >
             <Form.Item name="date" label="Ngày khám" rules={[{ required: true, message: 'Ngày khám không được để trống!' }]}>
               <DatePicker
                 type="text"
