@@ -3,7 +3,7 @@ import moment from "moment";
 import { useState, useEffect, useCallback } from "react";
 import { message, Table, Input, Space, Button, Modal, Select, DatePicker, Form, Collapse, InputNumber } from "antd";
 import { getMedicalNurDoc, getRecordNurDoc, getDepartmentNurDoc, getMark, updateMedical, lockedMedical } from "../../../Api";
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, FunnelPlotOutlined } from '@ant-design/icons';
 import Loading from "../../../hook/Loading";
 import logo from "../../../assets/img/logo3.png"
 
@@ -17,6 +17,8 @@ const MedicalManagementByDoctor = () => {
   const [searchMarkMedical, setSearchMarkMedical] = useState("");
   const [idRecord, setIdRecord] = useState("");
   const [searchIdRecord, setSearchIdRecord] = useState("");
+  const [show, setShow] = useState(true);
+  const [buttonShow, setButtonShow] = useState("Bệnh án của bác sĩ")
   const [dataMedical, setDataMedical] = useState([]);
   const [pageMedical, setPageMedical] = useState("0");
   const [totalItemsMedical, setTotalItemsMedical] = useState("0");
@@ -55,6 +57,8 @@ const MedicalManagementByDoctor = () => {
   
   const [edittingOutpatient, setEdittingOutpatient] = useState(false);
   const [edittingInpatient, setEdittingInpatient] = useState(false);
+  const [edittingUpdate, setEdittingUpdate] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const columnsMedicals = [
     {
@@ -318,7 +322,7 @@ const MedicalManagementByDoctor = () => {
     try {
       setLoading(true);
       const markSearch = searchMarkMedical || ""
-      let response = await axios.get(getMedicalNurDoc(searchKeywordMedical, markSearch, searchIdRecord ,pageMedical), {
+      let response = await axios.get(getMedicalNurDoc(searchKeywordMedical, markSearch, searchIdRecord ,pageMedical, show), {
         withCredentials: true
       });
       if (response.status === 200) {
@@ -330,7 +334,7 @@ const MedicalManagementByDoctor = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchKeywordMedical, searchMarkMedical, searchIdRecord, pageMedical]);
+  }, [searchKeywordMedical, searchMarkMedical, searchIdRecord, pageMedical, show]);
 
   useEffect(() => {
       fetchMedical();
@@ -455,7 +459,6 @@ const MedicalManagementByDoctor = () => {
     setPageRecord("0");
   }
 
-
   const handleClearRecordMedical = () => {
     setName("");
     setIdRecord("");
@@ -507,6 +510,7 @@ const MedicalManagementByDoctor = () => {
 
   const handleReadUpdate = (medical) => {
     console.log(medical);
+    setEdittingUpdate(medical.Locked);
     if (medical.Type === "INPATIENT") {
       setVisibleReUpInpatient(true);
       formUpdateInpatient.setFieldsValue({
@@ -586,20 +590,26 @@ const MedicalManagementByDoctor = () => {
     formUpdateOutpatient.resetFields();
     setVisibleReUpOutpatient(false);
     setEdittingOutpatient(false);
+    setCollapsed(false);
   }
 
   const handleOpenFormOutpatient = () => {
+    setEdittingUpdate(true);
     setEdittingOutpatient(true);
+    setCollapsed(true);
   }
 
   const handleCancelReupInpatient = () => {
     formUpdateInpatient.resetFields();
     setVisibleReUpInpatient(false);
     setEdittingInpatient(false);
+    setCollapsed(false);
   }
 
   const handleOpenFormInpatient = () => {
+    setEdittingUpdate(true);
     setEdittingInpatient(true);
+    setCollapsed(true);
   }
 
   const handleUpdateOutpatient = async(values) => {
@@ -914,6 +924,16 @@ const MedicalManagementByDoctor = () => {
     const newWindow = window.open(`${nameTicket}`, '_blank');
     newWindow.document.write(ticketTemplate);
   }
+  
+  const handleSetShow = () => {
+    if (show) {
+      setShow(false);
+      setButtonShow("Tất cả bệnh án");
+    } else {
+      setShow(true);
+      setButtonShow("Bệnh án của bác sĩ");
+    } 
+  }
 
   const formLayout = {
     labelCol: { span: 6 },
@@ -947,6 +967,7 @@ const MedicalManagementByDoctor = () => {
       <Button onClick={() => handleReadRecordMedical()} className="bg-blue-700 text-white" htmlType="submit">Chọn hồ sơ</Button>
       <br/>
       <Button onClick={() => handleSearchMedical()} className="bg-blue-700 text-white mt-4" htmlType="submit" icon={<SearchOutlined />} >Tìm kiếm</Button>
+      <Button onClick={() => handleSetShow()} className="bg-green-500 text-white mt-4 ml-3" htmlType="submit" icon={<FunnelPlotOutlined />} >{buttonShow}</Button>
       <br/>
       <Button onClick={() => handleCreateTicket()} className="bg-cyan-500 text-white mt-4" htmlType="submit" icon={<PlusOutlined />} >Tạo phiếu chỉ định</Button>
       <Table 
@@ -965,7 +986,7 @@ const MedicalManagementByDoctor = () => {
         visible={visibleReUpOutpatient}
         onCancel={handleCancelReupOutpatient}
         footer={[
-          <Button key="custom" disabled={edittingOutpatient} className="bg-green-500 text-white" onClick={handleOpenFormOutpatient}>
+          <Button key="custom" disabled={edittingUpdate} className="bg-green-500 text-white" onClick={handleOpenFormOutpatient}>
               Cập nhật
           </Button>,
           <Button key="submit" disabled={!edittingOutpatient} className="bg-blue-700" onClick={() => formUpdateOutpatient.submit()}>
@@ -988,7 +1009,7 @@ const MedicalManagementByDoctor = () => {
             }
           }}
         >
-          <Collapse className="w-full">
+          <Collapse className="w-full" activeKey={collapsed ? ['1'] : undefined} onChange={(keys) => setCollapsed(keys.length > 0)}>
             <Panel header="Thông tin chung" key="1">
               <Form.Item name="Id" label="Id bệnh án" className="w-full">
                 <Input disabled={true}/>
@@ -1021,7 +1042,6 @@ const MedicalManagementByDoctor = () => {
                   <Select.Option value="UNCHANGED">Không đổi</Select.Option>
                   <Select.Option value="WORSENED">Nặng hơn</Select.Option>
                   <Select.Option value="DEATH">Tử vong</Select.Option>
-                  <Select.Option value="ACCIDENT">Tai nạn</Select.Option>
                 </Select>
               </Form.Item>
               <Form.Item name="DepartmentId" label="Khoa khám" className="w-full">
@@ -1077,7 +1097,7 @@ const MedicalManagementByDoctor = () => {
               </Form.Item>
             </Panel>
           </Collapse> 
-          <Collapse className="w-full">
+          <Collapse className="w-full" activeKey={collapsed ? ['2'] : undefined} onChange={(keys) => setCollapsed(keys.length > 0)}>
             <Panel header="Thông tin hình ảnh" key="2">
               {formUpdateOutpatient.getFieldValue('DiagnosisImage')?.length > 0 ? (
                 <>
@@ -1112,7 +1132,7 @@ const MedicalManagementByDoctor = () => {
               )}
             </Panel>
           </Collapse>
-          <Collapse className="w-full">
+          <Collapse className="w-full" activeKey={collapsed ? ['3'] : undefined} onChange={(keys) => setCollapsed(keys.length > 0)}>
             <Panel header="Thông tin sinh hiệu" key="3">
               <Form.Item name="HeartRate" label="Mạch đập (nhịp/phút)" rules={[{ required: true, message: 'Vui lòng nhập mạch đập' }]} className="w-full">
                 <Input disabled={!edittingOutpatient}/>
@@ -1138,7 +1158,7 @@ const MedicalManagementByDoctor = () => {
         visible={visibleReUpInpatient}
         onCancel={handleCancelReupInpatient}
         footer={[
-          <Button key="custom" disabled={edittingInpatient} className="bg-green-500 text-white" onClick={handleOpenFormInpatient}>
+          <Button key="custom" disabled={edittingUpdate} className="bg-green-500 text-white" onClick={handleOpenFormInpatient}>
               Cập nhật
           </Button>,
           <Button key="submit" disabled={!edittingInpatient} className="bg-blue-700" onClick={() => formUpdateInpatient.submit()}>
@@ -1161,7 +1181,7 @@ const MedicalManagementByDoctor = () => {
             }
           }}
         >
-          <Collapse className="w-full">
+          <Collapse className="w-full" activeKey={collapsed ? ['1'] : undefined} onChange={(keys) => setCollapsed(keys.length > 0)}>
             <Panel header="Thông tin chung" key="1">
               <Form.Item name="Id" label="Id bệnh án" className="w-full">
                 <Input disabled={true}/>
@@ -1203,7 +1223,6 @@ const MedicalManagementByDoctor = () => {
                   <Select.Option value="UNCHANGED">Không đổi</Select.Option>
                   <Select.Option value="WORSENED">Nặng hơn</Select.Option>
                   <Select.Option value="DEATH">Tử vong</Select.Option>
-                  <Select.Option value="ACCIDENT">Tai nạn</Select.Option>
                 </Select>
               </Form.Item>
               <Form.Item name="CreateDate" label="Ngày tạo bệnh án" className="w-full">
@@ -1247,7 +1266,7 @@ const MedicalManagementByDoctor = () => {
               </Form.Item>
             </Panel>
           </Collapse> 
-          <Collapse className="w-full">
+          <Collapse className="w-full" activeKey={collapsed ? ['2'] : undefined} onChange={(keys) => setCollapsed(keys.length > 0)}>
             <Panel header="Thông tin nhập viện" key="2">
               <Form.Item name="DateAdmission" label="Thời gian" rules={[{ required: true, message: 'Vui lòng chọn ngày nhập viện' }]} className="w-full">
                 <DatePicker disabled={!edittingInpatient} placeholder="Chọn ngày nhập viện" className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
@@ -1266,7 +1285,7 @@ const MedicalManagementByDoctor = () => {
               </Form.Item>
             </Panel>
           </Collapse>
-          <Collapse className="w-full">
+          <Collapse className="w-full" activeKey={collapsed ? ['3'] : undefined} onChange={(keys) => setCollapsed(keys.length > 0)}>
             <Panel header="Thông tin chuyển khoa" key="3">
               <Form.Item name="DateTransfer" label="Thời gian" className="w-full">
                 <DatePicker disabled={!edittingInpatient} placeholder="Chọn ngày chuyển khoa" className="w-full" showTime format="HH:mm DD/MM/YYYY"/>
@@ -1285,7 +1304,7 @@ const MedicalManagementByDoctor = () => {
               </Form.Item>
             </Panel>
           </Collapse>
-          <Collapse className="w-full">
+          <Collapse className="w-full" activeKey={collapsed ? ['4'] : undefined} onChange={(keys) => setCollapsed(keys.length > 0)}>
             <Panel header="Thông tin hình ảnh" key="4">
               {formUpdateInpatient.getFieldValue('DiagnosisImage')?.length > 0 ? (
                 <>
@@ -1320,7 +1339,7 @@ const MedicalManagementByDoctor = () => {
               )}
             </Panel>
           </Collapse>
-          <Collapse className="w-full">
+          <Collapse className="w-full" activeKey={collapsed ? ['5'] : undefined} onChange={(keys) => setCollapsed(keys.length > 0)}>
             <Panel header="Thông tin sinh hiệu" key="5">
               <Form.Item name="HeartRate" label="Mạch đập (nhịp/phút)" rules={[{ required: true, message: 'Vui lòng nhập mạch đập' }]} className="w-full">
                 <Input disabled={!edittingInpatient}/>

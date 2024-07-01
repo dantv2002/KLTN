@@ -1,6 +1,7 @@
 export const host = "http://localhost:8080/emr"
 // THIS IS YOUR SERVER DOMAIN, REPLACE IT WITH YOUR DOMAN
 // export const host = "http://kltn-spkt-benhvienx.me/emr"
+
 // Auth
 
 //Login
@@ -117,7 +118,7 @@ export const getMedicalPatient = (id, keyword, page) => `${host}/api/patient/med
 //Get biosignal by patient
 export const getBiosignalPatient = (id) => `${host}/api/patient/biosignal-statistical/${id}`
 //Get medical by nurse-doctor
-export const getMedicalNurDoc = (keyword, mark, record, page) => `${host}/api/nurse-doctor/medicals?keyword=${keyword}&mark=${mark}&record=${record}&page=${page}&showAll=true&sortDir=desc`
+export const getMedicalNurDoc = (keyword, mark, record, page, show) => `${host}/api/nurse-doctor/medicals?keyword=${keyword}&mark=${mark}&record=${record}&page=${page}&showAll=${show}&sortDir=desc`
 //Get medical by doctor 
 export const getMedicalDiagnostic = (keyword, mark, record, page) => `${host}/api/nurse-doctor/medicals?keyword=${keyword}&mark=${mark}&record=${record}&page=${page}&showAll=true&showLock=false&sortDir=desc`
 //Create medical by nurse

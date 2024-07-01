@@ -2,14 +2,15 @@ import { useState, useEffect } from "react"
 import { getDataStatistics } from "../../Api";
 import moment from "moment";
 import axios from "axios";
-import { message, DatePicker, Button, Spin } from "antd";
-import {SearchOutlined} from "@ant-design/icons"
+import { message, DatePicker, Button, Spin, Modal, Form} from "antd";
+import {SearchOutlined, SaveOutlined} from "@ant-design/icons"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { FaUser,  FaFileAlt, FaFileMedical } from 'react-icons/fa';
 import { IoTicket } from "react-icons/io5";
 import { VscNewFile } from "react-icons/vsc";
 import { BsFileEarmarkLock } from "react-icons/bs";
 import { LuFileX } from "react-icons/lu";
+import ExportToExcel from "../../hook/ExportToExcel";
 
 const DataStatisticsManagementByAdmin = () => {
 
@@ -41,6 +42,10 @@ const DataStatisticsManagementByAdmin = () => {
   const [dateEndMedical, setDateEndMedical] = useState("");
   const [searchDateStartMedical, setSearchDateStartMedical] = useState("");
   const [searchDateEndMedical, setSearchDataEndMedical] = useState("");
+  const [dateStartExport, setDateStartExport] = useState("");
+  const [dateEndExport, setDateEndExport] = useState("");
+  const [visibleExport, setVisibleExport] = useState(false);
+  const [formExport] = Form.useForm();
 
   const [dayupdated, setDayUpdated] = useState("");
 
@@ -221,6 +226,27 @@ const DataStatisticsManagementByAdmin = () => {
     fetchDataStatisticsMedical();
   },[searchDateStartMedical, searchDateEndMedical])
 
+  const handleExportExcel = async() => {
+    try {
+      let datestart = moment(dateStartExport).format("DD/MM/YYYY");
+      let dateend = moment(dateEndExport).format("DD/MM/YYYY");
+      let response = await axios.post(getDataStatistics, {
+        StartDate: datestart,
+        EndDate: dateend,
+      },{
+        withCredentials: true
+      })
+      if (response.status === 200) {
+        message.success("Xuất file excel thành công");
+        console.log(response.data.Data);
+        ExportToExcel({ data: response.data.Data });
+      }
+    } catch(error) {
+      message.error(error.response.data.Message)
+    }
+  }
+  
+
   const handleSearchAccount = () => {
     setSearchDateStartAccount(dateStartAccount);
     setSearchDataEndAccount(dateEndAccount);
@@ -241,8 +267,25 @@ const DataStatisticsManagementByAdmin = () => {
     setSearchDataEndMedical(dateEndMedical);
   }
 
+  const handleExport = () => {
+    setVisibleExport(true);
+  }
+
+  const handleCancelExport = () => {
+    setVisibleExport(false);
+    setDateStartExport("");
+    setDateEndExport("");
+    formExport.resetFields();
+  }
+
+  const formLayout = {
+    labelCol: { span: 6 },
+    wrapperCol: { span: 16 },
+  };
+
   return (
     <div className="container mx-auto p-4">
+      <Button onClick={() => handleExport()} className="bg-teal-500 text-white mb-5" htmlType="submit" icon={<SaveOutlined />} >Xuất dữ liệu ra file excel</Button>
       <h1 className="text-2xl font-bold mb-4 text-darkmagenta">Hồ sơ bệnh án</h1>
       <div className="flex flex-wrap justify-between">
         <div className="w-1/4">
@@ -451,6 +494,44 @@ const DataStatisticsManagementByAdmin = () => {
           <Bar dataKey="Count" name="Số lượng" fill="#D2691E" />
         </BarChart>
       </ResponsiveContainer>
+      <Modal 
+        title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xuất file excel</h1>}
+        visible={visibleExport}
+        onOk={() => formExport.submit()}
+        okText="Xuất file"
+        onCancel={handleCancelExport}
+        cancelText="Thoát"
+        okButtonProps={{ className: "bg-blue-700" }}
+        cancelButtonProps={{ className: "bg-red-600" }}
+      >
+        <Form 
+          {...formLayout} 
+          form={formExport} 
+          onFinish={handleExportExcel}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              formExport.submit();
+            }
+          }}
+        >
+          <Form.Item name="exportstart" label="Ngày bắt đầu" rules={[{ required: true, message: 'Ngày bắt đầu không được để trống!' }]}>
+            <DatePicker
+              className="w-full"
+              placeholder="Chọn ngày bắt đầu"
+              value={dateStartExport ? moment(dateStartExport, 'YYYY-MM-DD') : null}
+              onChange={(date, dateString) => setDateStartExport(dateString)}
+            />
+          </Form.Item>
+          <Form.Item name="exportend" label="Ngày kết thúc" rules={[{ required: true, message: 'Ngày kết thúc không được để trống!' }]}>
+              <DatePicker 
+                className="w-full"
+                placeholder="Chọn ngày kết thúc"
+                value={dateEndExport ? moment(dateEndExport, 'YYYY-MM-DD') : null}
+                onChange={(date, dateString) => setDateEndExport(dateString)}
+              />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
