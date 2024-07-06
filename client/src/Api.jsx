@@ -141,6 +141,8 @@ export const getDepartmentReceptionist = (keyword, page) => `${host}/api/recepti
 export const showDepartmentAdmin = `${host}/api/admin/departments?size=1000`
 //Get department by admin
 export const getDepartmentAdmin = (keyword, page) => `${host}/api/admin/departments?keyword=${keyword}&page=${page}&sortDir=desc`
+//Get 1 department by admin
+export const getOneDepartmentAdmin = (id) => `${host}/api/admin/department/${id}`
 //Create department by admin
 export const createDepartment = `${host}/api/admin/department/new`
 //Update department by admin

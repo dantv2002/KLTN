@@ -121,7 +121,14 @@ const MedicalManagementByDoctor = () => {
         return (record.Type === 'OUTPATIENT' && dateOutpatient.isSame(filterValue, 'day')) ||
                (record.Type === 'INPATIENT' && dateInpatient.isSame(filterValue, 'day'));
       },
-    },    
+    },
+    {
+      title: 'Lí do khám',
+      dataIndex: 'Reason',
+      key: 'Reason',
+      sorter: (a, b) => a.Reason.localeCompare(b.Reason),
+      sortDirections: ['ascend', 'descend'],
+    },
     {
       title: 'Kết quả xuất viện',
       dataIndex: 'DiagnosisDischarge',

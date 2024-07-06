@@ -364,8 +364,8 @@ const Navbar = () => {
           setTotalItemsDoctor(response.data.Data.TotalItems);
           setDataDoctors(response.data.Data.HealthCareStaffs);
         }
-      } catch(error) {
-        message.error(error.response.data.Message);
+      } catch(error) { 
+          message.error(error.response.data.Message);
       } finally {
         setLoading(false);
       }

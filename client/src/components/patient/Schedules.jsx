@@ -255,13 +255,6 @@ const Schedules = () => {
                                                                             <br />
                                                                         </td>
                                                                     </tr>
-                                                                    <tr>
-                                                                        <td style="text-align: left">
-                                                                            <i>Ghi chú: Phiếu khám bệnh chỉ có giá trị
-                                                                                trong ngày khám từ
-                                                                                <b>7h00 - 16h00</b>.</i>
-                                                                        </td>
-                                                                    </tr>
                                                                 </tbody>
                                                             </table>
                                                         </div>

@@ -18,7 +18,6 @@ const Home = () => {
 
     useEffect(() => {
         setLoading(true);
-
         setTimeout(() => {
             setLoading(false);
             const SuccessMessage = sessionStorage.getItem("successMessage");

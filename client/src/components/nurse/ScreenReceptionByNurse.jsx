@@ -20,6 +20,19 @@ const ScreenReceptionByNurse = () => {
     };
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("screenOpen", "true");
+    const handleBeforeUnload = () => {
+      localStorage.setItem("screenOpen", "false");
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      localStorage.setItem("screenOpen", "false");
+    };
+  }, []);
+  
+
   return (
     <div className="min-h-screen bg-blue-700 text-white p-6">
       <div className="mb-6">

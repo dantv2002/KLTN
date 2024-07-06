@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartmentAdmin, deleteSchedule, deleteAllSchedule } from "../../Api";
+import { createSchedule, getDoctor, getSchedule, updateSchedule, getDepartmentAdmin, deleteSchedule, deleteAllSchedule, getOneDepartmentAdmin } from "../../Api";
 import axios from "axios";
 import { message, Button, Space, Table, Input, Select, Form, Modal, DatePicker } from "antd";
 import { useLocation } from "react-router-dom";
@@ -27,8 +27,7 @@ const ScheduleManagementByAdmin = () => {
     const [idSchedule, setIdSchedule] = useState("");
     const [date, setDate] = useState("");
     const [time, setTime] = useState("");
-    const [localtion2, setLocation2] = useState("");
-    const [clinic, setClinic] = useState("");
+    const [clinic, setClinic] = useState(null);
     const [visibleUpdate, setVisibleUpdate] = useState(false);
     const [formUpdate] = Form.useForm();
     const [newSchedules, setNewSchedules] = useState([]);
@@ -41,6 +40,8 @@ const ScheduleManagementByAdmin = () => {
     const [loading, setLoading] = useState(false);
     const [visibleDelete, setVisibleDelete] = useState(false);
     const [visibleDeleteAll, setVisibleDeleteAll] = useState(false);
+    const [idDepartment, setIdDepartment] = useState("");
+    const [listClinics, setListClinics] = useState([]);
 
     const columnsDoctors = [
         {
@@ -83,10 +84,10 @@ const ScheduleManagementByAdmin = () => {
           key: 'options',
           render: (_, doctor) => (
             <Space size="middle">
-              <Button type="link" onClick={() => handleReadSchedules(doctor.Id)}>
+              <Button type="link" onClick={() => handleReadSchedules(doctor)}>
                 Xem lịch
               </Button>
-              <Button type="link" onClick={() => handleInsert(doctor.Id)}>
+              <Button type="link" onClick={() => handleInsert(doctor)}>
                 Tạo lịch
               </Button>
             </Space>
@@ -237,10 +238,28 @@ const ScheduleManagementByAdmin = () => {
       }
     }
 
+    const fetchOneDepartment = useCallback(async () => {
+      console.log(idDepartment);
+      if (idDepartment !== "") {
+        try {
+          let response = await axios.get(getOneDepartmentAdmin(idDepartment), {
+            withCredentials: true
+          });
+          if (response.status === 200) {
+            console.log(response.data.Data.Department.Clinics);
+            setListClinics(response.data.Data.Department.Clinics);
+          }
+        } catch(error) {
+          message.error(error.response.data.Message);
+        }
+      }
+    }, [idDepartment]);
+
     useEffect(() => {
       fetchDoctor();
       fetchDepartment();
-    }, [location.pathname, fetchDoctor]);
+      fetchOneDepartment();
+    }, [location.pathname, fetchDoctor, fetchOneDepartment]);
 
     const handleChangPageDoctor = (page) => {
       setPageDoctor(page-1);
@@ -259,10 +278,10 @@ const ScheduleManagementByAdmin = () => {
       wrapperCol: { span: 16 },
     };
 
-    const handleReadSchedules = (id) => {
+    const handleReadSchedules = (doctor) => {
+      setIdDepartment(doctor.DepartmentId);
+      setIdDoctor(doctor.Id);
       setVisibleRead(true);
-      setIdDoctor(id);
-      console.log(id);
       setShouldReloadFormRead(true);
     }
 
@@ -294,18 +313,21 @@ const ScheduleManagementByAdmin = () => {
       setPageSchedule(page-1);
     }
 
-    const handleInsert = (id) => {
+    const handleInsert = (doctor) => {
+      setIdDepartment(doctor.DepartmentId);
+      setIdDoctor(doctor.Id);
       setVisibleInsert(true);
-      setIdDoctor(id);
     };
 
     const handleCancelInsert = () => {
       setVisibleInsert(false);
+      setIdDepartment("")
       setNewSchedules([])
     };
 
     const handleCancelRead = () => {
       setVisibleRead(false);
+      setIdDepartment("");
       setPageSchedule("0");
     }
 
@@ -313,7 +335,6 @@ const ScheduleManagementByAdmin = () => {
       setIdSchedule(schedules.Id);
       setDate(moment(schedules.Date, "DD/MM/YYYY"));
       setTime(schedules.Time);
-      setLocation2(schedules.Location);
       setClinic(schedules.Clinic);
       setIdDoctor(schedules.DoctorId);
       formUpdate.setFieldsValue({
@@ -335,7 +356,6 @@ const ScheduleManagementByAdmin = () => {
           Id: idSchedule,
           Date: moment(date).format("DD/MM/YYYY"),
           Time: time,
-          Location: localtion2,
           Clinic: clinic,
           DoctorId: idDoctor,
         }];
@@ -356,7 +376,7 @@ const ScheduleManagementByAdmin = () => {
     }
 
     const addScheduleForm = () => {
-      setNewSchedules([...newSchedules, { date: "", time: "", clinic: "", location: "", datescreen: "" }]);
+      setNewSchedules([...newSchedules, { date: "", time: "", clinic: null, datescreen: "" }]);
     };
 
     const handleDateChange = (date, dateValue, index) => {
@@ -372,12 +392,6 @@ const ScheduleManagementByAdmin = () => {
       setNewSchedules(updatedSchedules);
     };
 
-    const handleLocationChange = (locationValue, index) => {
-      const updatedSchedules = [...newSchedules];
-      updatedSchedules[index].location = locationValue;
-      setNewSchedules(updatedSchedules);
-    };
-
     const handleClinicChange = (clinicValue, index) => {
       const updatedSchedules = [...newSchedules];
       updatedSchedules[index].clinic = clinicValue;
@@ -389,7 +403,6 @@ const ScheduleManagementByAdmin = () => {
         const schedulesData = newSchedules.map(schedule => ({
           Date: moment(schedule.date).format("DD/MM/YYYY"),
           Time: schedule.time,
-          Location: schedule.location,
           Clinic: schedule.clinic
         }));
         let response = await axios.post(createSchedule(idDoctor), schedulesData, {
@@ -398,6 +411,7 @@ const ScheduleManagementByAdmin = () => {
         if (response.status === 200) {
           setVisibleInsert(false);
           setNewSchedules([]);
+          setIdDepartment("");
           message.success(response.data.Message);
         }
       } catch(error) {
@@ -537,21 +551,23 @@ const ScheduleManagementByAdmin = () => {
                     <Select.Option value="AFTERNOON">Buổi chiều</Select.Option>
                   </Select>
                 </Form.Item>
-                <Form.Item label="Vị trí" rules={[{ required: true, message: 'Vị trí không được để trống!' }]}>
-                  <Input
-                    className="w-full"
-                    placeholder="Nhập vị trí khám"
-                    value={schedule.location}
-                    onChange={(e) => handleLocationChange(e.target.value, index)}
-                  />
-                </Form.Item>
                 <Form.Item label="Phòng" rules={[{ required: true, message: 'Phòng không được để trống!' }]}>
-                  <Input
+                  <Select
                     className="w-full"                
-                    placeholder="Nhập phòng khám"
+                    placeholder="Chọn phòng khám"
                     value={schedule.clinic}
-                    onChange={(e) => handleClinicChange(e.target.value, index)}
-                  />
+                    onChange={(value) => handleClinicChange(value, index)}
+                    allowClear
+                  >
+                    {listClinics.map((clinics) => (
+                      <Select.Option 
+                        key={clinics}
+                        value={clinics}
+                      >
+                        Phòng {clinics}
+                      </Select.Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Form>
             </div>
@@ -622,23 +638,23 @@ const ScheduleManagementByAdmin = () => {
                 <Select.Option value="AFTERNOON">Buổi chiều</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="location" label="Vị trí" rules={[{ required: true, message: 'Vị trí không được để trống!' }]}>
-              <Input
-                type="text"
-                className="w-full"
-                placeholder="Nhập vị trí"
-                value={localtion2}
-                onChange={(e) => setLocation2(e.target.value)}
-              />
-            </Form.Item>
             <Form.Item name="clinic" label="Phòng" rules={[{ required: true, message: 'Phòng không được để trống!' }]}>
-              <Input
-                placeholder="Nhập phòng"
-                type="text"
-                className="w-full"
+              <Select
+                className="w-full"                
+                placeholder="Chọn phòng khám"
                 value={clinic}
-                onChange={(e) => setClinic(e.target.value)}
-              />
+                onChange={(value) => setClinic(value)}
+                allowClear
+              >
+                {listClinics.map((clinics) => (
+                  <Select.Option 
+                    key={clinics}
+                    value={clinics}
+                  >
+                    Phòng {clinics}
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
           </Form>
         </Modal>

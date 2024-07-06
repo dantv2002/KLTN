@@ -27,6 +27,7 @@ const Records = () => {
   const [updateAddress, setUpdateAddress] = useState("");
   const [updateHealth, setUpdateHealth] = useState("");
   const [data, setData] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [dateStart, setDateStart] = useState("");
   const [dateEnd, setDateEnd] = useState("");
   const [searchDateStart, setSearchDateStart] = useState("");
@@ -55,6 +56,7 @@ const Records = () => {
             withCredentials: true
           })
           if (response.status === 200) {
+            setTotalItems(response.data.Data.TotalItems);
             setData(response.data.Data.Records)
           }
         } catch(error) {
@@ -72,7 +74,11 @@ const Records = () => {
   };
 
   const handleInsert = () => {
-    setVisibleInsert(true);
+    if (totalItems === 10) {
+      message.error("Số lượng hồ sơ đã đạt tối đa!")
+    } else {
+      setVisibleInsert(true);
+    }
   };
   const handleCancelInsert = () => {
     setVisibleInsert(false);

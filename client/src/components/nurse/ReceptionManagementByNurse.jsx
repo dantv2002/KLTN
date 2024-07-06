@@ -26,20 +26,25 @@ const ReceptionManagementByNurse = () => {
   const [loading, setLoading] = useState(false);
 
   const handleCallPatient = async() => {
-    setGetClinic(clinic);
-    try {
-      let response = await axios.get(callNext(clinic), {
-        withCredentials: true,
-      })
-      if (response.status === 200){
-        message.success(response.data.Message);
-        console.log(response.data.Data.Number);
-        setCallNumber(response.data.Data.Number)
-        localStorage.setItem("nextNumber", response.data.Data.Number);
-        localStorage.setItem("dataUpdated", "true");
+    const screen = localStorage.getItem("screenOpen")
+    if (screen === "false") {
+      message.error("Hình như bạn chưa mở màn hình ngoài, hãy mở màn hình ngoài trước khi gọi bệnh nhân")
+    } else {
+      setGetClinic(clinic);
+      try {
+        let response = await axios.get(callNext(clinic), {
+          withCredentials: true,
+        })
+        if (response.status === 200){
+          message.success(response.data.Message);
+          console.log(response.data.Data.Number);
+          setCallNumber(response.data.Data.Number)
+          localStorage.setItem("nextNumber", response.data.Data.Number);
+          localStorage.setItem("dataUpdated", "true");
+        }
+      }catch(error){
+        message.error(error.response.data.Message);
       }
-    }catch(error){
-      message.error(error.response.data.Message);
     }
   }
 
@@ -143,8 +148,17 @@ const ReceptionManagementByNurse = () => {
   }
 
   const handleCallScreen = () => {
-    window.open('/call', '_blank')
-  }
+    const newWindow = window.open('/call', '_blank', 'noopener');
+    if (newWindow) {
+      newWindow.onload = () => {
+        localStorage.setItem("screenOpen", "true");
+      };
+      const handleBeforeUnload = () => {
+        localStorage.setItem("screenOpen", "false");
+      };
+      newWindow.addEventListener("beforeunload", handleBeforeUnload);
+    }
+  };
 
   const columns = [
     {
