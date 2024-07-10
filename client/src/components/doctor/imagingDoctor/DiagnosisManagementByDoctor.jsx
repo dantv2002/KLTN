@@ -666,6 +666,7 @@ const DiagnosisManagementByDoctor = () => {
           <p><b>Bước 4:</b> Kết quả sau khi trả về sẽ xuất hiện thêm nút lưu kết quả</p>
           <p><b>Bước 5</b> Bấm nút lưu kết quả sẽ hiện ra giao diện để nhập thông tin về hình ảnh</p>
           <p><b>Bước 6</b> Chọn hồ sơ bệnh án và điền đầy đủ thông tin sau đó bấm lưu</p>
+          <p><b>Bước 7</b> Form xác nhận lưu chẩn đoán hiện ra và nhấn xác nhận</p>
         </div>
       </Modal>
       <Modal
