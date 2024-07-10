@@ -18,7 +18,7 @@ if gpus:
   try:
     tf.config.set_logical_device_configuration(
         gpus[0],
-        [tf.config.LogicalDeviceConfiguration(memory_limit=int(1024*7))])
+        [tf.config.LogicalDeviceConfiguration(memory_limit=int(1024*3))])
     logical_gpus = tf.config.list_logical_devices('GPU')
     print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
   except RuntimeError as e:
@@ -131,7 +131,7 @@ def train_model(model, name, train_ds=train_ds, valid_ds=val_ds, test_ds=test_ds
     model.save(modelName)
     his = history.history
     joblib.dump(his, hisName)
-    return history, hisName, modelName
+    return his, hisName, modelName
 
 # %% Model like alexnet
 model = tf.keras.models.Sequential()
@@ -171,6 +171,41 @@ else:
     alxnetModel = keras.models.load_model(modelName)
     historyAlxnetModel = joblib.load(hisSavedName)
     alxnetModel.evaluate(test_ds)
+    
+# %% history f1_score
+f1_score = historyAlxnetModel['f1_score']
+val_f1_score = historyAlxnetModel['val_f1_score']
+
+loss = historyAlxnetModel['loss']
+val_loss = historyAlxnetModel['val_loss']
+
+epochs_range = range(len(f1_score))  # Use consistent length for both plots
+
+plt.figure(figsize=(8, 8))
+
+# Subplot 1 (F1 Score) - Top Position
+plt.subplot2grid((2, 1), (0, 0))  # (rows, columns, row_start, col_start)
+plt.plot(epochs_range, f1_score, label='Training F1 Score')
+plt.plot(epochs_range, val_f1_score, label='Validation F1 Score')
+
+plt.legend(loc='lower right')
+plt.title('Training and Validation F1 Score')
+plt.xlabel('Epoch')
+plt.ylabel('F1 Score')
+
+# Subplot 2 (Loss) - Bottom Position
+plt.subplot2grid((2, 1), (1, 0))
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+
+plt.tight_layout()
+plt.show()
+
 # %%
 resnet_base = tf.keras.applications.ResNet50(weights='imagenet', include_top=False, input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))
 
@@ -217,6 +252,40 @@ else:
     resnet50Model = keras.models.load_model(modelName)
     historyResnet50Model = joblib.load(hisSavedName)
     resnet50Model.evaluate(resnet_test_ds)
+    
+#%% History f1_score
+f1_score = historyResnet50Model['f1_score']
+val_f1_score = historyResnet50Model['val_f1_score']
+
+loss = historyResnet50Model['loss']
+val_loss = historyResnet50Model['val_loss']
+
+epochs_range = range(len(f1_score))  # Use consistent length for both plots
+
+plt.figure(figsize=(8, 8))
+
+# Subplot 1 (F1 Score) - Top Position
+plt.subplot2grid((2, 1), (0, 0))  # (rows, columns, row_start, col_start)
+plt.plot(epochs_range, f1_score, label='Training F1 Score')
+plt.plot(epochs_range, val_f1_score, label='Validation F1 Score')
+
+plt.legend(loc='lower right')
+plt.title('Training and Validation F1 Score')
+plt.xlabel('Epoch')
+plt.ylabel('F1 Score')
+
+# Subplot 2 (Loss) - Bottom Position
+plt.subplot2grid((2, 1), (1, 0))
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+
+plt.tight_layout()
+plt.show()
 # %% model like resnet
 
 def conv_block(input_tensor, filters, kernel_size, strides=(1, 1), padding='same'):
@@ -280,17 +349,49 @@ model = tf.keras.models.Model(inputs=input_layer, outputs=outputs)
 modelResnetCustom, resnetCustomModelName = make_model(model, "modelResnetCustom")
 # %%
 historyResnetCustom, hisSavedName, modelName = None, "modelResnetCustomhistory", "modelResnetCustom.h5"
-new_training = 1
+new_training = 0
 if new_training:
     historyResnetCustom, hisSavedName, modelName = train_model(modelResnetCustom, resnetCustomModelName, train_ds=resnet_train_ds, valid_ds=resnet_valid_ds, test_ds=resnet_test_ds)
 else: 
     modelResnetCustom = keras.models.load_model(modelName)
     historyResnetCustom = joblib.load(hisSavedName)
     modelResnetCustom.evaluate(resnet_test_ds)
+#%% History f1_score
+f1_score = historyResnetCustom['f1_score']
+val_f1_score = historyResnetCustom['val_f1_score']
 
+loss = historyResnetCustom['loss']
+val_loss = historyResnetCustom['val_loss']
+
+epochs_range = range(len(f1_score))  # Use consistent length for both plots
+
+plt.figure(figsize=(8, 8))
+
+# Subplot 1 (F1 Score) - Top Position
+plt.subplot2grid((2, 1), (0, 0))  # (rows, columns, row_start, col_start)
+plt.plot(epochs_range, f1_score, label='Training F1 Score')
+plt.plot(epochs_range, val_f1_score, label='Validation F1 Score')
+
+plt.legend(loc='lower right')
+plt.title('Training and Validation F1 Score')
+plt.xlabel('Epoch')
+plt.ylabel('F1 Score')
+
+# Subplot 2 (Loss) - Bottom Position
+plt.subplot2grid((2, 1), (1, 0))
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+
+plt.tight_layout()
+plt.show()
 # %% Try prediction:
 class_names = train_ds.class_names
-model = keras.models.load_model("modelResnetCustom.h5")
+model = keras.models.load_model("resnet50.h5")
 if 10: 
     
     for images, labels in resnet_test_ds.take(2):
@@ -328,7 +429,3 @@ ax = plt.subplot(1, 2, 2)
 plt.imshow(preprocessed_image, cmap="gray")
 plt.axis("off")
 print(model.predict(preprocessed_image))
-
-# %% Confusion matrix
-
-# %%

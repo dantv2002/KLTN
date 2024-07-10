@@ -12,13 +12,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import joblib
 
-
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
   try:
     tf.config.set_logical_device_configuration(
         gpus[0],
-        [tf.config.LogicalDeviceConfiguration(memory_limit=int(1024*1))])
+        [tf.config.LogicalDeviceConfiguration(memory_limit=int(1024*2))])
     logical_gpus = tf.config.list_logical_devices('GPU')
     print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
   except RuntimeError as e:
@@ -78,7 +77,7 @@ y = tf.keras.utils.to_categorical(
 from sklearn.model_selection import train_test_split
 
 X_train_full, X_test, y_train_full, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-X_train, X_valid, y_train, y_valid = train_test_split(X_train_full, y_train_full, test_size=0.2, random_state=42)
+X_train, X_valid, y_train, y_valid = train_test_split(X_train_full, y_train_full, test_size=0.3, random_state=42)
 # Convert data to tensors
 X_train = tf.convert_to_tensor(X_train.values)
 X_valid = tf.convert_to_tensor(X_valid.values)
@@ -125,7 +124,7 @@ def train_model(model, name, train_ds, valid_ds, test_ds, epochs=100, callbacks=
     model.save(modelName)
     his = history.history
     joblib.dump(his, hisName)
-    return history, hisName, modelName
+    return his, hisName, modelName
 # %% Define the model
 model = tf.keras.models.Sequential()
 model.add(tf.keras.layers.Input(shape=[X_train.shape[1]], dtype=tf.float32))
@@ -136,9 +135,50 @@ model.add(tf.keras.layers.Dropout(0.3))
 model.add(tf.keras.layers.Dense(64, activation="relu"))
 model.add(tf.keras.layers.Dropout(0.3))
 model.add(tf.keras.layers.Dense(NUM_CLASSES, activation="softmax"))
-# %% Training the model
 predict_disease_model, model_name = make_model(model, "predict_disease_with_symptoms")
-history, hisName, modelName = train_model(predict_disease_model, model_name, train_ds=(X_train,y_train), valid_ds=(X_valid, y_valid), test_ds=(X_test, y_test))
+# %% Training the model
+history, hisName, modelName = None, "predict_disease_with_symptomshistory", "predict_disease_with_symptoms.h5"
+new_training = 0
+if new_training:
+    history, hisName, modelName = train_model(predict_disease_model, model_name, train_ds=(X_train,y_train), valid_ds=(X_valid, y_valid), test_ds=(X_test, y_test))
+else:
+    predict_disease_model = keras.models.load_model(modelName)
+    history = joblib.load(hisName)
+predict_disease_model.evaluate(X_test, y_test)
+# %% history f1_score
+f1_score = history['f1_score']
+val_f1_score = history['val_f1_score']
+
+loss = history['loss']
+val_loss = history['val_loss']
+
+epochs_range = range(len(f1_score))  # Use consistent length for both plots
+
+plt.figure(figsize=(8, 8))
+
+# Subplot 1 (F1 Score) - Top Position
+plt.subplot2grid((2, 1), (0, 0))  # (rows, columns, row_start, col_start)
+plt.plot(epochs_range, f1_score, label='Training F1 Score')
+plt.plot(epochs_range, val_f1_score, label='Validation F1 Score')
+
+plt.legend(loc='lower right')
+plt.title('Training and Validation F1 Score')
+plt.xlabel('Epoch')
+plt.ylabel('F1 Score')
+
+# Subplot 2 (Loss) - Bottom Position
+plt.subplot2grid((2, 1), (1, 0))
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+
+plt.tight_layout()
+plt.show()
+
 # %% Try some predict
 # inputs = ['stomach pain','acidity','Chest pain'] # GERD
 inputs = ['continuous sneezing','watering from  EYES'] # Allergry
@@ -165,4 +205,22 @@ else:
     predict_proba = predict_disease_model.predict(preprocessed_inputs)
     rs = names[ np.argmax(predict_proba)]
     print(rs, " ",  np.max(predict_proba) * 100)
+# %% Confusion matrix
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+y_pred = predict_disease_model.predict(X_test)
+y_pred_classes = tf.argmax(y_pred, axis=1)
+y_true = tf.argmax(y_test, axis=1)
+
+cm = confusion_matrix(y_true, y_pred_classes)
+
+fig, ax = plt.subplots(figsize=(20, 20))  # Adjust figsize for better readability
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot(ax=ax, cmap=plt.cm.Blues)
+
+plt.title('Confusion Matrix for Model Symptoms', fontsize=18)
+plt.xlabel('Predicted Label', fontsize=16)
+plt.ylabel('True Label', fontsize=16)
+plt.xticks(np.arange(41), labels=names, rotation=90, fontsize=12) 
+plt.yticks(np.arange(41), labels=names, fontsize=12)
 # %%
