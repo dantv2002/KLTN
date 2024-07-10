@@ -39,6 +39,8 @@ const DiagnosisManagementByDoctor = () => {
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingConsultan, setLoadingConsultan] = useState(false);
+  const [visibleSave, setVisibleSave] = useState(false);
+  const [dataSave, setDataSave] = useState("");
   
   const handleImageUpload = (info) => {
     setIsLoading(true);
@@ -146,6 +148,7 @@ const DiagnosisManagementByDoctor = () => {
   }
 
   const handleSaveDiagnostic = async(values) => {
+    setVisibleSave(true);
     const { 
       Method,
       Content,
@@ -158,17 +161,26 @@ const DiagnosisManagementByDoctor = () => {
       Conclude: Conclude,
       MedicalId: idMedical,
     }
+    setDataSave(data);
+  }
 
+  const handleConfirmSave = async() => {
     try {
-      const response = await axios.post(saveDiagnostic, data, { withCredentials: true });
+      const response = await axios.post(saveDiagnostic, dataSave, { withCredentials: true });
       if (response.status === 200) {
         message.success(response.data.Message);
+        setVisibleSave(false);
         setVisibleInsert(false);
+        setDataSave("");
         fetchMedical();
       }
     } catch (error) {
       message.error(error.response.data.Message);
     }
+  }
+
+  const handleCancelConfirmSave = () => {
+    setVisibleSave(false);
   }
   
   const handleReadMedical = () => {
@@ -656,6 +668,20 @@ const DiagnosisManagementByDoctor = () => {
           <p><b>Bước 6</b> Chọn hồ sơ bệnh án và điền đầy đủ thông tin sau đó bấm lưu</p>
         </div>
       </Modal>
+      <Modal
+          title={<h1 className="text-2xl font-bold text-blue-700 text-center mb-4">Xác nhận lưu chẩn đoán</h1>}
+          visible={visibleSave}
+          onOk={() => handleConfirmSave()}
+          okText="Xác nhận"
+          onCancel={handleCancelConfirmSave}
+          cancelText="Thoát"
+          okButtonProps={{ className: "bg-blue-700" }}
+          cancelButtonProps={{ className: "bg-red-600" }}
+        >
+          <div className="text-center">
+            <p className="text-red-600 mb-4 text-[17px]">Bạn có chắc chắn muốn lưu chẩn đoán có nội dung như bạn đã nhập không?</p>
+          </div>
+        </Modal>
     </div>
   );
 }
