@@ -925,11 +925,17 @@ const MedicalManagementByDoctor = () => {
                   </div>
               </div>
           </div>
+          <script>
+            window.onload = function() {
+                window.print();
+            }
+          </script>
       </body>
       </html>
     `;
     const newWindow = window.open(`${nameTicket}`, '_blank');
     newWindow.document.write(ticketTemplate);
+    newWindow.document.close();
   }
   
   const handleSetShow = () => {

@@ -24,6 +24,7 @@ const ReceptionManagementByNurse = () => {
   const [departmentConfirm, setDepartmentConfirm] = useState("");
   const [callNumber, setCallNumber] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [disable, setDisable] = useState(false);
 
   const handleCallPatient = async() => {
     const screen = localStorage.getItem("screenOpen")
@@ -37,7 +38,7 @@ const ReceptionManagementByNurse = () => {
         })
         if (response.status === 200){
           message.success(response.data.Message);
-          console.log(response.data.Data.Number);
+          handleTextToSpeechVN(response.data.Data.Number);
           setCallNumber(response.data.Data.Number)
           localStorage.setItem("nextNumber", response.data.Data.Number);
           localStorage.setItem("dataUpdated", "true");
@@ -140,8 +141,22 @@ const ReceptionManagementByNurse = () => {
     }
   };
 
+  useEffect(() => {
+    const screenOpen = localStorage.getItem("screenOpen") === "true";
+    setDisable(screenOpen);
 
-  const handleTextToSpeechVN = () => {
+    const handleStorageChange = () => {
+      const screenOpen = localStorage.getItem("screenOpen") === "true";
+      setDisable(screenOpen);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  const handleTextToSpeechVN = (callNumber) => {
     if (callNumber !== 0) {
       speakVN(`Xin mời bệnh nhân có số thứ tự tiếp theo là ${callNumber} vào khám bệnh xin nhắc lại bệnh nhân có số thứ tự tiếp theo là ${callNumber} vào khám bệnh`);
     }
@@ -152,13 +167,16 @@ const ReceptionManagementByNurse = () => {
     if (newWindow) {
       newWindow.onload = () => {
         localStorage.setItem("screenOpen", "true");
+        setDisable(true)
       };
       const handleBeforeUnload = () => {
         localStorage.setItem("screenOpen", "false");
+        setDisable(false)
       };
       newWindow.addEventListener("beforeunload", handleBeforeUnload);
     }
   };
+
 
   const columns = [
     {
@@ -237,8 +255,8 @@ const ReceptionManagementByNurse = () => {
       </div>
       <br/>
       <Button onClick={() => handleCallPatient()} className="bg-green-500 text-white mt-3" htmlType="submit" icon={<UserAddOutlined/>} >Gọi bệnh nhân</Button>
-      <Button onClick={() => handleTextToSpeechVN()} className="bg-blue-600 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát loa ngoài</Button>
-      <Button onClick={() => handleCallScreen()} className="bg-cyan-400 text-white mt-3 ml-5" htmlType="submit" icon={<FundProjectionScreenOutlined/>} >Màn hình ngoài</Button>
+      <Button onClick={() => handleTextToSpeechVN(callNumber)} className="bg-blue-600 text-white mt-3 ml-5" htmlType="submit" icon={<HiMiniSpeakerWave/>} >Phát loa ngoài</Button>
+      <Button disabled={disable} onClick={() => handleCallScreen()} className="bg-cyan-400 text-white mt-3 ml-5" htmlType="submit" icon={<FundProjectionScreenOutlined/>} >Màn hình ngoài</Button>
       <hr className="my-8 border-gray-300"/>
       <Input
         className="w-96 mt-3 mr-3"

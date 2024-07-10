@@ -398,6 +398,12 @@ const ScheduleManagementByAdmin = () => {
       setNewSchedules(updatedSchedules);
     };
 
+    const handleDeleteOneSchedule = (index) => {
+      const updatedSchedules = [...newSchedules];
+      updatedSchedules.splice(index, 1);
+      setNewSchedules(updatedSchedules);
+    };
+
     const handleCreateMultipleSchedules = async () => {
       try {
         const schedulesData = newSchedules.map(schedule => ({
@@ -533,6 +539,7 @@ const ScheduleManagementByAdmin = () => {
             <div key={index}>
               <Form {...formLayout} form={formInsert}>
                 <h2 className="text-sm font-bold mb-2 ml-3 text-green-400">Lịch khám {index + 1}</h2>
+                <Button className="bg-red-600 text-white mb-2 ml-3" onClick={() => handleDeleteOneSchedule(index)}>Xóa</Button>
                 <Form.Item label="Ngày khám" rules={[{ required: true, message: 'Ngày khám không được để trống!' }]}>
                   <DatePicker
                     className="w-full"

@@ -604,11 +604,17 @@ const RecordsManagementByReceptionist = () => {
                   </ul>
               </div>
           </div>
+          <script>
+            window.onload = function() {
+                window.print();
+            }
+          </script>
       </body>
       </html>
     `;
     const newWindow = window.open(`${ticket.Id}`, '_blank');
     newWindow.document.write(ticketTemplate);
+    newWindow.document.close();
   }
 
   return (

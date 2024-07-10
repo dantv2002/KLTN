@@ -46,7 +46,7 @@ const App = () => {
       '/': 'Trang chủ bệnh viện X',
       '/oauth2/redirect': 'Đăng nhập google',
       '/records': 'Hồ sơ bệnh nhân',
-      '/schedules': 'Lịch khám',
+      '/schedules': 'Phiếu khám',
       '/medicals': 'Hồ sơ bệnh án',
       '/call': 'Gọi bệnh nhân',
       '/nurse/medical': 'Điều dưỡng - Quản lý hồ sơ bệnh án',
