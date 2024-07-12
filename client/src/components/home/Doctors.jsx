@@ -16,33 +16,33 @@ const Doctors = () => {
   const data = [
     {
       img: doctor1,
-      name: "Dr. Serena Mitchell",
-      specialties: "Khoa não",
+      name: "Dr. Nguyễn Văn Minh",
+      specialties: "Khoa khám bệnh cấp cứu",
     },
     {
       img: doctor2,
-      name: "Dr. Julian Bennett",
-      specialties: "Nhân viên tiếp nhận",
+      name: "N. Võ Thị Ngọc Bích",
+      specialties: "Khoa thần kinh",
     },
     {
       img: doctor3,
-      name: "Dr. Camila Rodriguez",
-      specialties: "Đa khoa",
+      name: "Dr. Phan Văn Quang",
+      specialties: "Khoa tim mạch",
     },
     {
       img: doctor4,
-      name: "Dr. Victor Nguyen",
+      name: "Nguyễn Thị Ngọc Yến",
       specialties: "Điều dưỡng",
     },
     {
       img: doctor5,
-      name: "Dr. Ethan Carter",
-      specialties: "Khoa thần kinh",
+      name: "Dr. Lê Văn Phú",
+      specialties: "Khoa hô hấp",
     },
     {
       img: doctor6,
-      name: "Dr. Olivia Martinez",
-      specialties: "Khoa tim mạch",
+      name: "Dr. Võ Văn Việt",
+      specialties: "Khoa ung bướu",
     },
   ];
 
@@ -127,8 +127,8 @@ const Doctors = () => {
               </div>
 
               <div className=" flex flex-col justify-center items-center">
-                <h1 className=" font-semibold text-xl pt-4">{e.name}</h1>
-                <h3 className=" pt-2">{e.specialties}</h3>
+                <h1 className=" font-semibold text-xl pt-4 font-rubik">{e.name}</h1>
+                <h3 className=" pt-2 font-rubik">{e.specialties}</h3>
               </div>
             </div>
           ))}
