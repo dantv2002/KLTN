@@ -270,18 +270,11 @@ const Schedules = () => {
                 </tbody>
             </table>
         </div>
-        <script>
-          window.onload = function() {
-              window.print();
-          }
-        </script>
     </body>
-    
     </html>
     `;
     const newWindow = window.open(`${ticket.Id}`, '_blank');
     newWindow.document.write(confirmationReceipt);
-    newWindow.document.close();
   };
 
 
