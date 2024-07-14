@@ -173,7 +173,7 @@ public class AccountService {
         log.info("Login account: " + email + " - Auth provider: " + AuthProvider.LOCAL);
         return this.accountRepository.findByEmailAndAuthProvider(email, AuthProvider.LOCAL)
                 .map(acc -> {
-                    if (acc.getDeleted() | !acc.getEmailVerified() || !acc.getActived()) {
+                    if (acc.getDeleted() || !acc.getEmailVerified() || !acc.getActived()) {
                         log.error("Login account failed: " + email);
                         if (acc.getDeleted() || !acc.getEmailVerified()) {
                             throw new CustomException("Tài khoản không tồn tại", HttpStatus.UNAUTHORIZED.value());
