@@ -37,7 +37,7 @@ const ChangePassword = ({closeFormChangePassword}) => {
     }
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="popup-form absolute mt-12 text-black">
             <Form onFinish={handleChange} className="w-80 md:w-96 bg-white p-5 rounded-xl flex flex-col">
                 <img className=" mx-auto w-50 h-auto min-w-[120px] max-w-[200px] mt-2" src={logo} alt="logo" />
