@@ -41,7 +41,7 @@ const Schedules = () => {
     
     <head>
         <meta charset="UTF-8" />
-        <title th:inline="text"> Xác nhận Phiếu Khám Bệnh: ${ticket.Id}</title>
+        <title th:inline="text"> Phiếu Khám Bệnh: ${ticket.Id}</title>
     </head>
     
     <body>
@@ -270,12 +270,18 @@ const Schedules = () => {
                 </tbody>
             </table>
         </div>
+        <script>
+          window.onload = function() {
+              window.print();
+          }
+        </script>
     </body>
     
     </html>
     `;
     const newWindow = window.open(`${ticket.Id}`, '_blank');
     newWindow.document.write(confirmationReceipt);
+    newWindow.document.close();
   };
 
 

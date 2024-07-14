@@ -54,6 +54,7 @@ const RecordsManagementByReceptionist = () => {
   const [visibleTicket, setVisibleTicket] = useState(false);
   const [nameDepartment, setNameDepartment] = useState("");
   const [namePatient, setNamePatient] = useState("");
+  const [nameLocation, setNameLocation] = useState("");
 
   // Enable/disable update
   const [editing, setEditing] = useState(false);
@@ -379,6 +380,7 @@ const RecordsManagementByReceptionist = () => {
   const handleReadSchedules = async(department) => {
     try{
       setNameDepartment(department.NameDepartment);
+      setNameLocation(department.Location);
       setLoading(true);
       let response = await axios.get(getListSchedule(department.Id),{
         withCredentials: true
@@ -587,7 +589,7 @@ const RecordsManagementByReceptionist = () => {
                       <span class="label">Khoa:</span> ${nameDepartment}
                   </div>
                   <div class="field">
-                      <span class="label">Tầng:</span> ${ticket.Location}
+                      <span class="label">Tầng:</span> ${nameLocation}
                   </div>
                   <div class="field">
                       <span class="label">Phòng:</span> ${ticket.Clinic}
@@ -602,11 +604,17 @@ const RecordsManagementByReceptionist = () => {
                   </ul>
               </div>
           </div>
+          <script>
+            window.onload = function() {
+                window.print();
+            }
+          </script>
       </body>
       </html>
     `;
     const newWindow = window.open(`${ticket.Id}`, '_blank');
     newWindow.document.write(ticketTemplate);
+    newWindow.document.close();
   }
 
   return (
