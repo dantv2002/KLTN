@@ -56,7 +56,7 @@ public class MedicalController {
             @RequestParam(name = "showLock", defaultValue = "true", required = false) String showLock,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
-            @RequestParam(name = "sortBy", defaultValue = "createDate", required = false) String sortBy,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt", required = false) String sortBy,
             @RequestParam(name = "sortDir", defaultValue = "desc", required = false) String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -156,7 +156,7 @@ public class MedicalController {
             @RequestParam(name = "type", defaultValue = "", required = false) String type,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
-            @RequestParam(name = "sortBy", defaultValue = "createDate", required = false) String sortBy,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt", required = false) String sortBy,
             @RequestParam(name = "sortDir", defaultValue = "desc", required = false) String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
