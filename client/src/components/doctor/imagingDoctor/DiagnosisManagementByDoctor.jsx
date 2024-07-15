@@ -41,6 +41,8 @@ const DiagnosisManagementByDoctor = () => {
   const [loadingConsultan, setLoadingConsultan] = useState(false);
   const [visibleSave, setVisibleSave] = useState(false);
   const [dataSave, setDataSave] = useState("");
+  const [checkRemove, setCheckRemove] = useState(false);
+  const [disableUpload, setDisableUpload] = useState(false);
   
   const handleImageUpload = (info) => {
     setIsLoading(true);
@@ -49,6 +51,7 @@ const DiagnosisManagementByDoctor = () => {
       handleDiagnostic(info.file.response.secure_url);
       setImage(info.file.response.secure_url);
       setPublicId(info.file.response.public_id);
+      setDisableUpload(true);
     } else if (info.file.status === 'error') {
       console.error('Upload error:', info.file.error);
     }
@@ -79,6 +82,17 @@ const DiagnosisManagementByDoctor = () => {
     }
   }
 
+  const handleImgRemove = () => {
+    setDisableUpload(false);
+    if (!checkRemove) {
+      handleImageRemove();
+    } else {
+      setImage("");
+      setPublicId("");
+      setResult("");
+      setCheckRemove(false);
+    }
+  }
   const handleDiagnostic = async(image) => {
     try{
       setLoadingConsultan(true)
@@ -172,6 +186,7 @@ const DiagnosisManagementByDoctor = () => {
         setVisibleSave(false);
         setVisibleInsert(false);
         setDataSave("");
+        setCheckRemove(true);
         fetchMedical();
       }
     } catch (error) {
@@ -466,10 +481,10 @@ const DiagnosisManagementByDoctor = () => {
               data={{ upload_preset: uploadPreset, cloud_name: cloudName }}
               listType="picture"
               onChange={handleImageUpload}
-              onRemove={handleImageRemove}
+              onRemove={handleImgRemove}
               accept=".jpg,.jpeg,.png"
             >
-              <Button className="mt-3 mb-3" icon={<UploadOutlined />}>Tải ảnh lên</Button>
+              <Button disabled={disableUpload} className="mt-3 mb-3" icon={<UploadOutlined />}>Tải ảnh lên</Button>
             </Upload>
             {image && (
               <div className="mt-3 mb-3">
