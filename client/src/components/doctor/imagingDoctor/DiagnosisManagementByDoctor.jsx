@@ -477,8 +477,11 @@ const DiagnosisManagementByDoctor = () => {
             <Upload
               className="mt-3 mb-3"
               name="file"
-              action={`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`}
-              data={{ upload_preset: uploadPreset, cloud_name: cloudName }}
+              action={`https://api.cloudinary.com/v1_1/${cloudName}/image/upload/`}
+              data={{ 
+                upload_preset: uploadPreset, 
+                cloud_name: cloudName,
+              }}
               listType="picture"
               onChange={handleImageUpload}
               onRemove={handleImgRemove}

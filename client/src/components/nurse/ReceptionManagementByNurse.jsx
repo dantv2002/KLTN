@@ -105,6 +105,7 @@ const ReceptionManagementByNurse = () => {
       })
       if (response.status === 200){
         message.success(response.data.Message);
+        setVisibleConfirm(false);
         fetchTicket();
       }
     }catch(error){
