@@ -49,6 +49,8 @@ public class TicketService {
     @Autowired
     private EmailService emailService;
 
+    private Integer limit = 24;
+
     public List<Ticket> getDashboard(Date startDate, Date endDate) {
         return ticketRepository.findAllByCreatedAtBetween(startDate, endDate);
     }
@@ -64,8 +66,31 @@ public class TicketService {
         DepartmentDto departmentDto = departmentService.get(doctorDto.getDepartmentId(), true);
         ScheduleDto scheduleDto = scheduleService.get(idSchedule);
         String accountId = authManager.getAuthentication().getName();
+        // check limit booking
+        if (scheduleDto.getNumber() == this.limit) {
+            log.error("Limit booking");
+            throw new CustomException("Lịch khám đã kín, vui lòng chọn lịch khám khác!",
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        // check conflict time
+        ticketRepository.findByRecordIdAndStatusAndDate(idRecord, TicketStatus.WAITING,
+                new SimpleDateFormat("dd/MM/yyyy").format(scheduleDto.getDate()))
+                .stream()
+                .forEach(ticket -> {
+                    ScheduleTime scheduleTime = LocalTime.parse(ticket.getTime()).isBefore(LocalTime.of(12, 00))
+                            ? ScheduleTime.MORNING
+                            : ScheduleTime.AFTERNOON;
+                    if (scheduleDto.getTime() == scheduleTime) {
+                        log.error("Conflict time");
+                        throw new CustomException(
+                                "Bệnh nhân: " + recordDto.getFullName().toLowerCase() + ", đã có lịch khám vào buổi: "
+                                        + (scheduleTime == ScheduleTime.MORNING ? "sáng" : "chiều") + ", ngày: "
+                                        + ticket.getDate() + ", vui lòng chọn lịch khám khác!",
+                                HttpStatus.BAD_REQUEST.value());
+                    }
+                });
         // Set value for ticket
-        int examinationTime = 15; // Thời gian khám bệnh (phút)
+        int examinationTime = 5; // Thời gian khám bệnh (phút)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalTime starTime = scheduleDto.getTime().equals(ScheduleTime.MORNING) ? LocalTime.of(7, 00)
                 : LocalTime.of(13, 00);
