@@ -17,7 +17,7 @@ const ServicesCard = ({ icon, title }) => {
   } else if (title === "Thời gian") {
     content = (
       <p>
-        Thời gian khám chữa bệnh từ thứ 2 - thứ 6. Mỗi ngày sẽ chia làm 2 ca: ca sáng từ 6h-12h, ca chiều từ 13h-18h
+        Thời gian khám chữa bệnh từ thứ 2 - thứ 6. Mỗi ngày sẽ chia làm 2 ca: ca sáng từ 7h-11h, ca chiều từ 13h-17h
       </p>
     );
   }

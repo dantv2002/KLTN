@@ -10,7 +10,7 @@ import logo from "../../assets/img/logo3.png"
 import { createTicker, getDepartmentPatient, getAllRecordsPatient, getDoctorPatient, getSchedulePatient, getScheduleOption, logoutApi } from "../../Api";
 import Cookies from "js-cookie"
 import axios from "axios";
-import { Modal, message, Button, Space, Select, Input, Table, DatePicker } from "antd";
+import { Modal, message, Button, Space, Select, Input, Table, DatePicker, Tooltip } from "antd";
 import {SearchOutlined} from "@ant-design/icons"
 import replacePlusWithSpace from "../../hook/ReplacePlusWithSpace";
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -200,9 +200,11 @@ const Navbar = () => {
       key: 'options',
       render: (_,schedule) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleReadRecord(schedule.Id)}>
-            Chọn
-          </Button>
+          <Tooltip title={schedule.Number >= 24 ? 'Đã kín lịch đăng ký trước' : ''}>
+            <Button type="link" onClick={() => handleReadRecord(schedule.Id)} disabled={schedule.Number >= 24}>
+              Chọn
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
@@ -481,7 +483,7 @@ const Navbar = () => {
     } finally {
       setLoading(false)
     }
-};
+  };
 
   const handleReadRecord = async(id) => {
     setIdSchedule(id);
