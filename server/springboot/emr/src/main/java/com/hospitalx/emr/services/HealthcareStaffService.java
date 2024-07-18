@@ -142,7 +142,11 @@ public class HealthcareStaffService {
             if (entities.size() == 0) {
                 return Page.empty();
             }
-            Page<HealthcareStaff> entitiesPage = new PageImpl<>(entities, pageable, entities.size());
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), entities.size());
+            List<HealthcareStaff> paginatedList = entities.subList(start, end);
+
+            Page<HealthcareStaff> entitiesPage = new PageImpl<>(paginatedList, pageable, entities.size());
             return entitiesPage.map(entity -> {
                 HealthcareStaffDto healthcareStaffDto = modelMapper.map(entity, HealthcareStaffDto.class);
                 String departmentName = departmentService.get(healthcareStaffDto.getDepartmentId(), false)
