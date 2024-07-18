@@ -219,7 +219,6 @@ const Medicals = () => {
           <div>
             <Collapse className="w-full text-lg font-rubik">
               <Panel header="Thông tin chung" key="1">
-                <p className="text-base font-rubik"><b>Ngày khám:</b> {Date}</p>
                 <p className="text-base font-rubik"><b>Lí do khám:</b> {Reason}</p>
                 <p className="text-base font-rubik"><b>Quá trình bệnh lý:</b> {PathologicalProcess}</p>
                 <p className="text-base font-rubik"><b>Tiền sử bệnh:</b> {MedicalHistory}</p>
